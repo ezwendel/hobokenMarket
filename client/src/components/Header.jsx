@@ -12,6 +12,7 @@ import {
 } from "@mui/material/";
 import ChatIcon from "@mui/icons-material/Chat";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import StoreIcon from '@mui/icons-material/Store';
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import HelpIcon from "@mui/icons-material/Help";
 import LoginIcon from "@mui/icons-material/Login";
@@ -43,6 +44,22 @@ const Header = () => {
         </Link>
         <Box sx={{ flexGrow: 1 }} />
         <Searchbar />
+        <Box>
+          <Tooltip title="View Listings">
+            <Link style={{ color: "inherit" }} to="/items">
+              <IconButton
+                size="large"
+                color="inherit"
+                aria-label="View Listings"
+                sx={{ ml: 0.8, mr: 0.8 }}
+              >
+                <Badge>
+                  <StoreIcon />
+                </Badge>
+              </IconButton>
+            </Link>
+          </Tooltip>
+        </Box>
         <Box>
           <Tooltip title="My Messages">
             <Link style={{ color: "inherit" }} to="/messages">
@@ -86,22 +103,6 @@ const Header = () => {
               >
                 <Badge>
                   <LoginIcon />
-                </Badge>
-              </IconButton>
-            </Link>
-          </Tooltip>
-        </Box>
-        <Box>
-          <Tooltip title="Help">
-            <Link style={{ color: "inherit" }} to="/help">
-              <IconButton
-                size="large"
-                color="inherit"
-                aria-label="App Info"
-                sx={{ ml: 0.8, mr: 0.8 }}
-              >
-                <Badge>
-                  <HelpIcon />
                 </Badge>
               </IconButton>
             </Link>

@@ -1,32 +1,41 @@
-import '../css/App.css';
+import React, { useState } from "react";
 
-import Header from './Header';
-import Item from './Item';
+import "../css/App.css";
 
-import { createTheme, ThemeProvider, Container } from '@mui/material';
+import Header from "./Header";
+import Item from "./Item";
+import ItemList from "./ItemList";
+
+import { createTheme, ThemeProvider, Container } from "@mui/material";
 import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#A32638"
+      main: "#A32638",
     },
     secondary: {
-      main: "#2F80ED"
-    }
-  }
+      main: "#2F80ED",
+    },
+  },
 });
 
 function App() {
+  const [items, setItems] = useState([1, 2, 3, 4, 5, 6, 7, 8]); // placeholder items
+
   return (
     <ThemeProvider theme={theme}>
       <Router>
         <div className="App">
           <Header />
-          <Container sx={{marginTop: "6em"}}>
+          <Container sx={{ marginTop: "6em" }}>
             <Switch>
               <Route exact path="/">
-                <Item/>
+                <div>Homepage</div>
+                <Item />
+              </Route>
+              <Route exact path="/items">
+                <ItemList items={items}/>
               </Route>
               <Route exact path="/messages">
                 <div>Messages</div>
@@ -36,9 +45,6 @@ function App() {
               </Route>
               <Route exact path="/profile">
                 <div>Profile</div>
-              </Route>
-              <Route exact path="/help">
-                <div>Help</div>
               </Route>
             </Switch>
           </Container>

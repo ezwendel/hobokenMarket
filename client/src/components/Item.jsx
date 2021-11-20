@@ -15,7 +15,7 @@ import Placeholder from "../img/default.png";
 
 const Item = () => {
   return (
-    <Card sx={{ maxWidth: 350, maxHeight: 450, minHeght: 450 }}>
+    <Card sx={{ maxWidth: 300, maxHeight: 450, minHeght: 450 }}>
       <CardHeader
         avatar={<Avatar sx={{ bgcolor: "#EB5757" }}>A</Avatar>}
         title="Item Name"
