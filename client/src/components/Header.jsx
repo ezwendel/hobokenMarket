@@ -1,5 +1,4 @@
 import React from "react";
-import { styled, alpha } from "@mui/material/styles";
 import {
   AppBar,
   Icon,
@@ -12,9 +11,8 @@ import {
 } from "@mui/material/";
 import ChatIcon from "@mui/icons-material/Chat";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import StoreIcon from '@mui/icons-material/Store';
+import StoreIcon from "@mui/icons-material/Store";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import HelpIcon from "@mui/icons-material/Help";
 import LoginIcon from "@mui/icons-material/Login";
 import { Link } from "react-router-dom";
 
@@ -22,10 +20,10 @@ import Searchbar from "./Searchbar";
 
 const Header = () => {
   return (
-    <AppBar>
+    <AppBar style={{ position: "static" }}>
       <Toolbar>
         <Link style={{ color: "inherit", textDecoration: "none" }} to="/">
-          <Box ml="1em" style={{display: "inline"}}>
+          <Box ml="1em" style={{ display: "inline" }}>
             <Icon color="inherit" aria-label="App Icon">
               <ShoppingCartIcon />
             </Icon>
@@ -37,7 +35,7 @@ const Header = () => {
             fontWeight="500"
             fontSize="22px"
             ml="1rem"
-            style={{display: "inline"}}
+            style={{ display: "inline" }}
           >
             Hoboken Marketplace
           </Typography>

@@ -3,11 +3,15 @@ import React, { useState } from "react";
 import "../css/App.css";
 
 import Header from "./Header";
-import Item from "./Item";
-import ItemList from "./ItemList";
+import Login from "./Login";
+import CreateAccount from "./CreateAccount";
+import ListingsPage from "./ListingsPage";
 
-import { createTheme, ThemeProvider, Container } from "@mui/material";
-import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
+import {
+  createTheme,
+  ThemeProvider,
+} from "@mui/material";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 
 const theme = createTheme({
   palette: {
@@ -21,33 +25,31 @@ const theme = createTheme({
 });
 
 function App() {
-  const [items, setItems] = useState([1, 2, 3, 4, 5, 6, 7, 8]); // placeholder items
+  const [items, setItems] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]); // placeholder items
 
   return (
     <ThemeProvider theme={theme}>
       <Router>
         <div className="App">
           <Header />
-          <Container sx={{ marginTop: "6em" }}>
+          <div style={{ margin: "2em" }}>
             <Switch>
               <Route exact path="/">
                 <div>Homepage</div>
-                <Item />
               </Route>
               <Route exact path="/items">
-                <ItemList items={items}/>
+                <ListingsPage items={items} />
               </Route>
               <Route exact path="/messages">
                 <div>Messages</div>
               </Route>
-              <Route exact path="/login">
-                <div>Login</div>
-              </Route>
+              <Route exact path="/login" component={Login} />
+              <Route exact path="/create-account" component={CreateAccount} />
               <Route exact path="/profile">
                 <div>Profile</div>
               </Route>
             </Switch>
-          </Container>
+          </div>
         </div>
       </Router>
     </ThemeProvider>
