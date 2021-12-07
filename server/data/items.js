@@ -66,17 +66,18 @@ async function createItem(
   const insertInfo = await itemsCollection.insertOne(newItem);
   if (insertInfo.insertedCount === 0) throw "createItem: Failed to create item";
   const id = insertInfo.insertedId.toString();
+  return getItemById(id);
 }
 
 async function getAllItems() {
   const itemsCollection = await items();
-  const items = await itemsCollection.find({}).toArray();
-  if (items.length === 0) return [];
-  for (let item of items) {
+  const itemsList = await itemsCollection.find({}).toArray();
+  if (itemsList.length === 0) return [];
+  for (let item of itemsList) {
     item._id = item._id.toString();
     item.sellerId = item.sellerId.toString();
   }
-  return items;
+  return itemsList;
 }
 
 async function getItemById(id) {
@@ -98,8 +99,10 @@ async function getItemById(id) {
 
 async function deleteItemById(id) {
   if (!id) throw "deleteItemById: Missing id";
-  if (typeof id !== "string") throw "deleteItemById: The provided id must be a string";
-  if (id.trim().length === 0) throw "deleteItemById: The provided id must not be an empty string";
+  if (typeof id !== "string")
+    throw "deleteItemById: The provided id must be a string";
+  if (id.trim().length === 0)
+    throw "deleteItemById: The provided id must not be an empty string";
   const parsedId = ObjectId(id.trim());
 
   const itemCollection = await items();
@@ -107,21 +110,23 @@ async function deleteItemById(id) {
   if (deletionInfo.deletedCount === 0) {
     throw "deleteItemById: Failed to delete item";
   }
-  return true;
+  return { deleted: true };
 }
 
 async function getItemsByCategory(category) {
   if (!category) throw "getItemsByCategory: Missing category";
-  if (typeof category !== "string") throw "getItemsByCategory: The provided category must be a string";
-  if (category.trim().length === 0) throw "getItemsByCategory: The provided category must not be an empty string";
+  if (typeof category !== "string")
+    throw "getItemsByCategory: The provided category must be a string";
+  if (category.trim().length === 0)
+    throw "getItemsByCategory: The provided category must not be an empty string";
 
   const itemCollection = await items();
-  const items = await itemCollection.find({ categories: category }).toArray();
-  for (let item of items) {
+  const itemsList = await itemCollection.find({ categories: category }).toArray();
+  for (let item of itemsList) {
     item._id = item._id.toString();
     item.sellerId = item.sellerId.toString();
   }
-  return items;
+  return itemsList;
 }
 
 module.exports = {
@@ -129,5 +134,5 @@ module.exports = {
   getAllItems,
   getItemById,
   deleteItemById,
-  getItemsByCategory
+  getItemsByCategory,
 };
