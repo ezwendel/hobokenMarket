@@ -13,13 +13,13 @@ const main = async () => {
   console.log("Seeding database...\n");
 
   try {
-    const item1 = await itemsData.createItem(
-      "Item 1",
-      "Testing createItem",
-      new ObjectId().toString(),
-      null,
-      ["Electronics", "Home"]
-    );
+    const item1 = await itemsData.createItem({
+      name: "Item 1",
+      description: "Testing createItem",
+      sellerId: new ObjectId().toString(),
+      itemPictures: null,
+      categories: ["Electronics", "Home"]
+    });
     const item1_id = item1._id.toString();
   
     console.log("getItems:", await itemsData.getAllItems());

@@ -2,13 +2,13 @@ const { items, users } = require("../config/mongoCollections");
 const moment = require("moment"); // for date checking
 const { ObjectId } = require("mongodb");
 
-async function createItem(
-  name,
-  description,
-  sellerId,
-  itemPictures,
-  categories
-) {
+async function createItem(body) {
+  let name = body.name;
+  let description = body.description;
+  let sellerId = body.sellerId;
+  let itemPictures = body.itemPictures;
+  let categories = body.categories;
+
   // Name Error Checking
   if (!name) throw "createItem: Missing name";
   if (typeof name !== "string") throw `createItem: name must be a string`;
@@ -129,10 +129,27 @@ async function getItemsByCategory(category) {
   return itemsList;
 }
 
+async function getItemsBySeller(sellerId) {
+  if (!sellerId) throw "getItemsBySeller: Missing sellerId";
+  if (typeof sellerId !== "string")
+    throw "getItemsBySeller: The provided sellerId must be a string";
+  if (sellerId.trim().length === 0)
+    throw "getItemsBySeller: The provided sellerId must not be an empty string";
+
+  const itemCollection = await items();
+  const itemsList = await itemCollection.find({ sellerId: ObjectId(sellerId.trim()) }).toArray();
+  for (let item of itemsList) {
+    item._id = item._id.toString();
+    item.sellerId = item.sellerId.toString();
+  }
+  return itemsList;
+}
+
 module.exports = {
   createItem,
   getAllItems,
   getItemById,
   deleteItemById,
   getItemsByCategory,
+  getItemsBySeller
 };

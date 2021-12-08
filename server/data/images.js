@@ -1,1 +1,0 @@
-const { items, users } = require("../config/mongoCollections");
