@@ -6,6 +6,7 @@ import Header from "./Header";
 import Login from "./Login";
 import CreateAccount from "./CreateAccount";
 import ListingsPage from "./ListingsPage";
+import ItemPage from "./ItemPage";
 
 import {
   createTheme,
@@ -39,6 +40,9 @@ function App() {
               </Route>
               <Route exact path="/items">
                 <ListingsPage items={items} />
+              </Route>
+              <Route exact path="/items/:id">
+                <ItemPage/>
               </Route>
               <Route exact path="/messages">
                 <div>Messages</div>

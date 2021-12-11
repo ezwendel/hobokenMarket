@@ -11,11 +11,13 @@ import {
   Typography,
 } from "@mui/material";
 
+import { Link } from "react-router-dom";
+
 import Placeholder from "../img/default.png";
 
 const Item = () => {
   return (
-    <Card sx={{ minWidth: 250, maxHeight: 450, minHeght: 450 }}>
+    <Card sx={{ minWidth: 250, maxHeight: 450, minHeight: 450 }}>
       <CardHeader
         avatar={<Avatar sx={{ bgcolor: "#EB5757" }}>A</Avatar>}
         title="Item Name"
@@ -28,8 +30,8 @@ const Item = () => {
           </Typography>
       </CardContent>
       <CardActions>
-          <Button color="secondary" size="small">CONTACT</Button>
-          <Button color="secondary" size="small">MORE INFO</Button>
+          <Button color="secondary" size="small"><Link style={{color: "inherit", textDecoration: "none"}}>CONTACT</Link></Button>
+          <Button color="secondary" size="small"><Link to="/items/0" style={{color: "inherit", textDecoration: "none"}}>MORE INFO</Link></Button>
       </CardActions>
     </Card>
   );
