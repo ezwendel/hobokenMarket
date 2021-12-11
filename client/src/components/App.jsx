@@ -7,6 +7,7 @@ import Login from "./Login";
 import CreateAccount from "./CreateAccount";
 import ListingsPage from "./ListingsPage";
 import ItemPage from "./ItemPage";
+import ProfilePage from "./ProfilePage";
 
 import {
   createTheme,
@@ -50,7 +51,7 @@ function App() {
               <Route exact path="/login" component={Login} />
               <Route exact path="/create-account" component={CreateAccount} />
               <Route exact path="/profile">
-                <div>Profile</div>
+                <ProfilePage />
               </Route>
             </Switch>
           </div>

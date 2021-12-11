@@ -1,4 +1,6 @@
 import React from "react";
+import { makeStyles } from "@mui/styles";
+import { useTheme } from "@mui/material/styles";
 
 import {
   Container,
@@ -13,12 +15,21 @@ import {
   TableContainer,
   TableBody,
   TableRow,
-  TableCell
+  TableCell,
+  Divider
 } from "@mui/material";
 
 import Placeholder from "../img/default.png";
 
 const ItemPage = () => {
+  const useStyles = makeStyles(() => ({
+    title: {
+      fontWeight: "bold",
+      color: "#444"
+    },
+  }));
+  const classes = useStyles();
+
   return (
     <Container maxWidth="100%">
       <Card sx={{ minWidth: 250, maxWidth: "70%", margin: "0 auto" }}>
@@ -27,8 +38,9 @@ const ItemPage = () => {
           avatar={<Avatar sx={{ bgcolor: "#EB5757" }}>A</Avatar>}
           title="Item Name"
           subheader="January 1, 2021"
+          classes={{ title: classes.title }}
         />
-        <hr style={{ margin: "0 1em" }} />
+        <Divider />
         <CardContent>
           <div style={{ margin: "1em 0" }}>
             <Typography gutterBottom variant="h6" component="div">
