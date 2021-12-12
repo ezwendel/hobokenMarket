@@ -181,6 +181,7 @@ async function addItemToUser(userId, itemId) {
   const userCollection = await users();
   let oldUser = await getUserById(userId);
 
+  oldUser.items = oldUser.items.map((x) => ObjectId(x));
   let items = oldUser.items
   console.log(items);
   for (let item of items) {
@@ -216,7 +217,7 @@ async function getUserById(id) {
   const user = await userCollection.findOne({ _id: parsedId });
   if (user === null) throw `getUserById: Failed to find user with id '${id}'`;
   user._id = user._id.toString();
-  // user.items.map((x) => x.toString())
+  user.items = user.items.map((x) => x.toString());
   return user;
 }
 

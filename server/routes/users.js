@@ -16,7 +16,7 @@ router.get('/:id', async (req, res) => {
   }
 })
 
-router.post('', async (req, res) => {
+router.post('/', async (req, res) => {
   // get body + xss body
   let body = req.body
   let password = xss(body.password)
