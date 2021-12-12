@@ -44,7 +44,7 @@ const Header = () => {
         <Searchbar />
         <Box>
           <Tooltip title="View Listings">
-            <Link style={{ color: "inherit" }} to="/items">
+            <Link style={{ color: "inherit" }} to="/items/0">
               <IconButton
                 size="large"
                 color="inherit"
