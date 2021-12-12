@@ -15,6 +15,38 @@ router.get('/:id', async (req, res) => {
   }
 })
 
+router.get('/', async (req, res) => {
+  try {
+    let items = await data.items.getAllItems()
+    // console.log(req.query);
+    if (req.query.offset) {
+      let offset = Number(req.query.offset);
+      // console.log(skipNum);
+      if (offset < 0) {
+        res.status(400).json({error: "offset query cannot be less than 0"});
+        return;
+      } else {
+        items.splice(0, offset);
+      }
+    }
+    if (req.query.count) {
+      let count = Number(req.query.count);
+      if (count < 0) {
+        res.status(400).json({error: "Take query cannot be less than 0"});
+        return;
+      } else {
+        items = items.slice(0, count);
+      }
+    } else {
+      items = items.slice(0, 20); // 20 is default take
+    }
+    items = items.slice(0, 100); // max 100 blogs
+    res.json(items);
+  } catch (e) {
+    return res.status(500).json({error: e});
+  }
+})
+
 router.post('/', async (req, res) => {
   // get body + xss body
   let body = req.body
