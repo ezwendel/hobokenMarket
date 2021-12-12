@@ -51,41 +51,50 @@ async function createUser(body) {
   if (typeof emailAddress !== "string") throw `createUser: emailAddress must be a string`;
   if (emailAddress.trim().length === 0)
     throw "createUser: emailAddress must not be an empty string";
-  if (emailRegex.test(emailAddress)) throw "createUser: emailAddress is not a vaild emailAddress";
+  if (!emailRegex.test(emailAddress)) throw "createUser: emailAddress is not a vaild emailAddress";
 
   // TODO: profilePicture error checking
 
   const userCollection = await users();
 
   // Check if duplicate name from same seller
-  let sameUsername = userCollection.find({ username: username }).toArray();
-  if (sameUsername) throw `createUser: username "${username}" is taken`;
+  let sameUsername = await userCollection.find({ username: username }).toArray();
+  console.log("username: ", username)
+  console.log("sameUsername: ", sameUsername)
+  if (sameUsername.length != 0) throw `createUser: username "${username}" is taken`;
+
+  console.log("here")
 
   let passwordHash = await bcrypt.hash(password, saltRounds);
 
+  console.log("now here")
+
   const newUser = {
-    name: name.trim(),
+    name: name,
     username: username.trim(),
     passwordHash: passwordHash,
-    profilePicture: profilePicture,
+    profilePicture: null,
     emailAddress: emailAddress.trim(),
     joinDate: new Date(),
     items: []
   };
 
+  console.log(newUser)
+
   const insertInfo = await userCollection.insertOne(newUser);
-  if (insertInfo.insertedCount === 0) throw "createItem: Failed to create item";
+  if (insertInfo.insertedCount === 0) throw "createUser: Failed to create user";
   const id = insertInfo.insertedId.toString();
-  return getUserById(id);
+  console.log("got here")
+  return await getUserById(id);
 }
 
 async function updateUser(body) {
   let _id = body._id;
   let name = body.name
-  let username = body.username
+  let username = body.username.toLowerCase()
   let password = body.password
   let profilePicture = body.profilePicture
-  let emailAddress = body.emailAddress
+  let emailAddress = body.emailAddress.toLowerCase()
   let joinDate = body.joinDate
   let items = body.items
 
@@ -155,7 +164,7 @@ async function updateUser(body) {
   const insertInfo = await userCollection.updateOne({ _id: ObjectId(_id) }, { $set: newUser });
   if (insertInfo.insertedCount === 0) throw "createItem: Failed to update user";
   const id = insertInfo.insertedId.toString();
-  return getUserById(id);
+  return await getUserById(id);
 }
 
 async function getAllUsers() {
@@ -205,11 +214,11 @@ async function getUserById(id) {
   const parsedId = ObjectId(id.trim());
 
   const userCollection = await users();
-  const item = await itemsCollection.findOne({ _id: parsedId });
-  if (item === null) throw `getItemById: Failed to find item with id '${id}'`;
-  item._id = item._id.toString();
-  item.sellerId = item.sellerId.toString();
-  return item;
+  const user = await userCollection.findOne({ _id: parsedId });
+  if (user === null) throw `getUserById: Failed to find user with id '${id}'`;
+  user._id = user._id.toString();
+  // user.items.map((x) => x.toString())
+  return user;
 }
 
 module.exports = {
