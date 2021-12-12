@@ -4,7 +4,16 @@ const express = require("express"),
       xss = require('xss')
 
 router.get('/:id', async (req, res) => {
-  return;
+  let id = req.params.id
+  if (!id || id.trim().length == 0) { return res.status(400).json({ error: "id not valid" }) };
+  console.log("in route")
+  try {
+    let user = await data.users.getUserById(id);
+    delete user.passwordHash;
+    return res.json(user);
+  } catch (e) {
+    return res.status(404).json({ error: `user with id ${id} does not exist` })
+  }
 })
 
 router.post('', async (req, res) => {
@@ -30,7 +39,6 @@ router.post('', async (req, res) => {
     }
     if (i.emailAddress === emailAddress.toLowerCase()) {
       return res.status(403).json({ error: `account using emailAddress ${emailAddress} already exists` })
-      
     }
   }
   // try to create user

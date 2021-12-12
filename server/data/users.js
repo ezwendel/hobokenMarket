@@ -161,10 +161,9 @@ async function updateUser(body) {
     items: oldUser.items
   };
 
-  const insertInfo = await userCollection.updateOne({ _id: ObjectId(_id) }, { $set: newUser });
-  if (insertInfo.insertedCount === 0) throw "createItem: Failed to update user";
-  const id = insertInfo.insertedId.toString();
-  return await getUserById(id);
+  const updateInfo = await userCollection.updateOne({ _id: ObjectId(_id) }, { $set: newUser });
+  if (updateInfo.modifiedCount === 0) throw "createItem: Failed to update user";
+  return await getUserById(_id);
 }
 
 async function getAllUsers() {
@@ -180,11 +179,12 @@ async function getAllUsers() {
 
 async function addItemToUser(userId, itemId) {
   const userCollection = await users();
-  let oldUser = getUserById(_id);
+  let oldUser = await getUserById(userId);
 
   let items = oldUser.items
+  console.log(items);
   for (let item of items) {
-    if (item.toString() = itemId.toString()) throw "addItemToUser: item already added to user"
+    if (item.toString() == itemId.toString()) throw "addItemToUser: item already added to user"
   }
   items.push(ObjectId(itemId))
 
@@ -198,10 +198,9 @@ async function addItemToUser(userId, itemId) {
     items: items
   };
 
-  const insertInfo = await userCollection.updateOne({ _id: ObjectId(userId) }, { $set: newUser });
-  if (insertInfo.insertedCount === 0) throw "createItem: Failed to update user";
-  const id = insertInfo.insertedId.toString();
-  return getUserById(id);
+  const updateInfo = await userCollection.updateOne({ _id: ObjectId(userId) }, { $set: newUser });
+  if (updateInfo.modifiedCount === 0) throw "createItem: Failed to update user";
+  return getUserById(userId);
 }
 
 async function getUserById(id) {
