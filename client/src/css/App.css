@@ -45,3 +45,22 @@
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
+.category-label {
+  display: inline;
+  font-weight: 500;
+  margin-right: 1em;
+}
+
+.category-list {
+  font-weight: 500;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: inline;
+}
+
+.category-list li {
+  display: inline;
+  margin-right: 1em;
+}

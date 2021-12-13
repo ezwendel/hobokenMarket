@@ -11,7 +11,8 @@ import {
   Avatar,
   Button,
   Typography,
-  Tooltip
+  Tooltip,
+  Chip
 } from "@mui/material";
 
 import { Link } from "react-router-dom";
@@ -50,7 +51,7 @@ const Item = ({ item }) => {
     return null;
   }
   return (
-    <Card sx={{ minWidth: 250, maxHeight: 450, height: "fit-content" }}>
+    <Card sx={{ minWidth: 250, maxHeight: 500, height: "fit-content" }}>
       <CardHeader
         avatar={<Tooltip title={user.username}><Avatar sx={{ bgcolor: "#EB5757" }}>{user.username.charAt(0).toUpperCase()}</Avatar></Tooltip>}
         title={item.name}
@@ -62,6 +63,13 @@ const Item = ({ item }) => {
         classes={{ title: classes.title }}
       />
       <CardMedia component="img" height="194" image={Placeholder} />
+      <div style={{ padding: "1em 1em 0 1em"}}>
+        <ul className="category-list">
+          {item.categories.map((category) => (
+            <li><Chip label={category} size="small" color="primary" variant="outlined" /></li>
+          ))}
+        </ul>
+      </div>
       <CardContent>
         <Typography
           variant="body1"

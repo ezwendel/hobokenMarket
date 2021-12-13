@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { makeStyles } from "@mui/styles";
+import { useTheme } from "@mui/material/styles";
 import axios from "axios";
 
 import {
@@ -20,6 +21,7 @@ import {
   CardActions,
   Button,
   Tooltip,
+  Chip
 } from "@mui/material";
 
 import { Link } from "react-router-dom";
@@ -32,6 +34,8 @@ const ItemPage = (props) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+
+  const theme = useTheme();
 
   // Get item
   useEffect(() => {
@@ -106,8 +110,16 @@ const ItemPage = (props) => {
           classes={{ title: classes.title }}
         />
         <Divider />
+        <div style={{ padding: "0.5em 1em"}}>
+          <div className="category-label">Categories:</div>
+          <ul className="category-list">
+            {item.categories.map((category) => (
+              <li><Chip label={category} size="small" color="primary" variant="outlined" /></li>
+            ))}
+          </ul>
+        </div>
         <CardContent>
-          <div style={{ margin: "1em 0" }}>
+          <div style={{ marginBottom: "1em" }}>
             <Typography gutterBottom variant="h6" component="div">
               Description
             </Typography>
