@@ -35,6 +35,36 @@
   }
 }
 
+/* Hide scrollbar for Chrome, Safari and Opera */
+.description::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.description {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.category-label {
+  display: inline;
+  font-weight: 500;
+  margin-right: 1em;
+}
+
+.category-list {
+  font-weight: 500;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: inline;
+}
+
+.category-list li {
+  display: inline;
+  margin-right: 1em;
+}
+
 .forgotPassword {
 	background: none !important;
 	border: none !important;

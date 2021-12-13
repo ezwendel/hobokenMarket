@@ -6,7 +6,7 @@ const express = require("express"),
 router.get('/:id', async (req, res) => {
   let id = req.params.id
   if (!id || id.trim().length == 0) { return res.status(400).json({ error: "id not valid" }) };
-  console.log("in route")
+  // console.log("in route")
   try {
     let item = await data.items.getItemById(id);
     return res.json(item);

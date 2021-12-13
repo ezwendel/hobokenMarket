@@ -59,15 +59,15 @@ async function createUser(body) {
 
   // Check if duplicate name from same seller
   let sameUsername = await userCollection.find({ username: username }).toArray();
-  console.log("username: ", username)
-  console.log("sameUsername: ", sameUsername)
+  // console.log("username: ", username)
+  // console.log("sameUsername: ", sameUsername)
   if (sameUsername.length != 0) throw `createUser: username "${username}" is taken`;
 
-  console.log("here")
+  // console.log("here")
 
   let passwordHash = await bcrypt.hash(password, saltRounds);
 
-  console.log("now here")
+  // console.log("now here")
 
   const newUser = {
     name: name,
@@ -79,7 +79,7 @@ async function createUser(body) {
     items: []
   };
 
-  console.log(newUser)
+  // console.log(newUser)
 
   const insertInfo = await userCollection.insertOne(newUser);
   if (insertInfo.insertedCount === 0) throw "createUser: Failed to create user";

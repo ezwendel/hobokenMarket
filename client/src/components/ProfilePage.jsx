@@ -16,6 +16,7 @@ import {
   ListItemIcon,
   ListItemText,
   Divider,
+  Chip,
 } from "@mui/material";
 import { Link } from "react-router-dom";
 
@@ -28,12 +29,31 @@ const Label = styled("span")(({ theme }) => ({
 
 const ItemListing = () => {
   return (
-    <Link to="/items/0" style={{color: "inherit", textDecoration: "none"}}>
+    <Link to="/items/0" style={{ color: "inherit", textDecoration: "none" }}>
       <ListItemButton>
         <ListItemIcon>
           <ShoppingBasketIcon />
         </ListItemIcon>
-        <ListItemText primary="Item" secondary="Description" />
+        <ListItemText
+          primary="Item"
+          secondary={
+            <>
+              <div style={{marginTop: ".5em"}}>
+                <ul className="category-list">
+                  <li>
+                    <Chip
+                      label="Category"
+                      size="small"
+                      color="primary"
+                      variant="outlined"
+                    />
+                  </li>
+                </ul>
+              </div>
+              <div style={{marginTop: ".5em"}}>Description</div>
+            </>
+          }
+        />
       </ListItemButton>
       <Divider />
     </Link>

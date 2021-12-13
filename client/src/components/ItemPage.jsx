@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { makeStyles } from "@mui/styles";
 import { useTheme } from "@mui/material/styles";
+import axios from "axios";
 
 import {
   Container,
@@ -16,33 +17,123 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  Divider
+  Divider,
+  CardActions,
+  Button,
+  Tooltip,
+  Chip,
 } from "@mui/material";
+
+import { Link } from "react-router-dom";
 
 import Placeholder from "../img/default.png";
 
-const ItemPage = () => {
+const ItemPage = (props) => {
+  const id = props.match.params.id;
+  const [item, setItem] = useState(null);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  const theme = useTheme();
+
+  // Get item
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const { data } = await axios.get(`http://localhost:4000/items/${id}`);
+        console.log(data);
+        setItem(data);
+      } catch (e) {
+        setError(e);
+        console.log(e);
+      }
+    };
+    setLoading(true);
+    fetchData();
+  }, []);
+
+  // Get user
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (item) {
+          const { data: data2 } = await axios.get(
+            `http://localhost:4000/user/${item.sellerId}`
+          );
+          console.log(data2);
+          setUser(data2);
+          setLoading(false);
+        }
+      } catch (e) {
+        setError(e);
+        console.log(e);
+      }
+    };
+    setLoading(true);
+    fetchData();
+  }, [item]);
+
   const useStyles = makeStyles(() => ({
     title: {
       fontWeight: "bold",
-      color: "#444"
+      color: "#444",
     },
   }));
   const classes = useStyles();
 
+  if (loading) {
+    return (
+      <Container maxWidth="100%">
+        <div style={{ margin: "0 auto", width: "fit-content" }}>Loading...</div>
+      </Container>
+    );
+  }
   return (
     <Container maxWidth="100%">
       <Card sx={{ minWidth: 250, maxWidth: "70%", margin: "0 auto" }}>
         <CardMedia component="img" image={Placeholder} />
         <CardHeader
-          avatar={<Avatar sx={{ bgcolor: "#EB5757" }}>A</Avatar>}
-          title="Item Name"
-          subheader="January 1, 2021"
+          avatar={
+            <Tooltip title={user.username}>
+              <Avatar sx={{ bgcolor: "#EB5757" }}>
+                {user.username.charAt(0).toUpperCase()}
+              </Avatar>
+            </Tooltip>
+          }
+          title={item.name}
+          subheader={new Date(item.listDate).toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+          })}
           classes={{ title: classes.title }}
         />
         <Divider />
+        <div style={{ padding: "0.5em 1em" }}>
+          <Typography
+            className="category-label"
+            style={{ display: "inline", fontWeight: 500, marginRight: "1em" }}
+            component="small"
+            fontSize={14}
+          >
+            Categories:
+          </Typography>
+          <ul className="category-list">
+            {item.categories.map((category) => (
+              <li>
+                <Chip
+                  label={category}
+                  size="small"
+                  color="primary"
+                  variant="outlined"
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
         <CardContent>
-          <div style={{ margin: "1em 0" }}>
+          <div style={{ marginBottom: "1em" }}>
             <Typography gutterBottom variant="h6" component="div">
               Description
             </Typography>
@@ -53,21 +144,7 @@ const ItemPage = () => {
               fontSize="14px"
               gutterBottom
             >
-              Item description.
-            </Typography>
-          </div>
-          <div style={{ margin: "1em 0" }}>
-            <Typography gutterBottom variant="h6" component="div">
-              Location
-            </Typography>
-            <Typography
-              variant="body1"
-              color="text.secondary"
-              component="div"
-              fontSize="14px"
-              gutterBottom
-            >
-              1 Castle Point Terrace
+              {item.description}
             </Typography>
           </div>
           <div style={{ margin: "1em 0" }}>
@@ -75,17 +152,16 @@ const ItemPage = () => {
               Contact Information
             </Typography>
             <TableContainer component={Paper}>
-              <Table
-                sx={{ minWidth: 500 }}
-                aria-label="contact-info"
-              >
+              <Table sx={{ minWidth: 500 }} aria-label="contact-info">
                 <TableBody>
                   <TableRow>
                     <TableCell component="th" scope="row">
                       Name
                     </TableCell>
                     <TableCell style={{ width: 160 }} align="right">
-                      John Smith
+                      {user.name !== null
+                        ? `${user.name.firstName} ${user.name.lastName}`
+                        : "N/A"}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -93,7 +169,9 @@ const ItemPage = () => {
                       Cell Phone #:
                     </TableCell>
                     <TableCell style={{ width: 160 }} align="right">
-                      (123)-456-7890
+                      {user.number && user.number.cell !== null
+                        ? user.number.cell
+                        : "N/A"}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -101,7 +179,9 @@ const ItemPage = () => {
                       Home Phone #:
                     </TableCell>
                     <TableCell style={{ width: 160 }} align="right">
-                      (123)-456-7890
+                      {user.number && user.number.home !== null
+                        ? user.number.home
+                        : "N/A"}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -109,7 +189,7 @@ const ItemPage = () => {
                       Email Address:
                     </TableCell>
                     <TableCell style={{ width: 160 }} align="right">
-                      john.smith@gmail.com
+                      {user.emailAddress !== null ? user.emailAddress : "N/A"}
                     </TableCell>
                   </TableRow>
                 </TableBody>
@@ -117,6 +197,20 @@ const ItemPage = () => {
             </TableContainer>
           </div>
         </CardContent>
+        <CardActions>
+          <Link
+            to={`/items/0`}
+            style={{
+              color: "inherit",
+              textDecoration: "none",
+              margin: "0 auto",
+            }}
+          >
+            <Button color="secondary" size="small">
+              BACK TO LISTINGS
+            </Button>
+          </Link>
+        </CardActions>
       </Card>
     </Container>
   );
