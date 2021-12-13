@@ -21,7 +21,7 @@ import {
   CardActions,
   Button,
   Tooltip,
-  Chip
+  Chip,
 } from "@mui/material";
 
 import { Link } from "react-router-dom";
@@ -110,11 +110,25 @@ const ItemPage = (props) => {
           classes={{ title: classes.title }}
         />
         <Divider />
-        <div style={{ padding: "0.5em 1em"}}>
-          <div className="category-label">Categories:</div>
+        <div style={{ padding: "0.5em 1em" }}>
+          <Typography
+            className="category-label"
+            style={{ display: "inline", fontWeight: 500, marginRight: "1em" }}
+            component="small"
+            fontSize={14}
+          >
+            Categories:
+          </Typography>
           <ul className="category-list">
             {item.categories.map((category) => (
-              <li><Chip label={category} size="small" color="primary" variant="outlined" /></li>
+              <li>
+                <Chip
+                  label={category}
+                  size="small"
+                  color="primary"
+                  variant="outlined"
+                />
+              </li>
             ))}
           </ul>
         </div>
@@ -131,20 +145,6 @@ const ItemPage = (props) => {
               gutterBottom
             >
               {item.description}
-            </Typography>
-          </div>
-          <div style={{ margin: "1em 0" }}>
-            <Typography gutterBottom variant="h6" component="div">
-              Location
-            </Typography>
-            <Typography
-              variant="body1"
-              color="text.secondary"
-              component="div"
-              fontSize="14px"
-              gutterBottom
-            >
-              1 Castle Point Terrace
             </Typography>
           </div>
           <div style={{ margin: "1em 0" }}>
