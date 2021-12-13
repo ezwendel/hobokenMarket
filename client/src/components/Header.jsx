@@ -89,8 +89,8 @@ const Header = () => {
           </Tooltip>
         </Box>
         <Box>
-          <Tooltip title="Login">
-            <Link style={{ color: "inherit" }} to="/login">
+          <Tooltip title="Logout">
+            <Link style={{ color: "inherit" }} to="/logout">
               <IconButton
                 size="large"
                 color="inherit"

@@ -1,5 +1,9 @@
-import React from "react";
+import React, {useContext,useState }from "react";
 import { useTheme } from "@mui/material/styles";
+import { Redirect } from 'react-router-dom';
+import { doCreateUserWithEmailAndPassword } from "../firebase/FirebaseFunctions";
+import {AuthContext} from '../firebase/Auth';
+import SocialSignIn from './SocialSignIn';
 
 import {
   Card,
@@ -16,11 +20,35 @@ import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import EmailIcon from "@mui/icons-material/Email";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 
-const Login = () => {
+const CreateAccount = () => {
   const theme = useTheme();
+  const {currentUser}=useContext(AuthContext);
+  const [pwMatch, setPwMatch] = useState('');
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+    const { username, email, password, confirmpassword } = e.target.elements;
+    if (password.value !== confirmpassword.value) {
+      setPwMatch('Passwords do not match');
+      return false;
+    }
+
+    try {
+      await doCreateUserWithEmailAndPassword(
+        email.value,
+        password.value,
+        username
+      );
+    } catch (error) {
+      alert(error);
+    }
+  };
+  if (currentUser) {
+    return <Redirect to="/" />;
+  }
 
   return (
-    <form>
+    <div>
+    <form onSubmit={handleSignUp}>
       <Card sx={{ width: "400px", m: "0 auto" }}>
         <CardContent>
           <Grid
@@ -120,9 +148,11 @@ const Login = () => {
                 variant="contained"
                 width="100%"
                 endIcon={<PersonAddAltIcon />}
+                type="submit"
               >
                 Create Account
               </Button>
+              <SocialSignIn/>
             </Grid>
             <Grid item xs={6}>
               <Link
@@ -139,7 +169,9 @@ const Login = () => {
         </CardContent>
       </Card>
     </form>
+
+    </div>
   );
 };
 
-export default Login;
+export default CreateAccount;
