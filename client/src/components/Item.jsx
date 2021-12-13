@@ -68,6 +68,12 @@ const Item = ({ item }) => {
           color="text.secondary"
           component="div"
           fontSize="14px"
+          height="100px"
+          width="fit-content"
+          style={{
+            overflowY: "scroll"
+          }}
+          className="description"
         >
           {item.description}
         </Typography>

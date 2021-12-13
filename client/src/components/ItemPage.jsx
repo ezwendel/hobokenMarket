@@ -49,6 +49,7 @@ const ItemPage = (props) => {
     fetchData();
   }, []);
 
+  // Get user
   useEffect(() => {
     const fetchData = async () => {
       try {

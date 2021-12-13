@@ -22,11 +22,9 @@ const Header = () => {
   return (
     <AppBar style={{ position: "static" }}>
       <Toolbar>
-        <Link style={{ color: "inherit", textDecoration: "none" }} to="/">
+        <Link style={{ color: "inherit", textDecoration: "none", justifyContent: "center", alignItems: "center", display: "flex" }} to="/">
           <Box ml="1em" style={{ display: "inline" }}>
-            <Icon color="inherit" aria-label="App Icon">
               <ShoppingCartIcon />
-            </Icon>
           </Box>
           <Typography
             variant="h1"
@@ -35,7 +33,7 @@ const Header = () => {
             fontWeight="500"
             fontSize="22px"
             ml="1rem"
-            style={{ display: "inline" }}
+            style={{ display: "inline", position: "relative", top: "2px" }}
           >
             Hoboken Marketplace
           </Typography>
