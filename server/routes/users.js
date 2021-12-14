@@ -3,13 +3,23 @@ const express = require("express"),
       data = require('../data'),
       xss = require('xss')
 
+const bluebird = require('bluebird');
+const redis = require('redis');
+const client = redis.createClient();
+
+bluebird.promisifyAll(redis.RedisClient.prototype);
+bluebird.promisifyAll(redis.Multi.prototype);
+
 router.get('/:id', async (req, res) => {
   let id = req.params.id
   if (!id || id.trim().length == 0) { return res.status(400).json({ error: "id not valid" }) };
   console.log("in route")
+  let userData = await client.hgetAsync("user", `${id}`);
+  if (userData) { return res.json(JSON.parse(userData)) }
   try {
     let user = await data.users.getUserById(id);
     delete user.passwordHash;
+    let userDataCached = await client.hsetAsync("user", `${id}`, JSON.stringify(user));
     return res.json(user);
   } catch (e) {
     return res.status(404).json({ error: `user with id ${id} does not exist` })

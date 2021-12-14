@@ -3,12 +3,22 @@ const express = require("express"),
       data = require('../data'),
       xss = require('xss')
 
+const bluebird = require('bluebird');
+const redis = require('redis');
+const client = redis.createClient();
+
+bluebird.promisifyAll(redis.RedisClient.prototype);
+bluebird.promisifyAll(redis.Multi.prototype);
+
 router.get('/:id', async (req, res) => {
   let id = req.params.id
   if (!id || id.trim().length == 0) { return res.status(400).json({ error: "id not valid" }) };
   console.log("in route")
+  let itemData = await client.hgetAsync("item", `${id}`);
+  if (itemData) { return res.json(JSON.parse(itemData)) }
   try {
     let item = await data.items.getItemById(id);
+    let itemDataCached = await client.hsetAsync("item", `${id}`, JSON.stringify(item))
     return res.json(item);
   } catch (e) {
     return res.status(404).json({ error: `item with id ${id} does not exist` })
@@ -61,19 +71,17 @@ router.post('/', async (req, res) => {
   if (!sellerId || sellerId.trim().length == 0) { return res.status(400).json({ error: "sellerId not valid" }) };
   if (!categories || !Array.isArray(categories) || categories.length == 0) { return res.status(400).json({ error: "categories not valid" }) };
   // see if seller exists
-  let allUsers = await data.users.getAllUsers();
-  let sellerExists = false;
-  for (i of allUsers) {
-    if (i._id.toString() === sellerId.toString()) {
-      sellerExists = true;
-      break;
-    }
+  let seller = null;
+  try {
+    seller = await data.users.getUserById(id);
+  } catch (e) {
+    return res.status(404).json({ error: `user with id ${sellerId} does not exist` }) 
   }
-  if (!sellerExists) { return res.status(404).json({ error: `user with id ${sellerId} does not exist` }) }
-  // try to create item
   try {
     let item = await data.items.createItem({ name: name, description: description, sellerId: sellerId, categories: categories })
-    await data.users.addItemToUser(sellerId, item._id)
+    let sellerWithItem = await data.users.addItemToUser(sellerId, item._id)
+    delete sellerWithItem.passwordHash;
+    let userDataCached = await client.hsetAsync("user", `${sellerId}`, JSON.stringify(sellerWithItem));
     return res.json(item);
   } catch (e) {
     console.log("server error", e)
