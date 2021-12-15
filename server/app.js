@@ -7,6 +7,24 @@ app.use(cors({
 }));
 
 const configRoutes = require('./routes');
+const http = require('http').createServer(app);
+var io = require('socket.io')(http);
+
+io.on('connection', (socket) => {
+  console.log('new client connected', socket.id);
+  const id = socket.handshake.query.id
+  socket.join(id)
+
+  socket.on('send_message', ({ recipients, message }) => {
+    recipients.forEach(recipient => {
+      const newRecipients = recipients.filter(r => r !== recipient)
+      newRecipients.push(id)
+      socket.broadcast.to(recipient).emit('receive_message', {
+        recipients: newRecipients, sender: id, message
+      })
+    })
+  })
+})
 
 app.use('/public', static);
 app.use(express.json());
