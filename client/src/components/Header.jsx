@@ -50,7 +50,6 @@ const Header = () => {
           </Typography>
         </Link>
         <Box sx={{ flexGrow: 1 }} />
-        <Searchbar />
         <HeaderButton to="/items/0" title="View Listings" icon={<StoreIcon/>} />
         <HeaderButton to="/messages" title="My Messages" icon={<ChatIcon/>} />
         <HeaderButton to="/profile" title="My Account" icon={<AccountCircleIcon/>} />
