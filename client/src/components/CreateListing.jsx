@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import axios from "axios";
 
 import {
   Dialog,
@@ -14,10 +15,70 @@ import {
   Select,
   OutlinedInput,
   MenuItem,
+  Alert,
 } from "@mui/material";
 
-const CreateListing = ({formOpen, handleFormClose}) => {
-  const [categories, setCategories] = React.useState([]);
+const CreateListing = ({ formOpen, handleFormClose }) => {
+  const [categories, setCategories] = useState([]);
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+  });
+  const [formError, setFormError] = useState(false);
+  const [nameError, setNameError] = useState(false);
+  const [descError, setDescError] = useState(false);
+  const [catError, setCatError] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const addItem = async (e) => {
+    setFormError(false);
+    setNameError(false);
+    setDescError(false);
+    setCatError(false);
+    e.preventDefault();
+    let submitError = false;
+    let nameField = document.getElementById("name");
+    let descriptionField = document.getElementById("description");
+    if (nameField.value.trim().length === 0) {
+      setNameError("Missing item name.");
+      submitError = true;
+    }
+    if (descriptionField.value.trim().length === 0) {
+      setDescError("Missing item description.");
+      submitError = true;
+    }
+    if (categories.length === 0) {
+      setCatError("Must include at least one category.");
+      submitError = true;
+    }
+    if (!submitError) {
+      try {
+        // TODO: change to current user's ID
+        const submitData = {
+          name: formData.name.trim(),
+          description: formData.description.trim(),
+          categories: categories,
+          sellerId: "61b7af9394292552b857d829",
+        };
+        console.log(submitData);
+        let { data } = await axios.post(
+          `http://localhost:4000/items`,
+          submitData
+        );
+        console.log(data);
+        nameField.value = "";
+        descriptionField.value = "";
+        setCategories([]);
+        handleFormClose();
+      } catch (error) {
+        console.log(error);
+        setFormError(error.toString());
+      }
+    }
+  };
 
   // https://mui.com/components/selects/
   const handleCategoryChange = (event) => {
@@ -40,8 +101,9 @@ const CreateListing = ({formOpen, handleFormClose}) => {
   ];
 
   return (
-    <Dialog open={formOpen} onClose={handleFormClose}>
+    <Dialog open={formOpen} onClose={handleFormClose} scroll="body">
       <DialogTitle>Add New Listing</DialogTitle>
+      {formError && <Alert severity="error">{formError}</Alert>}
       <DialogContent sx={{ width: 500 }}>
         <DialogContentText>
           Enter all of the details for your new listing.
@@ -49,29 +111,35 @@ const CreateListing = ({formOpen, handleFormClose}) => {
         <TextField
           autoFocus
           margin="dense"
-          id="item-name"
+          id="name"
+          name="name"
           label="Item Name"
           type="text"
           fullWidth
           placeholder="Enter a name for your item"
           variant="standard"
+          onChange={(e) => handleChange(e)}
         />
+        {nameError && <Alert severity="error">{nameError}</Alert>}
         <TextField
           margin="dense"
-          id="item-description"
+          id="description"
           label="Item Description"
+          name="description"
           type="text"
           fullWidth
           multiline
           rows={6}
           placeholder="Describe your item"
           variant="standard"
+          onChange={(e) => handleChange(e)}
         />
+        {descError && <Alert severity="error">{descError}</Alert>}
         <FormControl sx={{ mt: 1, mb: 1, width: "100%" }}>
-          <InputLabel id="item-categories">Categories</InputLabel>
+          <InputLabel id="categories">Categories</InputLabel>
           <Select
-            labelId="item-categories"
-            id="item-categories"
+            labelId="categories"
+            id="categories"
             multiple
             value={categories}
             onChange={handleCategoryChange}
@@ -92,14 +160,22 @@ const CreateListing = ({formOpen, handleFormClose}) => {
             ))}
           </Select>
         </FormControl>
+        {catError && <Alert severity="error">{catError}</Alert>}
         <FormControl sx={{ mt: 1, width: "35ch" }}>
-          <label htmlFor="item-image">Upload Image</label>
-          <Input accept="image/*" id="item-image" multiple type="file" />
+          <label htmlFor="image">Upload Image</label>
+          <Input accept="image/*" id="image" multiple type="file" />
         </FormControl>
       </DialogContent>
       <DialogActions>
         <Button onClick={handleFormClose}>Cancel</Button>
-        <Button onClick={handleFormClose}>Submit Listing</Button>
+        <Button
+          onClick={(e) => {
+            addItem(e);
+          }}
+          type="submit"
+        >
+          Submit Listing
+        </Button>
       </DialogActions>
     </Dialog>
   );

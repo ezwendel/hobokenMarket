@@ -5,6 +5,7 @@ import { Container, Fab, Button, Chip } from "@mui/material";
 import ItemList from "./ItemList";
 import CreateListing from "./CreateListing";
 import Add from "@mui/icons-material/Add";
+import Searchbar from "./Searchbar";
 
 import { useLocation, Link } from "react-router";
 
@@ -73,7 +74,7 @@ const ListingsPage = (props) => {
   }
   return (
     <Container maxWidth="100%">
-      <div style={{ width: "fit-content", margin: "2em auto" }}>
+      <div style={{ width: "fit-content", margin: "1em auto" }}>
         {page > 0 ? (
           <Button onClick={() => prevPage()}>
             Previous
@@ -93,6 +94,9 @@ const ListingsPage = (props) => {
             Next
           </Button>
         )}
+      </div>
+      <div style={{width: "40em", margin: "0 auto 1.5em auto"}}>
+        <Searchbar />
       </div>
       <ItemList items={items} />
       <CreateListing formOpen={formOpen} handleFormClose={handleFormClose} />
