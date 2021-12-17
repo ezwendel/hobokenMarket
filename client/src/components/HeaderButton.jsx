@@ -8,7 +8,7 @@ import {
     Badge,
   } from "@mui/material/";
 
-const HeaderButton = ({to, title, icon}) => {
+const HeaderButton = ({to, title, icon, func}) => {
   return (
     <Link style={{ color: "inherit" }} to={to}>
       <Box>
@@ -18,6 +18,7 @@ const HeaderButton = ({to, title, icon}) => {
             color="inherit"
             aria-label={title}
             sx={{ ml: 0.8, mr: 0.8 }}
+            onClick={func}
           >
             <Badge>
               {icon}
