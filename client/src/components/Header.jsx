@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useContext} from "react";
 import {
   AppBar,
   Toolbar,
@@ -18,8 +18,10 @@ import HobokenIcon from "../img/hoboken.png";
 
 import Searchbar from "./Searchbar";
 import HeaderButton from "./HeaderButton";
+import { AuthContext } from '../firebase/Auth';
 
 const Header = () => {
+  const { currentUser } = useContext(AuthContext);
   return (
     <AppBar style={{ position: "static" }}>
       <Toolbar>
@@ -51,9 +53,9 @@ const Header = () => {
         </Link>
         <Box sx={{ flexGrow: 1 }} />
         <HeaderButton to="/items/0" title="View Listings" icon={<StoreIcon/>} />
-        <HeaderButton to="/messages" title="My Messages" icon={<ChatIcon/>} />
-        <HeaderButton to="/profile" title="My Account" icon={<AccountCircleIcon/>} />
-        <HeaderButton to="/logout" title="Logout" icon={<LoginIcon/>} />
+        {currentUser&&<HeaderButton to="/messages" title="My Messages" icon={<ChatIcon/>} />}
+        {currentUser&&<HeaderButton to="/profile" title="My Account" icon={<AccountCircleIcon/>} />}
+        {currentUser&&<HeaderButton to="/logout" title="Logout" icon={<LoginIcon/>} />}
       </Toolbar>
     </AppBar>
   );
