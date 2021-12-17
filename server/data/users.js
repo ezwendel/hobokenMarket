@@ -240,11 +240,28 @@ async function getUserById(id) {
   return user;
 }
 
+async function getUserByEmail(email) {
+  // ID Error Checking
+  if (!email) throw "getUserByEmail: Missing email";
+  if (typeof email !== "string")
+    throw "getUserByEmail: The provided email must be a string";
+  if (email.trim().length === 0)
+    throw "getUserByEmail: The provided email must not be an empty string";
+  
+  const userCollection = await users();
+  const user = await userCollection.findOne({ emailAddress: email });
+  if (user === null) throw `getUserByEmail: Failed to find user with email '${email}'`;
+  user._id = user._id.toString();
+  user.items = user.items.map((x) => x.toString());
+  return user;
+}
+
 module.exports = {
   createUser,
   updateUser,
   getAllUsers,
   addItemToUser,
   getUserById,
-  updatePfp
+  updatePfp,
+  getUserByEmail
 };
