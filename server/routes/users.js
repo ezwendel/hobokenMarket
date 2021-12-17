@@ -1,11 +1,15 @@
 const express = require("express"),
-      router = express.Router(),
-      data = require('../data'),
-      xss = require('xss')
+  router = express.Router(),
+  data = require('../data'),
+  xss = require('xss')
 
 const bluebird = require('bluebird');
 const redis = require('redis');
-const client = redis.createClient();
+const redisOptions = {
+  host: process.env.DOCKER_MODE ? 'redis' : 'localhost',
+  port: 6379,
+};
+const client = redis.createClient(redisOptions);
 
 bluebird.promisifyAll(redis.RedisClient.prototype);
 bluebird.promisifyAll(redis.Multi.prototype);

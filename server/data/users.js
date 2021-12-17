@@ -25,11 +25,11 @@ async function createUser(body) {
 
   // Name Error Checking
   if (!name) throw 'createUser: Missing name'
-  if (typeof(name) != 'object') throw 'createUser: name must be an object';
+  if (typeof (name) != 'object') throw 'createUser: name must be an object';
   if (!name.firstName) throw 'createUser: Missing name.firstName';
   if (!name.lastName) throw 'createUser: Missing name.lastName';
-  if (typeof(name.firstName) !== "string") throw `createUser: name.firstName must be a string`;
-  if (typeof(name.lastName) !== "string") throw `createUser: name.lastName must be a string`;
+  if (typeof (name.firstName) !== "string") throw `createUser: name.firstName must be a string`;
+  if (typeof (name.lastName) !== "string") throw `createUser: name.lastName must be a string`;
   if (name.firstName.trim().length === 0)
     throw "createUser: name.firstName must not be an empty string";
   if (name.lastName.trim().length === 0)
@@ -84,7 +84,6 @@ async function createUser(body) {
   const insertInfo = await userCollection.insertOne(newUser);
   if (insertInfo.insertedCount === 0) throw "createUser: Failed to create user";
   const id = insertInfo.insertedId.toString();
-  console.log("got here")
   return await getUserById(id);
 }
 
@@ -101,7 +100,7 @@ async function updateUser(body) {
   let oldUser = getUserById(_id);
 
   // Username Error Checking
-  if (!username) {username = oldUser.username};
+  if (!username) { username = oldUser.username };
   if (typeof username !== "string") throw `createUser: username must be a string`;
   if (username.trim().length === 0)
     throw "createUser: username must not be an empty string";
@@ -109,12 +108,12 @@ async function updateUser(body) {
     throw "createUser: username must not exceed 20 characters";
 
   // Name Error Checking
-  if (!name) {name = oldUser.name};
-  if (typeof(name) != 'object') throw 'createUser: name must be an object';
+  if (!name) { name = oldUser.name };
+  if (typeof (name) != 'object') throw 'createUser: name must be an object';
   if (!name.firstName) throw 'createUser: Missing name.firstName';
   if (!name.lastName) throw 'createUser: Missing name.lastName';
-  if (typeof(name.firstName) !== "string") throw `createUser: name.firstName must be a string`;
-  if (typeof(name.lastName) !== "string") throw `createUser: name.lastName must be a string`;
+  if (typeof (name.firstName) !== "string") throw `createUser: name.firstName must be a string`;
+  if (typeof (name.lastName) !== "string") throw `createUser: name.lastName must be a string`;
   if (name.firstName.trim().length === 0)
     throw "createUser: name.firstName must not be an empty string";
   if (name.lastName.trim().length === 0)
@@ -132,12 +131,12 @@ async function updateUser(body) {
   } else {
     passwordHash = oldUser.passwordHash;
   }
-  
+
   // Email Address Error Checking
 
   const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
-  if (!emailAddress) {emailAddress = oldUser.emailAddress};
+  if (!emailAddress) { emailAddress = oldUser.emailAddress };
   if (typeof emailAddress !== "string") throw `createUser: emailAddress must be a string`;
   if (emailAddress.trim().length === 0)
     throw "createUser: emailAddress must not be an empty string";

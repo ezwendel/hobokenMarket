@@ -3,9 +3,9 @@ services:
     server:
         build: ./server/
         ports:
-            - '5000:5000'
+            - '4000:4000'
         depends_on:
-            - db
+            - mongo
             - redis
         command: npm run dockerStart
 
@@ -17,12 +17,12 @@ services:
             - server
         command: npm run dockerStart
 
-    db:
-        expose:
-            - '27017'
-        image: mongo:4.2.13-bionic
+    mongo:
+        image: mongo
+        ports:
+        - '27017:27017'
 
     redis:
         expose:
             - '6379'
-        image: redis:6.2.2-alpine3.13
+        image: redis:latest

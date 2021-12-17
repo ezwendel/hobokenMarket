@@ -4,6 +4,8 @@
   "description": "Server for Hoboken Marketplace Application",
   "main": "index.js",
   "scripts": {
+    "dockerStart": "npm run dockerSeed && DOCKER_MODE=true node app.js",
+    "dockerSeed": "DOCKER_MODE=true node ./tasks/seed.js",
     "start": "node app.js",
     "seed": "node ./tasks/seed.js"
   },
