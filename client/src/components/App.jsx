@@ -50,7 +50,6 @@ function App() {
               <Route exact path="/create-account" component={CreateAccount} />
               <Route exact path="/profile">
                 <ProfilePage />
-              
               </Route>
             </Switch>
           </div>
