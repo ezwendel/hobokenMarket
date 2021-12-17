@@ -69,11 +69,13 @@ const Item = ({ item }) => {
     <Card sx={{ minWidth: 250, height: 500 }}>
       <CardHeader
         avatar={
-          <Tooltip title={user.username}>
-            <Avatar sx={{ bgcolor: "#EB5757" }}>
-              {user.username.charAt(0).toUpperCase()}
-            </Avatar>
-          </Tooltip>
+          <Link to={`/user/${user._id}`}>
+            <Tooltip title={user.username}>
+              <Avatar sx={{ bgcolor: "#EB5757" }}>
+                {user.username.charAt(0).toUpperCase()}
+              </Avatar>
+            </Tooltip>
+          </Link>
         }
         title={item.name}
         subheader={new Date(item.listDate).toLocaleDateString("en-US", {
@@ -86,7 +88,11 @@ const Item = ({ item }) => {
       <CardMedia
         component="img"
         height="194"
-        image={item.itemPictures !== null ? `http://localhost:4000/file/${item.itemPictures[0]}` : Placeholder}
+        image={
+          item.itemPictures !== null
+            ? `http://localhost:4000/file/${item.itemPictures[0]}`
+            : Placeholder
+        }
         onError={(e) => {
           e.target.src = Placeholder;
         }}
@@ -122,19 +128,17 @@ const Item = ({ item }) => {
         </Typography>
       </CardContent>
       <CardActions>
-        <Link style={{ color: "inherit", textDecoration: "none" }}>
-          <Button color="secondary" size="small">
-            CONTACT
-          </Button>
-        </Link>
-        <Link
+        <Button color="secondary" size="small" component={Link}>
+          CONTACT
+        </Button>
+        <Button
+          color="secondary"
+          size="small"
+          component={Link}
           to={`/item/${item._id}`}
-          style={{ color: "inherit", textDecoration: "none" }}
         >
-          <Button color="secondary" size="small">
-            MORE INFO
-          </Button>
-        </Link>
+          MORE INFO
+        </Button>
       </CardActions>
     </Card>
   );

@@ -1,9 +1,9 @@
-import React, { useState, useEffect ,useContext} from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { styled } from "@mui/styles";
 import { makeStyles } from "@mui/styles";
 import { useTheme } from "@mui/material/styles";
 import axios from "axios";
-import { AuthContext } from '../firebase/Auth';
+import { AuthContext } from "../firebase/Auth";
 
 import {
   Container,
@@ -14,6 +14,7 @@ import {
   Typography,
   Button,
   List,
+  ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
@@ -29,44 +30,57 @@ const Label = styled("span")(({ theme }) => ({
   fontWeight: 500,
 }));
 
-const ItemListing = () => {
+const ItemListing = (item) => {
+  console.log(item);
+  const categoryInList = (category) => {
+    <li key={category}>
+      <Chip label={category} size="small" color="primary" variant="outlined" />
+    </li>;
+  };
+
+  let categories = item.categories.map((category) => {
+    return categoryInList(category);
+  });
+
   return (
-    <Link to="/items/0" style={{ color: "inherit", textDecoration: "none" }}>
-      <ListItemButton>
+    <ListItem key={item._id}>
+      {/* <Link to={`/items/${item._id}`} style={{ color: "inherit", textDecoration: "none" }}> */}
+      <ListItemButton
+        component={Link}
+        to={`/items/${item._id}`}
+        style={{ color: "inherit", textDecoration: "none" }}
+      >
         <ListItemIcon>
           <ShoppingBasketIcon />
         </ListItemIcon>
         <ListItemText
-          primary="Item"
-          secondary={
-            <>
-              <div style={{marginTop: ".5em"}}>
-                <ul className="category-list">
-                  <li>
-                    <Chip
-                      label="Category"
-                      size="small"
-                      color="primary"
-                      variant="outlined"
-                    />
-                  </li>
-                </ul>
-              </div>
-              <div style={{marginTop: ".5em"}}>Description</div>
-            </>
-          }
+          primary={item.name}
+          // secondary={
+          //   <>
+          //     <div style={{marginTop: ".5em"}}>
+          //       <ul className="category-list">
+          //         {categories}
+          //       </ul>
+          //     </div>
+          //     <div style={{marginTop: ".5em"}}>{item.description}</div>
+          //   </>
+          // }
+          secondary={item.description}
         />
       </ListItemButton>
       <Divider />
-    </Link>
+      {/* </Link> */}
+    </ListItem>
   );
 };
 
-const ItemPage = () => {
-
+const ItemPage = (props) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const { currentUser } = useContext(AuthContext);
+  const [items, setItemData] = useState(undefined);
+  const [errorHappened, setError] = useState(undefined);
+
   const useStyles = makeStyles(() => ({
     title: {
       fontWeight: "bold",
@@ -77,10 +91,21 @@ const ItemPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data } = await axios.get(`http://localhost:4000/user/${currentUser.displayName}`);
+        const { data } = await axios.get(
+          `http://localhost:4000/user/${currentUser.displayName}`
+        );
+        const itemData = await Promise.all(
+          data.items.map(async (itemId) => {
+            let item = await axios.get(`http://localhost:4000/items/${itemId}`);
+            return item.data;
+          })
+        );
         setUser(data);
+        setItemData(itemData);
+        setError(undefined);
       } catch (e) {
-        setUser({ username: "?"});
+        setUser({ username: "?" });
+        setError(e);
       }
       setLoading(false);
     };
@@ -94,16 +119,40 @@ const ItemPage = () => {
         <div style={{ margin: "0 auto", width: "fit-content" }}>Loading...</div>
       </Container>
     );
+  } else if (errorHappened) {
+    return (
+      <div>
+        <h2>{errorHappened.toString()}</h2>
+      </div>
+    );
   }
+  // let itemListings = null;
+  let itemListings = items.map((item) => {
+    return ItemListing(item);
+  });
+
+  let avatarInternals = null;
+  if (user.profilePicture) {
+    avatarInternals = (
+      <Avatar
+        alt={`${user.name.firstName} ${user.name.lastName}`}
+        src={`http://localhost:4000/file/${user.profilePicture}`}
+        sx={{ width: 50, height: 50 }}
+      />
+    );
+  } else {
+    avatarInternals = (
+      <Avatar sx={{ bgcolor: "#EB5757", width: 50, height: 50 }}>
+        {user.username[0]}
+      </Avatar>
+    );
+  }
+
   return (
     <Container maxWidth="100%">
       <Card sx={{ minWidth: 250, maxWidth: "70%", margin: "0 auto" }}>
         <CardHeader
-          avatar={
-            <Avatar sx={{ bgcolor: "#EB5757", width: 50, height: 50 }}>
-              A
-            </Avatar>
-          }
+          avatar={avatarInternals}
           title={user.username}
           subheader={user.joinDate}
           action={
@@ -121,7 +170,9 @@ const ItemPage = () => {
               Contact Information
             </Typography>
             <Typography gutterBottom variant="div" component="div">
-              <Label>Full Name:</Label> {user.name.firstName}{user.name.lastName}
+              <Label>Full Name:</Label>{" "}
+              {`${user.name.firstName}
+              ${user.name.lastName}`}
             </Typography>
             <Typography gutterBottom variant="div" component="div">
               <Label>Cell Phone #:</Label> (123)-456-7890
@@ -138,13 +189,7 @@ const ItemPage = () => {
               Listed Items
             </Typography>
             <div>
-              <List>
-                <Divider />
-                <ItemListing />
-                <ItemListing />
-                <ItemListing />
-                <ItemListing />
-              </List>
+              <List>{itemListings}</List>
             </div>
           </div>
         </CardContent>

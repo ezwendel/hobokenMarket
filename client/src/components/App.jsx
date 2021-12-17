@@ -44,13 +44,9 @@ function App() {
               <PrivateRoute exact path="/" component={Home} />
               <Route exact path="/items/:page" component={ListingsPage} />
               <Route exact path="/item/:id" component={ItemPage} />
-
               <Route exact path="/user/:id" component={UserPage} />
-
 	            <Route exact path="/logout" component={Logout} />
-
               <PrivateRoute exact path="/messages" component={Messages}/>
-
               <Route exact path="/login" component={Login} />
               <Route exact path="/create-account" component={CreateAccount} />
               <PrivateRoute exact path="/profile" component={ProfilePage}/>

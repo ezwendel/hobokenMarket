@@ -105,11 +105,13 @@ const ItemPage = (props) => {
         />
         <CardHeader
           avatar={
-            <Tooltip title={user.username}>
-              <Avatar sx={{ bgcolor: "#EB5757" }}>
-                {user.username.charAt(0).toUpperCase()}
-              </Avatar>
-            </Tooltip>
+            <Link to={`/user/${user._id}`}>
+              <Tooltip title={user.username}>
+                <Avatar sx={{ bgcolor: "#EB5757" }}>
+                  {user.username.charAt(0).toUpperCase()}
+                </Avatar>
+              </Tooltip>
+            </Link>
           }
           title={item.name}
           subheader={new Date(item.listDate).toLocaleDateString("en-US", {
@@ -208,18 +210,14 @@ const ItemPage = (props) => {
           </div>
         </CardContent>
         <CardActions>
-          <Link
+          <Button
+            color="secondary"
+            size="small"
+            component={Link}
             to={`/items/0`}
-            style={{
-              color: "inherit",
-              textDecoration: "none",
-              margin: "0 auto",
-            }}
           >
-            <Button color="secondary" size="small">
-              BACK TO LISTINGS
-            </Button>
-          </Link>
+            BACK TO LISTINGS
+          </Button>
         </CardActions>
       </Card>
     </Container>

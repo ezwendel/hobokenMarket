@@ -30,9 +30,7 @@ const Label = styled("span")(({ theme }) => ({
 }));
 
 const ItemListing = (item) => {
-
   console.log(item);
-
   const categoryInList = (category) => {
     <li key={category}>
       <Chip
