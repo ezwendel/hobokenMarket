@@ -74,6 +74,7 @@ const ListingsPage = (props) => {
         }
       }
     };
+    setLast(null);
     setLoading(true);
     fetchData();
   }, [page, props.history, props.match.params.page, filter]);
@@ -135,6 +136,7 @@ const ListingsPage = (props) => {
   };
 
   const handleFilter = (e, newFilter) => {
+    props.history.push(`/items/0}`);
     setFilter(newFilter);
     console.log(newFilter);
   };

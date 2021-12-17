@@ -2,6 +2,11 @@ const { items, users } = require("../config/mongoCollections");
 const moment = require("moment"); // for date checking
 const { ObjectId } = require("mongodb");
 
+// https://stackoverflow.com/questions/7376598/in-javascript-how-do-i-check-if-an-array-has-duplicate-values
+function containsDuplicates(arr) {
+  return (new Set(arr)).size !==  arr.length;
+}
+
 async function createItem(body) {
   let name = body.name;
   let description = body.description;
@@ -46,6 +51,8 @@ async function createItem(body) {
       throw "createItem: Each category must be a string";
     categoriesTrim.push(category.trim());
   }
+  // Check if categories has duplicates
+  if (containsDuplicates(categories)) throw `createItem: Each category must be unique`;
 
   const itemsCollection = await items();
 

@@ -13,7 +13,7 @@ const ItemList = ({ items }) => {
       ))}
     </Grid>
   ) : (
-    <div style={{ margin: "0 auto", width: "fit-content" }}>No listings found.</div>
+    <div style={{ margin: "0 auto", width: "fit-content" }}>404: No listings found.</div>
   );
 };
 

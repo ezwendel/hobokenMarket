@@ -84,7 +84,7 @@ async function createUser(body) {
   const insertInfo = await userCollection.insertOne(newUser);
   if (insertInfo.insertedCount === 0) throw "createUser: Failed to create user";
   const id = insertInfo.insertedId.toString();
-  console.log("got here")
+  // console.log("got here")
   return await getUserById(id);
 }
 
@@ -183,7 +183,7 @@ async function addItemToUser(userId, itemId) {
 
   oldUser.items = oldUser.items.map((x) => ObjectId(x));
   let items = oldUser.items
-  console.log(items);
+  // console.log(items);
   for (let item of items) {
     if (item.toString() == itemId.toString()) throw "addItemToUser: item already added to user"
   }
