@@ -92,7 +92,17 @@ const ItemPage = (props) => {
   return (
     <Container maxWidth="100%">
       <Card sx={{ minWidth: 250, maxWidth: "70%", margin: "0 auto" }}>
-        <CardMedia component="img" image={Placeholder} />
+        <CardMedia
+          component="img"
+          image={
+            item.itemPictures !== null
+              ? `http://localhost:4000/file/${item.itemPictures[0]}`
+              : Placeholder
+          }
+          onError={(e) => {
+            e.target.src = Placeholder;
+          }}
+        />
         <CardHeader
           avatar={
             <Tooltip title={user.username}>

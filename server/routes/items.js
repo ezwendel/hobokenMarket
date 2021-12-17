@@ -96,6 +96,7 @@ router.get('/', async (req, res) => {
 })
 
 router.post('/with_image', upload.single("file"), async (req, res) => {
+  console.log("good");
   if (req.file === undefined) return res.status(400).json({error: "must select a file."})
 
   // get body + xss body
@@ -105,6 +106,7 @@ router.post('/with_image', upload.single("file"), async (req, res) => {
   let sellerId = xss(body.sellerId);
   let itemPictures = [req.file.id];
   let categories = body.categories.split(","); // xss later
+  console.log(body);
   // error checking
   if (!name || name.trim().length == 0) { return res.status(400).json({ error: "name not valid" }) };
   if (!description || description.trim().length == 0) { return res.status(400).json({ error: "description not valid" }) };
