@@ -48,9 +48,7 @@ function App() {
 	            <Route exact path="/logout" component={Logout} />
               <Route exact path="/login" component={Login} />
               <Route exact path="/create-account" component={CreateAccount} />
-              <Route exact path="/profile">
-                <ProfilePage />
-              </Route>
+              <Route exact path="/profile" component={ProfilePage}/>
             </Switch>
           </div>
         </div>

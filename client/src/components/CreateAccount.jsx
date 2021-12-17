@@ -4,6 +4,7 @@ import { Redirect } from 'react-router-dom';
 import { doCreateUserWithEmailAndPassword } from "../firebase/FirebaseFunctions";
 import {AuthContext} from '../firebase/Auth';
 import SocialSignIn from './SocialSignIn';
+import axios from "axios";
 
 import {
   Card,
@@ -23,23 +24,38 @@ import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 const CreateAccount = () => {
   const theme = useTheme();
   const {currentUser}=useContext(AuthContext);
+  const [id, setId] = useState('');
   const [pwMatch, setPwMatch] = useState('');
   const handleSignUp = async (e) => {
     e.preventDefault();
-    const { username, email, password, confirmpassword } = e.target.elements;
+    const { username, email, password, confirmpassword, } = e.target.elements;
     if (password.value !== confirmpassword.value) {
       setPwMatch('Passwords do not match');
       return false;
     }
+    postData(e);
 
+  };
+  const postData = async (e) => {
     try {
+      const { username, firstname,lastname,email, password } = e.target.elements;
+      const { data }=await axios.post(`http://localhost:4000/user/`,{
+        firstName: firstname.value,
+        lastName: lastname.value,
+        username: username.value,
+        password: password.value,
+        profilePicture: null,
+        emailAddress: email.value,
+
+      });
       await doCreateUserWithEmailAndPassword(
         email.value,
         password.value,
-        username
+        data._id
       );
-    } catch (error) {
-      alert(error);
+
+    } catch (e) {
+      alert(e);
     }
   };
   if (currentUser) {
