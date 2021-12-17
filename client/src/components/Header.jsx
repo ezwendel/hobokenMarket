@@ -24,7 +24,7 @@ const Header = () => {
       <Toolbar>
         <Link style={{ color: "inherit", textDecoration: "none", justifyContent: "center", alignItems: "center", display: "flex" }} to="/">
           <Box ml="1em" style={{ display: "inline" }}>
-              <ShoppingCartIcon />
+            <ShoppingCartIcon />
           </Box>
           <Typography
             variant="h1"
