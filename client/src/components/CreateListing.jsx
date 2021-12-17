@@ -24,6 +24,8 @@ const CreateListing = ({ formOpen, handleFormClose }) => {
     name: "",
     description: "",
   });
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [formError, setFormError] = useState(false);
   const [nameError, setNameError] = useState(false);
   const [descError, setDescError] = useState(false);
@@ -62,6 +64,7 @@ const CreateListing = ({ formOpen, handleFormClose }) => {
           description: formData.description.trim(),
           categories: categories,
           sellerId: "61b7af9394292552b857d829",
+          image: image
         };
         console.log(submitData);
         let { data } = await axios.post(
@@ -104,7 +107,9 @@ const CreateListing = ({ formOpen, handleFormClose }) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
       let imageDataUrl = await readFile(file);
-      setImage(imageDataUrl);
+      console.log(file);
+      setImage(file);
+      setImagePreview(imageDataUrl);
     }
   }
 
@@ -182,7 +187,7 @@ const CreateListing = ({ formOpen, handleFormClose }) => {
           <label htmlFor="item-image">Upload Image</label>
           <Input accept="image/*" id="item-image" multiple type="file" onChange={onFileChange} />
           {image && (
-            <img src={image} />
+            <img src={imagePreview} />
           )}
         </FormControl>
       </DialogContent>

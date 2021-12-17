@@ -1,22 +1,28 @@
-version: '3'
+version: '3.9'
 services:
-  web:
-    stdin_open: true
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    ports:
-      - '3000:3000'
-    volumes:
-      - /usr/app/node_modules
-      - .:/usr/app
-    environment:
-      
-  tests:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    volumes:
-      - /usr/app/node_modules
-      - .:/usr/node_modules
-    command: ['npm', 'run', 'test']
+    server:
+        build: ./server/
+        ports:
+            - '5000:5000'
+        depends_on:
+            - db
+            - redis
+        command: npm run dockerStart
+
+    client:
+        build: ./client/
+        ports:
+            - '3000:3000'
+        depends_on:
+            - server
+        command: npm run dockerStart
+
+    db:
+        expose:
+            - '27017'
+        image: mongo:4.2.13-bionic
+
+    redis:
+        expose:
+            - '6379'
+        image: redis:6.2.2-alpine3.13

@@ -2,7 +2,8 @@ const express = require("express"),
   router = express.Router(),
   data = require('../data'),
   xss = require('xss'),
-  im = require('imagemagick')
+  gm = require('gm'),
+  fs = require('fs')
 
 const bluebird = require('bluebird');
 const redis = require('redis');
@@ -89,11 +90,7 @@ router.post('/', async (req, res) => {
   let description = xss(body.description);
   let sellerId = xss(body.sellerId);
   let itemPictures = xss(body.pictures);//xss(body.itemImage);
-  im.convert(['Bday.png', '-resize', '256x256'],
-    function (err, stdout) {
-      if (err) throw err;
-      console.log('stdout:', stdout);
-    });
+  
   let categories = body.categories; // xss later
   // error checking
   if (!name || name.trim().length == 0) { return res.status(400).json({ error: "name not valid" }) };
