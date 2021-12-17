@@ -12,7 +12,7 @@ bluebird.promisifyAll(redis.Multi.prototype);
 
 router.get('/email/', async (req, res) => {
   let body = req.body;
-  let emailAddress = req.body.emailAddress
+  let emailAddress = xss(req.body.emailAddress)
   if (!emailAddress || emailAddress.trim().length == 0) { return res.status(400).json({ error: "emailAddress not valid" }) };
   try {
     let user = await data.users.getUserByEmail(emailAddress);
