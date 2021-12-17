@@ -1,20 +1,30 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-import { Container, Fab, Button, Chip } from "@mui/material";
+import {
+  Container,
+  Fab,
+  Button,
+  Chip,
+  ToggleButton,
+  ToggleButtonGroup,
+  useTheme
+} from "@mui/material";
 import ItemList from "./ItemList";
 import CreateListing from "./CreateListing";
 import Add from "@mui/icons-material/Add";
 import Searchbar from "./Searchbar";
 
-import { useLocation, Link } from "react-router";
-
 const ListingsPage = (props) => {
+  const theme = useTheme();
+
   const page = parseInt(props.match.params.page);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [last, setLast] = useState(null);
+  const [searching, setSearching] = useState(false);
+  const [filters, setFilters] = useState(() => [])
 
   const prevPage = () => {
     props.history.push(`/items/${page - 1}`);
@@ -41,7 +51,9 @@ const ListingsPage = (props) => {
 
       // Check if the next page has items
       try {
-        const { data } = await axios.get(`http://localhost:4000/items?offset=${(page + 1) * 20}`);
+        const { data } = await axios.get(
+          `http://localhost:4000/items?offset=${(page + 1) * 20}`
+        );
         if (data.length === 0) {
           setLast(page);
         }
@@ -65,6 +77,59 @@ const ListingsPage = (props) => {
     setFormOpen(false);
   };
 
+  const search = async () => {
+    setLoading(true);
+    console.log("Searching...");
+    let searchTerm = document.getElementById("search").value.trim();
+    if (searchTerm.trim() !== "") {
+      setSearching(true);
+      console.log("here");
+      try {
+        const { data } = await axios.get(
+          `http://localhost:4000/items/search/${searchTerm}`
+        );
+        console.log(data);
+        setItems(data);
+        setLoading(false);
+      } catch (e) {
+        setError(e);
+        setLoading(false);
+      }
+    } else {
+      setSearching(false);
+      try {
+        const { data } = await axios.get(
+          `http://localhost:4000/items?offset=${page * 20}`
+        );
+        console.log(data);
+        setItems(data);
+        setLoading(false);
+      } catch (e) {
+        setError(e);
+        setLoading(false);
+      }
+
+      // Check if the next page has items
+      try {
+        const { data } = await axios.get(
+          `http://localhost:4000/items?offset=${(page + 1) * 20}`
+        );
+        if (data.length === 0) {
+          setLast(page);
+        }
+      } catch (e) {
+        if (e.response.status === 404) {
+          setLast(page);
+        }
+      }
+    }
+  };
+
+  const handleFilters = (e, newFilters) => {
+    setFilters(newFilters);
+    console.log(newFilters);
+  }
+
   if (loading) {
     return (
       <Container maxWidth="100%">
@@ -74,29 +139,44 @@ const ListingsPage = (props) => {
   }
   return (
     <Container maxWidth="100%">
-      <div style={{ width: "fit-content", margin: "1em auto" }}>
-        {page > 0 ? (
-          <Button onClick={() => prevPage()}>
-            Previous
-          </Button>
-        ) : (
-          <Button disabled>
-            Previous
-          </Button>
-        )}
-        <Chip style={{ margin: "0 1em"}}label={page} />
-        {page !== last ? (
-          <Button onClick={() => nextPage()}>
-            Next
-          </Button>
-        ) : (
-          <Button disabled>
-            Next
-          </Button>
-        )}
-      </div>
-      <div style={{width: "40em", margin: "0 auto 1.5em auto"}}>
-        <Searchbar />
+      {!searching && (
+        <div style={{ width: "fit-content", margin: "1em auto" }}>
+          {page > 0 ? (
+            <Button onClick={() => prevPage()}>Previous</Button>
+          ) : (
+            <Button disabled>Previous</Button>
+          )}
+          <Chip style={{ margin: "0 1em" }} label={page} />
+          {!searching && page !== last ? (
+            <Button onClick={() => nextPage()}>Next</Button>
+          ) : (
+            <Button disabled>Next</Button>
+          )}
+        </div>
+      )}
+      <Searchbar search={search} />
+      <div style={{ width: "fit-content", margin: "0 auto 1.5em auto" }}>
+        <small style={{ marginRight: "1em", color: theme.palette.primary.main,}}>FILTERS:</small>
+        <ToggleButtonGroup color="primary" size="small" aria-label="filters" value={filters} onChange={handleFilters}>
+          <ToggleButton value="furniture" aria-label="furniture">
+            Furniture
+          </ToggleButton>
+          <ToggleButton value="electronics" aria-label="electronics">
+            Electronics
+          </ToggleButton>
+          <ToggleButton value="art" aria-label="art">
+            Art
+          </ToggleButton>
+          <ToggleButton value="entertainment" aria-label="entertainment">
+            Entertainment
+          </ToggleButton>
+          <ToggleButton value="clothing" aria-label="clothing">
+            Clothing
+          </ToggleButton>
+          <ToggleButton value="other" aria-label="other">
+            Other
+          </ToggleButton>
+        </ToggleButtonGroup>
       </div>
       <ItemList items={items} />
       <CreateListing formOpen={formOpen} handleFormClose={handleFormClose} />

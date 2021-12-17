@@ -10,8 +10,8 @@ const client = redis.createClient();
 bluebird.promisifyAll(redis.RedisClient.prototype);
 bluebird.promisifyAll(redis.Multi.prototype);
 
-router.get('/search/', async (req, res) => {
-  let keyword = req.body.keyword;
+router.get('/search/:keyword', async (req, res) => {
+  let keyword = req.params.keyword;
   if (!keyword || keyword.trim().length == 0) { return res.status(400).json({ error: "keyword not valid" }) };
   let searchData = await client.hgetAsync("search", `${keyword}`);
   if (searchData) { return res.json(JSON.parse(searchData)) }
