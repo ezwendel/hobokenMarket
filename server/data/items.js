@@ -145,11 +145,34 @@ async function getItemsBySeller(sellerId) {
   return itemsList;
 }
 
+
+
+async function search(keyword) {
+  if (!keyword) throw "search: Missing keyword";
+  if (typeof keyword !== "string")
+    throw "search: The provided keyword must be a string";
+  if (keyword.trim().length === 0)
+    throw "search: The provided keyword must not be an empty string";
+
+  const itemCollection = await items();
+  await itemCollection.createIndex( {name: "text", description: "text", categories: "text"} )
+  let itemsList = await itemCollection.find( { $text: { $search: keyword } } ).toArray()
+  await itemCollection.dropIndexes()
+  for (let item of itemsList) {
+    item._id = item._id.toString();
+    item.sellerId = item.sellerId.toString();
+  }
+  return itemsList;
+}
+
+
+
 module.exports = {
   createItem,
   getAllItems,
   getItemById,
   deleteItemById,
   getItemsByCategory,
-  getItemsBySeller
+  getItemsBySeller,
+  search
 };

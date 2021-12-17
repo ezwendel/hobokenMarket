@@ -3,12 +3,36 @@ const express = require("express"),
       data = require('../data'),
       xss = require('xss')
 
+const bluebird = require('bluebird');
+const redis = require('redis');
+const client = redis.createClient();
+
+bluebird.promisifyAll(redis.RedisClient.prototype);
+bluebird.promisifyAll(redis.Multi.prototype);
+
+router.get('/search/', async (req, res) => {
+  let keyword = req.body.keyword;
+  if (!keyword || keyword.trim().length == 0) { return res.status(400).json({ error: "keyword not valid" }) };
+  let searchData = await client.hgetAsync("search", `${keyword}`);
+  if (searchData) { return res.json(JSON.parse(searchData)) }
+  try {
+    let searchResults = await data.items.search(keyword);
+    let searchResultsCached = await client.hsetAsync("search", `${keyword}`, JSON.stringify(searchResults))
+    return res.json(searchResults);
+  } catch (e) {
+    return res.status(500).json({ error: e })
+  }
+})
+
 router.get('/:id', async (req, res) => {
   let id = req.params.id
   if (!id || id.trim().length == 0) { return res.status(400).json({ error: "id not valid" }) };
+  let itemData = await client.hgetAsync("item", `${id}`);
+  if (itemData) { return res.json(JSON.parse(itemData)) }
   // console.log("in route")
   try {
     let item = await data.items.getItemById(id);
+    let itemDataCached = await client.hsetAsync("item", `${id}`, JSON.stringify(item))
     return res.json(item);
   } catch (e) {
     return res.status(404).json({ error: `item with id ${id} does not exist` })
@@ -16,6 +40,15 @@ router.get('/:id', async (req, res) => {
 })
 
 router.get('/', async (req, res) => {
+  let searchStr = ""
+  if (req.query.offset) {
+    searchStr += `offset:${req.query.offset}` 
+  }
+  if (req.query.count) {
+    searchStr += `count:${req.query.count}`
+  }
+  let itemsData = await client.hgetAsync("items", `${searchStr}`);
+  if (itemsData) { return res.json(JSON.parse(itemsData)) }
   try {
     let items = await data.items.getAllItems()
     // console.log(req.query);
@@ -41,6 +74,7 @@ router.get('/', async (req, res) => {
       items = items.slice(0, 20); // 20 is default take
     }
     items = items.slice(0, 100); // max 100 blogs
+    let itemsDataCached = await client.hsetAsync("items", `${searchStr}`, JSON.stringify(items))
     res.json(items);
   } catch (e) {
     return res.status(500).json({error: e});
@@ -61,19 +95,22 @@ router.post('/', async (req, res) => {
   if (!sellerId || sellerId.trim().length == 0) { return res.status(400).json({ error: "sellerId not valid" }) };
   if (!categories || !Array.isArray(categories) || categories.length == 0) { return res.status(400).json({ error: "categories not valid" }) };
   // see if seller exists
-  let allUsers = await data.users.getAllUsers();
-  let sellerExists = false;
-  for (i of allUsers) {
-    if (i._id.toString() === sellerId.toString()) {
-      sellerExists = true;
-      break;
-    }
+  let seller = null;
+  try {
+    seller = await data.users.getUserById(sellerId);
+  } catch (e) {
+    console.log(e)
+    return res.status(404).json({ error: `user with id ${sellerId} does not exist` }) 
   }
-  if (!sellerExists) { return res.status(404).json({ error: `user with id ${sellerId} does not exist` }) }
-  // try to create item
   try {
     let item = await data.items.createItem({ name: name, description: description, sellerId: sellerId, categories: categories })
-    await data.users.addItemToUser(sellerId, item._id)
+    let sellerWithItem = await data.users.addItemToUser(sellerId, item._id)
+    delete sellerWithItem.passwordHash;
+    // update user with new items in cache
+    let userDataCached = await client.hsetAsync("user", `${sellerId}`, JSON.stringify(sellerWithItem));
+    // delete get items and search cache
+    let itemsDataCached = await client.delAsync("items")
+    let searchDataCached = await client.delAsync("search")
     return res.json(item);
   } catch (e) {
     console.log("server error", e)
