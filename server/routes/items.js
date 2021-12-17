@@ -50,6 +50,7 @@ router.get('/', async (req, res) => {
   if (req.query.filter) {
     searchStr += `filter:${req.query.filter}`
   }
+  searchStr = searchStr.toLowerCase()
   let itemsData = await client.hgetAsync("items", `${searchStr}`);
   if (itemsData) { return res.json(JSON.parse(itemsData)) }
   try {
