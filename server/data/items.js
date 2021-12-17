@@ -37,6 +37,12 @@ async function createItem(body) {
     throw "createItem: sellerId must not be an empty string";
 
   // TODO: Item Pictures error checking
+  let itemPicturesIds = []
+  if (itemPictures) {
+    for (i of itemPictures) {
+      itemPicturesIds.push(ObjectId(i))
+    }
+  }
 
   // Categories Error Checking
   if (!categories) throw "createItem: Missing categories";
@@ -68,7 +74,7 @@ async function createItem(body) {
     name: name.trim(),
     description: description.trim(),
     sellerId: ObjectId(sellerId.trim()),
-    itemPictures: itemPictures,
+    itemPictures: itemPicturesIds,
     listDate: new Date(),
     categories: categories,
   };

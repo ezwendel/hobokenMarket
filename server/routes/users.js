@@ -10,6 +10,20 @@ const client = redis.createClient();
 bluebird.promisifyAll(redis.RedisClient.prototype);
 bluebird.promisifyAll(redis.Multi.prototype);
 
+router.get('/email/', async (req, res) => {
+  let body = req.body;
+  let emailAddress = xss(req.body.emailAddress)
+  if (!emailAddress || emailAddress.trim().length == 0) { return res.status(400).json({ error: "emailAddress not valid" }) };
+  try {
+    let user = await data.users.getUserByEmail(emailAddress);
+    delete user.passwordHash;
+    return res.json(user);
+  } catch (e) {
+    console.log(e);
+    return res.status(404).json({ error: `user with emailAddress ${emailAddress} does not exist` })
+  }
+})
+
 router.get('/:id', async (req, res) => {
   let id = req.params.id
   if (!id || id.trim().length == 0) { return res.status(400).json({ error: "id not valid" }) };
