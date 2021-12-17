@@ -1,7 +1,8 @@
 const express = require("express"),
-      router = express.Router(),
-      data = require('../data'),
-      xss = require('xss')
+  router = express.Router(),
+  data = require('../data'),
+  xss = require('xss'),
+  im = require('imagemagick')
 
 const bluebird = require('bluebird');
 const redis = require('redis');
@@ -56,7 +57,7 @@ router.get('/', async (req, res) => {
       let offset = Number(req.query.offset);
       // console.log(skipNum);
       if (offset < 0) {
-        res.status(400).json({error: "offset query cannot be less than 0"});
+        res.status(400).json({ error: "offset query cannot be less than 0" });
         return;
       } else {
         items.splice(0, offset);
@@ -65,7 +66,7 @@ router.get('/', async (req, res) => {
     if (req.query.count) {
       let count = Number(req.query.count);
       if (count < 0) {
-        res.status(400).json({error: "Take query cannot be less than 0"});
+        res.status(400).json({ error: "Take query cannot be less than 0" });
         return;
       } else {
         items = items.slice(0, count);
@@ -77,7 +78,7 @@ router.get('/', async (req, res) => {
     let itemsDataCached = await client.hsetAsync("items", `${searchStr}`, JSON.stringify(items))
     res.json(items);
   } catch (e) {
-    return res.status(500).json({error: e});
+    return res.status(500).json({ error: e });
   }
 })
 
@@ -87,7 +88,12 @@ router.post('/', async (req, res) => {
   let name = xss(body.name);
   let description = xss(body.description);
   let sellerId = xss(body.sellerId);
-  // let itemPictures = xss(body.itemPictures);
+  let itemPictures = xss(body.pictures);//xss(body.itemImage);
+  im.convert(['Bday.png', '-resize', '256x256'],
+    function (err, stdout) {
+      if (err) throw err;
+      console.log('stdout:', stdout);
+    });
   let categories = body.categories; // xss later
   // error checking
   if (!name || name.trim().length == 0) { return res.status(400).json({ error: "name not valid" }) };

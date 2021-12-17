@@ -80,6 +80,7 @@ const CreateListing = ({ formOpen, handleFormClose }) => {
     }
   };
 
+  let fileUrl = "";
   // https://mui.com/components/selects/
   const handleCategoryChange = (event) => {
     const {
@@ -90,6 +91,22 @@ const CreateListing = ({ formOpen, handleFormClose }) => {
       typeof value === "string" ? value.split(",") : value
     );
   };
+
+  const readFile = async (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.addEventListener('load', () => resolve(reader.result), false);
+      reader.readAsDataURL(file);
+    })
+  }
+
+  const onFileChange = async (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      let imageDataUrl = await readFile(file);
+      setImage(imageDataUrl);
+    }
+  }
 
   const categoryNames = [
     "Furniture",
@@ -162,8 +179,11 @@ const CreateListing = ({ formOpen, handleFormClose }) => {
         </FormControl>
         {catError && <Alert severity="error">{catError}</Alert>}
         <FormControl sx={{ mt: 1, width: "35ch" }}>
-          <label htmlFor="image">Upload Image</label>
-          <Input accept="image/*" id="image" multiple type="file" />
+          <label htmlFor="item-image">Upload Image</label>
+          <Input accept="image/*" id="item-image" multiple type="file" onChange={onFileChange} />
+          {image && (
+            <img src={image} />
+          )}
         </FormControl>
       </DialogContent>
       <DialogActions>
