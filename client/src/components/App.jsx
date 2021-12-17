@@ -7,12 +7,12 @@ import Login from "./Login";
 import CreateAccount from "./CreateAccount";
 import ListingsPage from "./ListingsPage";
 import ItemPage from "./ItemPage";
+import UserPage from "./UserPage";
 import ProfilePage from "./ProfilePage";
 import {AuthProvider} from '../firebase/Auth'
 import PrivateRoute from './PrivateRoute';
 import Home from "./Home";
 import Logout from "./Logout";
-
 import {
   createTheme,
   ThemeProvider,
@@ -42,6 +42,7 @@ function App() {
               <PrivateRoute exact path="/" component={Home} />
               <Route exact path="/items/:page" component={ListingsPage} />
               <Route exact path="/item/:id" component={ItemPage} />
+              <Route exact path="/user/:id" component={UserPage} />
               <Route exact path="/messages">
                 <div>Messages</div>
               </Route>
