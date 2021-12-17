@@ -8,12 +8,13 @@ import {
   Chip,
   ToggleButton,
   ToggleButtonGroup,
-  useTheme
+  useTheme,
 } from "@mui/material";
 import ItemList from "./ItemList";
 import CreateListing from "./CreateListing";
 import Add from "@mui/icons-material/Add";
 import Searchbar from "./Searchbar";
+import Draggable from "react-draggable";
 
 const ListingsPage = (props) => {
   const theme = useTheme();
@@ -24,7 +25,8 @@ const ListingsPage = (props) => {
   const [error, setError] = useState(false);
   const [last, setLast] = useState(null);
   const [searching, setSearching] = useState(false);
-  const [filters, setFilters] = useState(() => [])
+  const [filter, setFilter] = useState("");
+  const [dragging, setDragging] = useState(false);
 
   const prevPage = () => {
     props.history.push(`/items/${page - 1}`);
@@ -38,9 +40,11 @@ const ListingsPage = (props) => {
     console.log(`Loading Page ${page}...`);
     const fetchData = async () => {
       try {
-        const { data } = await axios.get(
-          `http://localhost:4000/items?offset=${page * 20}`
-        );
+        const { data } = !filter
+          ? await axios.get(`http://localhost:4000/items?offset=${page * 20}`)
+          : await axios.get(
+              `http://localhost:4000/items?offset=${page * 20}&filter=${filter}`
+            );
         console.log(data);
         setItems(data);
         setLoading(false);
@@ -51,9 +55,15 @@ const ListingsPage = (props) => {
 
       // Check if the next page has items
       try {
-        const { data } = await axios.get(
-          `http://localhost:4000/items?offset=${(page + 1) * 20}`
-        );
+        const { data } = !filter
+          ? await axios.get(
+              `http://localhost:4000/items?offset=${(page + 1) * 20}`
+            )
+          : await axios.get(
+              `http://localhost:4000/items?offset=${
+                (page + 1) * 20
+              }&filter=${filter}`
+            );
         if (data.length === 0) {
           setLast(page);
         }
@@ -65,7 +75,7 @@ const ListingsPage = (props) => {
     };
     setLoading(true);
     fetchData();
-  }, [page, props.history, props.match.params.page]);
+  }, [page, props.history, props.match.params.page, filter]);
 
   const [formOpen, setFormOpen] = useState(false);
 
@@ -82,7 +92,7 @@ const ListingsPage = (props) => {
     console.log("Searching...");
     let searchTerm = document.getElementById("search").value.trim();
     if (searchTerm.trim() !== "") {
-      setSearching(true);
+      setSearching(searchTerm);
       console.log("here");
       try {
         const { data } = await axios.get(
@@ -118,17 +128,43 @@ const ListingsPage = (props) => {
           setLast(page);
         }
       } catch (e) {
-        if (e.response.status === 404) {
-          setLast(page);
-        }
+        setLast(page);
       }
     }
   };
 
-  const handleFilters = (e, newFilters) => {
-    setFilters(newFilters);
-    console.log(newFilters);
-  }
+  const handleFilter = (e, newFilter) => {
+    setFilter(newFilter);
+    console.log(newFilter);
+  };
+
+  const handleDelete = async () => {
+    setLoading(true);
+    setSearching(false);
+    try {
+      const { data } = await axios.get(
+        `http://localhost:4000/items?offset=${page * 20}`
+      );
+      console.log(data);
+      setItems(data);
+      setLoading(false);
+    } catch (e) {
+      setError(e);
+      setLoading(false);
+    }
+
+    // Check if the next page has items
+    try {
+      const { data } = await axios.get(
+        `http://localhost:4000/items?offset=${(page + 1) * 20}`
+      );
+      if (data.length === 0) {
+        setLast(page);
+      }
+    } catch (e) {
+      setLast(page);
+    }
+  };
 
   if (loading) {
     return (
@@ -155,41 +191,78 @@ const ListingsPage = (props) => {
         </div>
       )}
       <Searchbar search={search} />
-      <div style={{ width: "fit-content", margin: "0 auto 1.5em auto" }}>
-        <small style={{ marginRight: "1em", color: theme.palette.primary.main,}}>FILTERS:</small>
-        <ToggleButtonGroup color="primary" size="small" aria-label="filters" value={filters} onChange={handleFilters}>
-          <ToggleButton value="furniture" aria-label="furniture">
-            Furniture
-          </ToggleButton>
-          <ToggleButton value="electronics" aria-label="electronics">
-            Electronics
-          </ToggleButton>
-          <ToggleButton value="art" aria-label="art">
-            Art
-          </ToggleButton>
-          <ToggleButton value="entertainment" aria-label="entertainment">
-            Entertainment
-          </ToggleButton>
-          <ToggleButton value="clothing" aria-label="clothing">
-            Clothing
-          </ToggleButton>
-          <ToggleButton value="other" aria-label="other">
-            Other
-          </ToggleButton>
-        </ToggleButtonGroup>
-      </div>
+      {searching && (
+        <div style={{ width: "fit-content", margin: "1.5em auto" }}>
+          <Chip
+            label={`Search Term: ${searching}`}
+            color="primary"
+            variant="outlined"
+            onDelete={handleDelete}
+          />
+        </div>
+      )}
+      {!searching && (
+        <div style={{ width: "fit-content", margin: "0 auto 1.5em auto" }}>
+          <small
+            style={{ marginRight: "1em", color: theme.palette.primary.main }}
+          >
+            FILTERS:
+          </small>
+          <ToggleButtonGroup
+            color="primary"
+            size="small"
+            aria-label="filters"
+            exclusive
+            value={filter}
+            onChange={handleFilter}
+          >
+            <ToggleButton value="Furniture" aria-label="furniture">
+              Furniture
+            </ToggleButton>
+            <ToggleButton value="Electronics" aria-label="electronics">
+              Electronics
+            </ToggleButton>
+            <ToggleButton value="Art" aria-label="art">
+              Art
+            </ToggleButton>
+            <ToggleButton value="Entertainment" aria-label="entertainment">
+              Entertainment
+            </ToggleButton>
+            <ToggleButton value="Clothing" aria-label="clothing">
+              Clothing
+            </ToggleButton>
+            <ToggleButton value="Other" aria-label="other">
+              Other
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </div>
+      )}
       <ItemList items={items} />
       <CreateListing formOpen={formOpen} handleFormClose={handleFormClose} />
-      <Fab
-        color="primary"
-        variant="extended"
-        aria-label="create-post"
-        style={{ position: "fixed", right: "5em", bottom: "3em" }}
-        onClick={() => handleFormOpen()}
+      <Draggable
+        onDrag={() => {
+          setDragging(true);
+        }}
+        onStop={() => {
+          if (!dragging) {
+            handleFormOpen()
+          }
+          setDragging(false);
+        }}
       >
-        <Add sx={{ mr: 1 }} />
-        Create Listing
-      </Fab>
+        <Fab
+          color="primary"
+          variant="extended"
+          aria-label="create-post"
+          style={{ position: "fixed", right: "5em", bottom: "3em" }}
+          onClick={() => {
+            
+          }}
+        >
+          <Add sx={{ mr: 1 }} />
+          Create Listing
+        </Fab>
+      </Draggable>
     </Container>
   );
 };

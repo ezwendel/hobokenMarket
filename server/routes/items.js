@@ -47,10 +47,18 @@ router.get('/', async (req, res) => {
   if (req.query.count) {
     searchStr += `count:${req.query.count}`
   }
+  if (req.query.filter) {
+    searchStr += `filter:${req.query.filter}`
+  }
   let itemsData = await client.hgetAsync("items", `${searchStr}`);
   if (itemsData) { return res.json(JSON.parse(itemsData)) }
   try {
-    let items = await data.items.getAllItems()
+    let items;
+    if (!req.query.filter) {
+      items = await data.items.getAllItems();
+    } else {
+      items = await data.items.getItemsByCategory(req.query.filter);
+    }
     // console.log(req.query);
     if (req.query.offset) {
       let offset = Number(req.query.offset);
