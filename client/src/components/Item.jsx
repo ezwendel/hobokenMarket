@@ -96,6 +96,7 @@ const Item = ({ item }) => {
         onError={(e) => {
           e.target.src = Placeholder;
         }}
+        alt={`${item.name}-img`}
       />
       <div style={{ padding: "1em 1em 0 1em" }}>
         <ul className="category-list">

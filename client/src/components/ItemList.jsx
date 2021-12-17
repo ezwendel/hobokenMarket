@@ -7,7 +7,7 @@ import LinearProgress from "@mui/material/LinearProgress";
 const ItemList = ({ items, loading }) => {
   if (loading) {
     return (
-      <Container maxWidth="100%">
+      <Container style={{maxWidth:"100%"}}>
         <div style={{ textAlign: "center", margin: "0 auto", maxWidth: "750px", width: "75%" }}>
           <Typography mb="1em" variant="p" component="div">
             Loading...

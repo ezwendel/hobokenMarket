@@ -83,3 +83,7 @@
 .title {
   font-family: Montserrat;
 }
+
+.header-button:hover {
+  color: inherit;
+}

@@ -84,13 +84,13 @@ const ItemPage = (props) => {
 
   if (loading) {
     return (
-      <Container maxWidth="100%">
+      <Container>
         <div style={{ margin: "0 auto", width: "fit-content" }}>Loading...</div>
       </Container>
     );
   }
   return (
-    <Container maxWidth="100%">
+    <Container>
       <Card sx={{ minWidth: 250, maxWidth: "70%", margin: "0 auto" }}>
         <CardMedia
           component="img"

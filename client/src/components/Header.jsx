@@ -36,7 +36,7 @@ const Header = () => {
           to="/"
         >
           <Box ml="1em" style={{ display: "inline" }}>
-            <img src={HobokenIcon} style={{ width: 40, height: 40 }} />
+            <img src={HobokenIcon} style={{ width: 40, height: 40 }} alt="Site Icon" />
           </Box>
           <Typography
             variant="h1"

@@ -32,16 +32,6 @@ const Label = styled("span")(({ theme }) => ({
 
 const ItemListing = (item) => {
   console.log(item);
-  const categoryInList = (category) => {
-    <li key={category}>
-      <Chip label={category} size="small" color="primary" variant="outlined" />
-    </li>;
-  };
-
-  let categories = item.categories.map((category) => {
-    return categoryInList(category);
-  });
-
   return (
     <ListItem key={item._id}>
       {/* <Link to={`/items/${item._id}`} style={{ color: "inherit", textDecoration: "none" }}> */}
@@ -55,17 +45,26 @@ const ItemListing = (item) => {
         </ListItemIcon>
         <ListItemText
           primary={item.name}
-          // secondary={
-          //   <>
-          //     <div style={{marginTop: ".5em"}}>
-          //       <ul className="category-list">
-          //         {categories}
-          //       </ul>
-          //     </div>
-          //     <div style={{marginTop: ".5em"}}>{item.description}</div>
-          //   </>
-          // }
-          secondary={item.description}
+          secondary={
+            <div>
+              <div style={{ marginTop: ".5em" }}>
+                <ul className="category-list">
+                  {item.categories.map((category) => {
+                    return <li key={category}>
+                      <Chip
+                        label={category}
+                        size="small"
+                        color="primary"
+                        variant="outlined"
+                      />
+                    </li>;
+                  })}
+                </ul>
+              </div>
+              <div style={{ marginTop: ".5em" }}>{item.description}</div>
+            </div>
+          }
+          secondaryTypographyProps={{ component: "div"}}
         />
       </ListItemButton>
       <Divider />
@@ -115,7 +114,7 @@ const ItemPage = (props) => {
 
   if (loading) {
     return (
-      <Container maxWidth="100%">
+      <Container style={{ maxWidth: "100%"}}>
         <div style={{ margin: "0 auto", width: "fit-content" }}>Loading...</div>
       </Container>
     );
@@ -149,12 +148,18 @@ const ItemPage = (props) => {
   }
 
   return (
-    <Container maxWidth="100%">
+    <Container style={{ maxWidth: "100%"}}>
       <Card sx={{ minWidth: 250, maxWidth: "70%", margin: "0 auto" }}>
         <CardHeader
           avatar={avatarInternals}
           title={user.username}
-          subheader={user.joinDate}
+          subheader={`Member since: ${new Date(
+            user.joinDate
+          ).toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+          })}`}
           action={
             <Button aria-label="message" color="secondary">
               Send a Message
