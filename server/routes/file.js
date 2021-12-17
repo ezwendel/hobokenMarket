@@ -38,7 +38,7 @@ router.post("/profile_upload", upload.single("file"), async (req, res) =>{
   console.log(req.body.userId)
   console.log(req.file)
   try {
-    let user = await data.users.getUserById(userId);
+    let user = await data.users.getUserById(req.body.userId);
     await data.users.updatePfp(req.body.userId, req.file.id)
     const imgUrl = `http://localhost:4000/file/${req.file.id}`;
     try {
