@@ -57,7 +57,7 @@ const Item = ({ item }) => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "5em 0"
+            padding: "5em 0",
           }}
         >
           <CircularProgress />
@@ -83,7 +83,14 @@ const Item = ({ item }) => {
         })}
         classes={{ title: classes.title }}
       />
-      <CardMedia component="img" height="194" image={Placeholder} />
+      <CardMedia
+        component="img"
+        height="194"
+        image={item.itemPictures !== null ? `http://localhost:4000/file/${item.itemPictures[0]}` : Placeholder}
+        onError={(e) => {
+          e.target.src = Placeholder;
+        }}
+      />
       <div style={{ padding: "1em 1em 0 1em" }}>
         <ul className="category-list">
           {item.categories.map((category) => (

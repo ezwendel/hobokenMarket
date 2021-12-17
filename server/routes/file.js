@@ -48,7 +48,7 @@ router.get('/:id', async (req, res) => {
     const _id = new mongoose.Types.ObjectId(id);
     const files = await gfs.find({ _id }).toArray()
     if (!files || files.length === 0) return res.status(404).json({error: {message: "file not found", status: 404}});
-    console.log(files)
+    // console.log(files)
     gfs.openDownloadStream(_id).pipe(res);
   });
 
