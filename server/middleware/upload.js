@@ -6,6 +6,8 @@ const storage = new GridFsStorage({
     url: url,
     options: { useNewUrlParser: true, useUnifiedTopology: true },
     file: (req,file) => {
+        console.log("req:",req.body)
+        console.log("file:",file);
         const match = ["image/png", "image/jpeg"];
         if (match.indexOf(file.mimetype) === -1) { // https://www.youtube.com/watch?v=XCRUzPi0X0Q
             const filename = `${Date.now()}-any-name-${file.originalname}`
