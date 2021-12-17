@@ -2,6 +2,11 @@ const { items, users } = require("../config/mongoCollections");
 const moment = require("moment"); // for date checking
 const { ObjectId } = require("mongodb");
 
+// https://stackoverflow.com/questions/7376598/in-javascript-how-do-i-check-if-an-array-has-duplicate-values
+function containsDuplicates(arr) {
+  return new Set(arr).size !== arr.length;
+}
+
 async function createItem(body) {
   let name = body.name;
   let description = body.description;
@@ -51,6 +56,11 @@ async function createItem(body) {
     if (category.trim().length === 0)
       throw "createItem: Each category must be a string";
     categoriesTrim.push(category.trim());
+  }
+  // Check if categories has duplicates
+  if (containsDuplicates(categories)) {
+    console.log(categories);
+    throw `createItem: Each category must be unique`;
   }
 
   const itemsCollection = await items();
@@ -127,7 +137,13 @@ async function getItemsByCategory(category) {
     throw "getItemsByCategory: The provided category must not be an empty string";
 
   const itemCollection = await items();
-  const itemsList = await itemCollection.find({ categories: category }).toArray();
+  // const itemsList = await itemCollection.find({ categories: category }).toArray();
+  await itemCollection.createIndex({ categories: "text" }); // case insensitive
+  const itemsList = await itemCollection
+    .find({ $text: { $search: category } })
+    .toArray();
+  await itemCollection.dropIndexes();
+  // itemsList.reverse() // this makes oldest first
   for (let item of itemsList) {
     item._id = item._id.toString();
     item.sellerId = item.sellerId.toString();
@@ -143,15 +159,15 @@ async function getItemsBySeller(sellerId) {
     throw "getItemsBySeller: The provided sellerId must not be an empty string";
 
   const itemCollection = await items();
-  const itemsList = await itemCollection.find({ sellerId: ObjectId(sellerId.trim()) }).toArray();
+  const itemsList = await itemCollection
+    .find({ sellerId: ObjectId(sellerId.trim()) })
+    .toArray();
   for (let item of itemsList) {
     item._id = item._id.toString();
     item.sellerId = item.sellerId.toString();
   }
   return itemsList;
 }
-
-
 
 async function search(keyword) {
   if (!keyword) throw "search: Missing keyword";
@@ -161,17 +177,21 @@ async function search(keyword) {
     throw "search: The provided keyword must not be an empty string";
 
   const itemCollection = await items();
-  await itemCollection.createIndex( {name: "text", description: "text", categories: "text"} )
-  let itemsList = await itemCollection.find( { $text: { $search: keyword } } ).toArray()
-  await itemCollection.dropIndexes()
+  await itemCollection.createIndex({
+    name: "text",
+    description: "text",
+    categories: "text",
+  });
+  let itemsList = await itemCollection
+    .find({ $text: { $search: keyword } })
+    .toArray();
+  await itemCollection.dropIndexes();
   for (let item of itemsList) {
     item._id = item._id.toString();
     item.sellerId = item.sellerId.toString();
   }
   return itemsList;
 }
-
-
 
 module.exports = {
   createItem,
@@ -180,5 +200,5 @@ module.exports = {
   deleteItemById,
   getItemsByCategory,
   getItemsBySeller,
-  search
+  search,
 };

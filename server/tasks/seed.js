@@ -83,7 +83,7 @@ const main = async () => {
       "Other",
     ];
     let user_id;
-    for (let i = 1; i <= 50; i++) {
+    for (let i = 1; i <= 100; i++) {
       if (count == 1) {
         count++;
         user_id = user1_id;
@@ -97,6 +97,16 @@ const main = async () => {
         count = 1;
         user_id = user4_id;
       }
+      // https://stackoverflow.com/questions/4550505/getting-a-random-value-from-a-javascript-array
+      let rand1 = Math.floor(Math.random() * categories.length);
+      let rand2 = Math.floor(Math.random() * categories.length);
+      if (rand1 === rand2) {
+        if (rand2 !== 0) {
+          rand2--;
+        } else {
+          rand2++;
+        }
+      }
       let new_item = await itemsData.createItem({
         name: `Item ${i}`,
         description:
@@ -104,9 +114,9 @@ const main = async () => {
         sellerId: user_id,
         itemPictures: null,
         categories: [
-          categories[Math.floor(Math.random() * categories.length)],
-          categories[Math.floor(Math.random() * categories.length)],
-        ], // https://stackoverflow.com/questions/4550505/getting-a-random-value-from-a-javascript-array
+          categories[rand1],
+          categories[rand2],
+        ],
       });
       const new_item_id = new_item._id.toString();
       console.log(

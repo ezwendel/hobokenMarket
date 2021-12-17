@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useState, useEffect ,useContext} from "react";
 import { styled } from "@mui/styles";
 import { makeStyles } from "@mui/styles";
 import { useTheme } from "@mui/material/styles";
+import axios from "axios";
+import { AuthContext } from '../firebase/Auth';
 
 import {
   Container,
@@ -61,7 +63,10 @@ const ItemListing = () => {
 };
 
 const ItemPage = () => {
-  const theme = useTheme();
+
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const { currentUser } = useContext(AuthContext);
   const useStyles = makeStyles(() => ({
     title: {
       fontWeight: "bold",
@@ -69,7 +74,27 @@ const ItemPage = () => {
     },
   }));
   const classes = useStyles();
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const { data } = await axios.get(`http://localhost:4000/user/${currentUser.displayName}`);
+        setUser(data);
+      } catch (e) {
+        setUser({ username: "?"});
+      }
+      setLoading(false);
+    };
+    setLoading(true);
+    fetchData();
+  }, []);
 
+  if (loading) {
+    return (
+      <Container maxWidth="100%">
+        <div style={{ margin: "0 auto", width: "fit-content" }}>Loading...</div>
+      </Container>
+    );
+  }
   return (
     <Container maxWidth="100%">
       <Card sx={{ minWidth: 250, maxWidth: "70%", margin: "0 auto" }}>
@@ -79,8 +104,8 @@ const ItemPage = () => {
               A
             </Avatar>
           }
-          title="jsmith1999"
-          subheader="Member since: December 10, 2021"
+          title={user.username}
+          subheader={user.joinDate}
           action={
             <Button aria-label="message" color="secondary">
               Send a Message
@@ -96,7 +121,7 @@ const ItemPage = () => {
               Contact Information
             </Typography>
             <Typography gutterBottom variant="div" component="div">
-              <Label>Full Name:</Label> John Smith
+              <Label>Full Name:</Label> {user.name.firstName}{user.name.lastName}
             </Typography>
             <Typography gutterBottom variant="div" component="div">
               <Label>Cell Phone #:</Label> (123)-456-7890
@@ -105,7 +130,7 @@ const ItemPage = () => {
               <Label>Home Phone #:</Label> (123)-456-7890
             </Typography>
             <Typography gutterBottom variant="div" component="div">
-              <Label>Email Address:</Label> john.smith@gmail.com
+              <Label>Email Address:</Label> {user.emailAddress}
             </Typography>
           </div>
           <div style={{ margin: "1em 0" }}>
