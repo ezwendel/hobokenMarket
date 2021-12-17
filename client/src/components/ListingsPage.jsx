@@ -74,7 +74,6 @@ const ListingsPage = (props) => {
         }
       }
     };
-    setLast(null);
     setLoading(true);
     fetchData();
   }, [page, props.history, props.match.params.page, filter]);
@@ -136,7 +135,8 @@ const ListingsPage = (props) => {
   };
 
   const handleFilter = (e, newFilter) => {
-    props.history.push(`/items/0}`);
+    props.history.push(`/items/0`);
+    setLast(null);
     setFilter(newFilter);
     console.log(newFilter);
   };
@@ -169,13 +169,6 @@ const ListingsPage = (props) => {
     }
   };
 
-  if (loading) {
-    return (
-      <Container maxWidth="100%">
-        <div style={{ margin: "0 auto", width: "fit-content" }}>Loading...</div>
-      </Container>
-    );
-  }
   return (
     <Container maxWidth="100%">
       {!searching && (
@@ -240,7 +233,7 @@ const ListingsPage = (props) => {
           </ToggleButtonGroup>
         </div>
       )}
-      <ItemList items={items} />
+      <ItemList items={items} loading={loading}/>
       <CreateListing formOpen={formOpen} handleFormClose={handleFormClose} />
       <Draggable
         onDrag={() => {

@@ -4,7 +4,7 @@ const { ObjectId } = require("mongodb");
 
 // https://stackoverflow.com/questions/7376598/in-javascript-how-do-i-check-if-an-array-has-duplicate-values
 function containsDuplicates(arr) {
-  return (new Set(arr)).size !==  arr.length;
+  return new Set(arr).size !== arr.length;
 }
 
 async function createItem(body) {
@@ -52,7 +52,10 @@ async function createItem(body) {
     categoriesTrim.push(category.trim());
   }
   // Check if categories has duplicates
-  if (containsDuplicates(categories)) throw `createItem: Each category must be unique`;
+  if (containsDuplicates(categories)) {
+    console.log(categories);
+    throw `createItem: Each category must be unique`;
+  }
 
   const itemsCollection = await items();
 
@@ -129,9 +132,11 @@ async function getItemsByCategory(category) {
 
   const itemCollection = await items();
   // const itemsList = await itemCollection.find({ categories: category }).toArray();
-  await itemCollection.createIndex( { categories: "text"} ) // case insensitive
-  const itemsList = await itemCollection.find({ $text: { $search: category } }).toArray();
-  await itemCollection.dropIndexes()
+  await itemCollection.createIndex({ categories: "text" }); // case insensitive
+  const itemsList = await itemCollection
+    .find({ $text: { $search: category } })
+    .toArray();
+  await itemCollection.dropIndexes();
   // itemsList.reverse() // this makes oldest first
   for (let item of itemsList) {
     item._id = item._id.toString();
@@ -148,7 +153,9 @@ async function getItemsBySeller(sellerId) {
     throw "getItemsBySeller: The provided sellerId must not be an empty string";
 
   const itemCollection = await items();
-  const itemsList = await itemCollection.find({ sellerId: ObjectId(sellerId.trim()) }).toArray();
+  const itemsList = await itemCollection
+    .find({ sellerId: ObjectId(sellerId.trim()) })
+    .toArray();
   for (let item of itemsList) {
     item._id = item._id.toString();
     item.sellerId = item.sellerId.toString();
@@ -164,17 +171,21 @@ async function search(keyword) {
     throw "search: The provided keyword must not be an empty string";
 
   const itemCollection = await items();
-  await itemCollection.createIndex( {name: "text", description: "text", categories: "text"} )
-  let itemsList = await itemCollection.find( { $text: { $search: keyword } } ).toArray()
-  await itemCollection.dropIndexes()
+  await itemCollection.createIndex({
+    name: "text",
+    description: "text",
+    categories: "text",
+  });
+  let itemsList = await itemCollection
+    .find({ $text: { $search: keyword } })
+    .toArray();
+  await itemCollection.dropIndexes();
   for (let item of itemsList) {
     item._id = item._id.toString();
     item.sellerId = item.sellerId.toString();
   }
   return itemsList;
 }
-
-
 
 module.exports = {
   createItem,
@@ -183,5 +194,5 @@ module.exports = {
   deleteItemById,
   getItemsByCategory,
   getItemsBySeller,
-  search
+  search,
 };

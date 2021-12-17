@@ -83,7 +83,7 @@ const main = async () => {
       "Other",
     ];
     let user_id;
-    for (let i = 1; i <= 50; i++) {
+    for (let i = 1; i <= 100; i++) {
       if (count == 1) {
         count++;
         user_id = user1_id;
@@ -100,9 +100,11 @@ const main = async () => {
       // https://stackoverflow.com/questions/4550505/getting-a-random-value-from-a-javascript-array
       let rand1 = Math.floor(Math.random() * categories.length);
       let rand2 = Math.floor(Math.random() * categories.length);
-      if (rand1 == rand2) {
+      if (rand1 === rand2) {
         if (rand2 !== 0) {
           rand2--;
+        } else {
+          rand2++;
         }
       }
       let new_item = await itemsData.createItem({
