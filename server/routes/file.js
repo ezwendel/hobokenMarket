@@ -8,6 +8,7 @@ const mongo = require('mongodb')
 const mongoose = require('mongoose')
 const mongoConfig = require('../config/settings');
 const e = require('express');
+const data = require('../data');
 const url = 'mongodb://localhost:27017/hobokenMarketDB';
 
 const conn = mongoose.createConnection(url, {
@@ -26,9 +27,19 @@ conn.once('open', () => {
 
 router.post("/upload", upload.single("file"), (req, res) =>{
     if (req.file === undefined) return res.send("must select a file.")
+    console.log(req.body.sellerId)
     console.log(req.file)
     const imgUrl = `http://localhost:4000/file/${req.file.id}`;
     return res.send(imgUrl);
+})
+
+router.post("/profile_upload", upload.single("file"), async (req, res) =>{
+  if (req.file === undefined) return res.send("must select a file.")
+  console.log(req.body.userId)
+  console.log(req.file)
+  await data.users.updatePfp(req.body.userId, req.file.id)
+  const imgUrl = `http://localhost:4000/file/${req.file.id}`;
+  return res.send(imgUrl);
 })
 
 router.get('/:id', async (req, res) => {
