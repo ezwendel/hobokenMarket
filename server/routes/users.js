@@ -13,9 +13,9 @@ bluebird.promisifyAll(redis.Multi.prototype);
 router.get('/:id', async (req, res) => {
   let id = req.params.id
   if (!id || id.trim().length == 0) { return res.status(400).json({ error: "id not valid" }) };
-  console.log("in route")
   let userData = await client.hgetAsync("user", `${id}`);
   if (userData) { return res.json(JSON.parse(userData)) }
+  // console.log("in route")
   try {
     let user = await data.users.getUserById(id);
     delete user.passwordHash;
@@ -34,7 +34,7 @@ router.post('/', async (req, res) => {
   let firstName = xss(body.firstName)
   let lastName = xss(body.lastName)
   let emailAddress = xss(body.emailAddress)
-  console.log(password)
+  // console.log(password)
   // error checking
   if (!password || password.trim().length == 0) { return res.status(400).json({ error: "password not valid" }) };
   if (!username || username.trim().length == 0) { return res.status(400).json({ error: "username not valid" }) };

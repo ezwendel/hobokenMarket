@@ -27,9 +27,9 @@ router.get('/search/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   let id = req.params.id
   if (!id || id.trim().length == 0) { return res.status(400).json({ error: "id not valid" }) };
-  console.log("in route")
   let itemData = await client.hgetAsync("item", `${id}`);
   if (itemData) { return res.json(JSON.parse(itemData)) }
+  // console.log("in route")
   try {
     let item = await data.items.getItemById(id);
     let itemDataCached = await client.hsetAsync("item", `${id}`, JSON.stringify(item))
