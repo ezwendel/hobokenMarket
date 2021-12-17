@@ -24,9 +24,11 @@ import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 const CreateAccount = () => {
   const theme = useTheme();
   const {currentUser}=useContext(AuthContext);
+  const [loading, setLoading] = useState(false);
   const [id, setId] = useState('');
   const [pwMatch, setPwMatch] = useState('');
   const handleSignUp = async (e) => {
+    setLoading(true);
     e.preventDefault();
     const { username, email, password, confirmpassword, } = e.target.elements;
     if (password.value !== confirmpassword.value) {
@@ -53,13 +55,22 @@ const CreateAccount = () => {
         password.value,
         data._id
       );
-
+      setLoading(false);
     } catch (e) {
+      setLoading(false);
       alert(e);
     }
+    
   };
   if (currentUser) {
     return <Redirect to="/" />;
+  }
+  if (loading) {
+    return (
+
+        <div style={{ margin: "0 auto", width: "fit-content" }}>Loading...</div>
+
+    );
   }
 
   return (
