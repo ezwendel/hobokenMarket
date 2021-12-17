@@ -3,6 +3,7 @@ import React from "react";
 import { styled, alpha } from "@mui/material/styles";
 import { InputBase, Button } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import SendIcon from '@mui/icons-material/Send';
 
 const Searchbar = ({ search }) => {
   // https://mui.com/components/app-bar/
@@ -65,8 +66,9 @@ const Searchbar = ({ search }) => {
         type="submit"
         variant="contained"
         style={{ display: "inline-block", width: "fit-content" }}
+        disableElevation
       >
-        {">"}
+        <SendIcon style={{ width: "20px", height: "20px"}}/>
       </Button>
     </form>
   );

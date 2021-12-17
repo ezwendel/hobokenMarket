@@ -13,6 +13,7 @@ import {
 import ItemList from "./ItemList";
 import CreateListing from "./CreateListing";
 import Add from "@mui/icons-material/Add";
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import Searchbar from "./Searchbar";
 import Draggable from "react-draggable";
 
@@ -206,7 +207,7 @@ const ListingsPage = (props) => {
           <small
             style={{ marginRight: "1em", color: theme.palette.primary.main }}
           >
-            FILTERS:
+            <FilterAltIcon style={{width: "18px", height: "18px", position: "relative", bottom: "2px"}} /> FILTERS:
           </small>
           <ToggleButtonGroup
             color="primary"
