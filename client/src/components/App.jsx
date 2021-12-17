@@ -7,6 +7,7 @@ import Login from "./Login";
 import CreateAccount from "./CreateAccount";
 import ListingsPage from "./ListingsPage";
 import ItemPage from "./ItemPage";
+import UserPage from "./UserPage";
 import ProfilePage from "./ProfilePage";
 import {AuthProvider} from '../firebase/Auth'
 import PrivateRoute from './PrivateRoute';
@@ -43,8 +44,13 @@ function App() {
               <PrivateRoute exact path="/" component={Home} />
               <Route exact path="/items/:page" component={ListingsPage} />
               <Route exact path="/item/:id" component={ItemPage} />
+
+              <Route exact path="/user/:id" component={UserPage} />
+
+	            <Route exact path="/logout" component={Logout} />
+
               <PrivateRoute exact path="/messages" component={Messages}/>
-	            <PrivateRoute exact path="/logout" component={Logout} />
+
               <Route exact path="/login" component={Login} />
               <Route exact path="/create-account" component={CreateAccount} />
               <PrivateRoute exact path="/profile" component={ProfilePage}/>
