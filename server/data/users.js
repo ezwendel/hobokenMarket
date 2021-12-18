@@ -307,7 +307,34 @@ async function addItemToUser(userId, itemId) {
     throw "addItemToUser: Failed to update user";
   return getUserById(userId);
 }
+async function deleteItemToUser(userId, itemId) {
+  const userCollection = await users();
+  const flag=false;
+  let oldUser = await getUserById(userId);
 
+  oldUser.items = oldUser.items.map((x) => ObjectId(x));
+  let items = oldUser.items
+  // console.log(items);
+
+  for (i=0;i<items.length; i++) {
+    if (items[i].toString() == itemId.toString()){
+      items.splice(i, 1);
+    }
+  }
+  const newUser = {
+    name: oldUser.name,
+    username: oldUser.username,
+    passwordHash: oldUser.passwordHash,
+    profilePicture: oldUser.profilePicture,
+    emailAddress: oldUser.emailAddress,
+    joinDate: oldUser.joinDate,
+    items: items
+  };
+
+  const updateInfo = await userCollection.updateOne({ _id: ObjectId(userId) }, { $set: newUser });
+  if (updateInfo.modifiedCount === 0) throw "deleteItemToUser: Failed to update user";
+  return getUserById(userId);
+}
 async function updatePfp(userId, imageId) {
   const userCollection = await users();
   let oldUser = await getUserById(userId);
@@ -375,7 +402,8 @@ module.exports = {
   updateUser,
   getAllUsers,
   addItemToUser,
+  deleteItemToUser,
   getUserById,
   updatePfp,
-  getUserByEmail,
+  getUserByEmail
 };

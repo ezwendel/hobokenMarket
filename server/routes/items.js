@@ -230,9 +230,12 @@ router.delete('/:id', async (req, res) => {
   let id = req.params.id
   if (!id || id.trim().length == 0) { return res.status(400).json({ error: "id not valid" }) };
   try {
+    let itemInfo=await data.items.getItemById(id);
     let delInfo = await data.items.deleteItemById(id);
+    let deluserInfo= await data.users.deleteItemToUser(itemInfo.sellerId,id);
     let itemDataCached = await client.hdelAsync("item", `${id}`)
-    return res.json(delInfo);
+    let userDataCached = await client.hsetAsync("user", `${itemInfo.sellerId}`, JSON.stringify(deluserInfo));
+    return res.json(deluserInfo);
   } catch (e) {
     console.log(e)
     return res.status(404).json({ error: `item with id ${id} does not exist` })
