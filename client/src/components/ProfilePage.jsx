@@ -1,10 +1,9 @@
-import React, { useState, useEffect ,useContext} from "react";
+import React, { useState, useEffect, useContext } from "react";
 
 import { styled } from "@mui/styles";
 import { makeStyles } from "@mui/styles";
 import { useTheme } from "@mui/material/styles";
-import axios from "axios";
-import { AuthContext } from '../firebase/Auth';
+import { AuthContext } from "../firebase/Auth";
 
 import {
   Container,
@@ -64,9 +63,7 @@ const ItemListing = () => {
   );
 };
 
-
-const ItemPage = () => {
-
+const ProfilePage = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const { currentUser } = useContext(AuthContext);
@@ -81,10 +78,12 @@ const ItemPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data } = await axios.get(`http://localhost:4000/user/${currentUser.displayName}`);
+        const { data } = await axios.get(
+          `http://localhost:4000/user/${currentUser.displayName}`
+        );
         setUser(data);
       } catch (e) {
-        setUser({ username: "?"});
+        setUser({ username: "?" });
       }
       setLoading(false);
     };
@@ -125,7 +124,8 @@ const ItemPage = () => {
               Contact Information
             </Typography>
             <Typography gutterBottom variant="div" component="div">
-              <Label>Full Name:</Label> {user.name.firstName}{user.name.lastName}
+              <Label>Full Name:</Label> {user.name.firstName}
+              {user.name.lastName}
             </Typography>
             <Typography gutterBottom variant="div" component="div">
               <Label>Cell Phone #:</Label> (123)-456-7890
@@ -150,25 +150,11 @@ const ItemPage = () => {
                 <ItemListing />
               </List>
             </div>
-            <div style={{ margin: "1em 0" }}>
-              <Typography variant="h6" component="div">
-                Listed Items
-              </Typography>
-              <div>
-                <List>
-                  <Divider />
-                  <ItemListing />
-                  <ItemListing />
-                  <ItemListing />
-                  <ItemListing />
-                </List>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </Container>
-    );
-  }
+          </div>
+        </CardContent>
+      </Card>
+    </Container>
+  );
 };
 
 export default ProfilePage;

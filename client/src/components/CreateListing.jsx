@@ -132,15 +132,15 @@ const CreateListing = (props) => {
     })
   }
 
-  const onFileChange = async (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      let imageDataUrl = await readFile(file);
-      console.log(file);
-      setImage(file);
-      setImagePreview(imageDataUrl);
-    }
-  }
+  // const onFileChange = async (e) => {
+  //   if (e.target.files && e.target.files.length > 0) {
+  //     const file = e.target.files[0];
+  //     let imageDataUrl = await readFile(file);
+  //     console.log(file);
+  //     setImage(file);
+  //     setImagePreview(imageDataUrl);
+  //   }
+  // }
 
   const categoryNames = [
     "Furniture",
