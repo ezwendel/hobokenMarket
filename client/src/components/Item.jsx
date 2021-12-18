@@ -17,6 +17,7 @@ import {
 
 import { Link } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
+import Skeleton from "@mui/material/Skeleton";
 
 import Placeholder from "../img/default.png";
 
@@ -54,6 +55,26 @@ const Item = ({ item }) => {
   if (loading) {
     return (
       <Card sx={{ minWidth: 250, height: 600 }}>
+        <CardHeader
+          avatar={
+            <Skeleton
+              animation="wave"
+              variant="circular"
+              width={40}
+              height={40}
+            />
+          }
+          title={
+            <Skeleton
+              animation="wave"
+              height={10}
+              width="80%"
+              style={{ marginBottom: 6 }}
+            />
+          }
+          subheader={<Skeleton animation="wave" height={10} width="40%" />}
+        />
+        <Skeleton sx={{ height: 300 }} animation="wave" variant="rectangular" />
         <CardContent
           style={{
             display: "flex",
@@ -62,7 +83,8 @@ const Item = ({ item }) => {
             padding: "5em 0",
           }}
         >
-          <CircularProgress />
+          <Skeleton animation="wave" height={10} style={{ marginBottom: 6 }} />
+          <Skeleton animation="wave" height={10} width="80%" />
         </CardContent>
       </Card>
     );
@@ -83,18 +105,34 @@ const Item = ({ item }) => {
       </Card>
     );
   }
+  let avatarInternals = null;
+  if (user.profilePicture) {
+    avatarInternals = (
+      <Link to={`/user/${user._id}`} className="item-avatar-link">
+        <Tooltip title={user.username}>
+          <Avatar
+            alt={`${user.name.firstName} ${user.name.lastName}`}
+            src={`http://localhost:4000/file/${user.profilePicture}`}
+          />
+        </Tooltip>
+      </Link>
+    );
+  } else {
+    avatarInternals = (
+      <Link to={`/user/${user._id}`} className="item-avatar-link">
+        <Tooltip title={user.username}>
+          <Avatar sx={{ bgcolor: "#EB5757" }}>
+            {user.username[0].toUpperCase()}
+          </Avatar>
+        </Tooltip>
+      </Link>
+    );
+  }
+
   return (
     <Card sx={{ minWidth: 250, height: 600 }}>
       <CardHeader
-        avatar={
-          <Link to={`/user/${user._id}`} className="item-avatar-link">
-            <Tooltip title={user.username}>
-              <Avatar sx={{ bgcolor: "#EB5757" }}>
-                {user.username.charAt(0).toUpperCase()}
-              </Avatar>
-            </Tooltip>
-          </Link>
-        }
+        avatar={avatarInternals}
         title={item.name}
         subheader={new Date(item.listDate).toLocaleDateString("en-US", {
           month: "long",

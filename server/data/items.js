@@ -1,6 +1,7 @@
 const { items, users } = require("../config/mongoCollections");
 const moment = require("moment"); // for date checking
 const { ObjectId } = require("mongodb");
+const { deleteImage } = require('./images')
 
 // https://stackoverflow.com/questions/7376598/in-javascript-how-do-i-check-if-an-array-has-duplicate-values
 function containsDuplicates(arr) {
@@ -120,6 +121,12 @@ async function deleteItemById(id) {
   if (id.trim().length === 0)
     throw "deleteItemById: The provided id must not be an empty string";
   const parsedId = ObjectId(id.trim());
+
+  let itemToDelete = await getItemById(id);
+
+  for (i of itemToDelete.itemPictures) {
+    await deleteImage(i.toString())
+  }
 
   const itemCollection = await items();
   const deletionInfo = await itemCollection.deleteOne({ _id: parsedId });

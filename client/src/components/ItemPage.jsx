@@ -98,6 +98,29 @@ const ItemPage = (props) => {
       </Container>
     );
   }
+  let avatarInternals = null;
+  if (user.profilePicture) {
+    avatarInternals = (
+      <Link to={`/user/${user._id}`} className="item-avatar-link">
+        <Tooltip title={user.username}>
+          <Avatar
+            alt={`${user.name.firstName} ${user.name.lastName}`}
+            src={`http://localhost:4000/file/${user.profilePicture}`}
+          />
+        </Tooltip>
+      </Link>
+    );
+  } else {
+    avatarInternals = (
+      <Link to={`/user/${user._id}`} className="item-avatar-link">
+        <Tooltip title={user.username}>
+          <Avatar sx={{ bgcolor: "#EB5757" }}>
+            {user.username[0].toUpperCase()}
+          </Avatar>
+        </Tooltip>
+      </Link>
+    );
+  }
   return (
     <Container>
       <Card sx={{ minWidth: 250, maxWidth: "70%", margin: "0 auto" }}>
@@ -114,13 +137,7 @@ const ItemPage = (props) => {
         />
         <CardHeader
           avatar={
-            <Link to={`/user/${user._id}`}>
-              <Tooltip title={user.username}>
-                <Avatar sx={{ bgcolor: "#EB5757" }}>
-                  {user.username.charAt(0).toUpperCase()}
-                </Avatar>
-              </Tooltip>
-            </Link>
+            avatarInternals
           }
           title={item.name}
           subheader={new Date(item.listDate).toLocaleDateString("en-US", {
