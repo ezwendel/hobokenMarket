@@ -4,6 +4,7 @@ const dbConnection = require("../config/mongoConnection");
 const data = require("../data/");
 const itemsData = data.items;
 const usersData = data.users;
+const messageThreadData = data.messageThreads;
 const { ObjectId } = require("mongodb");
 
 const main = async () => {
@@ -32,6 +33,18 @@ const main = async () => {
       emailAddress: "rjbarrett@gmail.com",
     });
     const user2_id = user2._id.toString();
+
+    const messageThread1 = await messageThreadData.createMessageThread([user1_id, user2_id])
+    const messageThread1_id = messageThread1._id.toString();
+    const user1_message = await usersData.addMessageThreadToUser(user1_id, messageThread1_id)
+    const user2_message = await usersData.addMessageThreadToUser(user2_id, messageThread1_id)
+
+    console.log(user1_message);
+    console.log(user2_message);
+
+    const newMessage = messageThreadData.addMessageToThread(messageThread1_id, user1_id, "hello")
+
+    console.log(newMessage);
 
     const user3 = await usersData.createUser({
       name: { firstName: "Derrick", lastName: "Rose" },

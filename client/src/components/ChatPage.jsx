@@ -1,50 +1,31 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
 import useLocalStorage from '../hooks/useLocalStorage';
-import { useContacts } from '../contexts/Contacts';
+import ChatBar from './ChatBar';
+import Contacts from './Contacts';
+import { ContactsProvider } from '../contexts/Contacts';
+import { ConversationProvider } from '../contexts/Conversations';
 import './App.css';
 
 
 
-function ChatPage() {
-    const [id, setId] = useLocalStorage('id');
-    const [state, setState] = useState({ message: '', name: ''})
-    const { contacts } = useContacts();
-    const [ chat, setChat ]
+const ChatPage = (props) => {
+    const [id, setId] = useLocalStorage(props.id);
+    const [selectedIndex, setSelectedIndex] = useState(0);
 
-    const socketRef = useRef();
+    const dashboard = (
+      <ContactsProvider>
+        <ConversationProvider>
+          <Contacts setSelectedIndex={setSelectedIndex} />
+          <ChatBar id={id} selectedIndex={selectedIndex} />
+        </ConversationProvider>
+      </ContactsProvider>
+    );
 
-    useEffect(() => {
-        socketRef.current = io('/');
-        return () => {
-            socketRef.current.disconnect();
-        };
-    }, []);
-
-    useEffect(() => {
-        socketRef.current.on('send_message', ({ }))
-    })
-
-    const messageSubmit = (e) => {
-        let msgEle = document.getElementById('message');
-        console.log([[msgEle.name], msgEle.value]);
-        socketRef.current.emit('send_message', {
-            recipients: msgEle,
-            message: msgEle.value
-        });
-        e.preventDefault();
-        setState({ message: '', name: state.name });
-        msgEle.value = '';
-        msgEle.focus();
-    }
-
-    const renderChat = () => {
-        return chat.map(({ name, message }, index) => (
-          <div key={index}>
-            <h3>
-              {name}: <span>{message}</span>
-            </h3>
-          </div>
-        ));
-      };
+    return (
+      {dashboard}
+    );
+  
 }
+
+export default ChatPage;

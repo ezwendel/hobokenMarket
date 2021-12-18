@@ -76,7 +76,8 @@ async function createUser(body) {
     profilePicture: null,
     emailAddress: emailAddress.trim(),
     joinDate: new Date(),
-    items: []
+    items: [],
+    messageIds: [],
   };
 
   // console.log(newUser)
@@ -158,7 +159,8 @@ async function updateUser(body) {
     profilePicture: profilePicture,
     emailAddress: emailAddress.trim(),
     joinDate: oldUser.joinDate,
-    items: oldUser.items
+    items: oldUser.items,
+    contacts: oldUser.contacts,
   };
 
   const updateInfo = await userCollection.updateOne({ _id: ObjectId(_id) }, { $set: newUser });
@@ -175,6 +177,31 @@ async function getAllUsers() {
     user.items = user.items.map((itemId) => itemId.toString())
   }
   return usersList;
+}
+
+async function addMessageThreadToUser(userId, messageId) {
+  const userCollection = await users();
+
+  let oldUser = await getUserById(userId);
+
+  let messageIds = oldUser.messageIds
+  messageIds.push(ObjectId(messageId))
+
+  const newUser = {
+    name: oldUser.name,
+    username: oldUser.username,
+    passwordHash: oldUser.passwordHash,
+    profilePicture: oldUser.profilePicture,
+    emailAddress: oldUser.emailAddress,
+    joinDate: oldUser.joinDate,
+    items: oldUser.items,
+    messageIds: messageIds,
+  };
+
+  const updateInfo = await userCollection.updateOne({ _id: ObjectId(userId) }, { $set: newUser });
+  if (updateInfo.modifiedCount === 0) throw "createItem: Failed to update user";
+  return getUserById(userId);
+
 }
 
 async function addItemToUser(userId, itemId) {
@@ -196,13 +223,16 @@ async function addItemToUser(userId, itemId) {
     profilePicture: oldUser.profilePicture,
     emailAddress: oldUser.emailAddress,
     joinDate: oldUser.joinDate,
-    items: items
+    items: items,
+    contacts: oldUser.contacts,
   };
 
   const updateInfo = await userCollection.updateOne({ _id: ObjectId(userId) }, { $set: newUser });
   if (updateInfo.modifiedCount === 0) throw "createItem: Failed to update user";
   return getUserById(userId);
 }
+
+
 
 async function getUserById(id) {
   // ID Error Checking
@@ -226,5 +256,6 @@ module.exports = {
   updateUser,
   getAllUsers,
   addItemToUser,
+  addMessageThreadToUser,
   getUserById
 };
