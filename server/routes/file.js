@@ -8,22 +8,27 @@ const mongo = require('mongodb')
 const mongoose = require('mongoose')
 const mongoConfig = require('../config/settings');
 const e = require('express');
+
+const url = process.env.DOCKER_MODE ? 'mongodb://mongo:27017/hobokenMarketDB' : 'mongodb://localhost:27017/hobokenMarketDB';
+
 const data = require('../data');
-const url = 'mongodb://localhost:27017/hobokenMarketDB';
+
+
 
 const conn = mongoose.createConnection(url, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useCreateIndex: true,
-  });
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useCreateIndex: true,
+});
 
 let gfs;
 
 conn.once('open', () => {
-    gfs = new mongoose.mongo.GridFSBucket(conn.db, {
-        bucketName: 'images',
-    }); // https://www.youtube.com/watch?v=OvbRLY1QRIk
+  gfs = new mongoose.mongo.GridFSBucket(conn.db, {
+    bucketName: 'images',
+  }); // https://www.youtube.com/watch?v=OvbRLY1QRIk
 });
+
 
 router.post("/upload", upload.single("file"), (req, res) =>{
     if (req.file === undefined) return res.send("must select a file.")
@@ -31,6 +36,7 @@ router.post("/upload", upload.single("file"), (req, res) =>{
     console.log(req.file)
     const imgUrl = `http://localhost:4000/file/${req.file.id}`;
     return res.send(imgUrl);
+
 })
 
 router.post("/profile_upload", upload.single("file"), async (req, res) =>{
@@ -51,5 +57,6 @@ router.get('/:id', async (req, res) => {
     // console.log(files)
     gfs.openDownloadStream(_id).pipe(res);
   });
+
 
 module.exports = router;

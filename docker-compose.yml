@@ -1,0 +1,28 @@
+version: '3.9'
+services:
+    server:
+        build: ./server/
+        ports:
+            - '4000:4000'
+        depends_on:
+            - mongo
+            - redis
+        command: npm run dockerStart
+
+    client:
+        build: ./client/
+        ports:
+            - '3000:3000'
+        depends_on:
+            - server
+        command: npm run dockerStart
+
+    mongo:
+        image: mongo
+        ports:
+        - '27017:27017'
+
+    redis:
+        expose:
+            - '6379'
+        image: redis:latest

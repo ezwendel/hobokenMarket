@@ -80,7 +80,7 @@ const ItemListing = (item) => {
   );
 };
 
-const ItemPage = (props) => {
+const ProfilePage = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const { currentUser } = useContext(AuthContext);
@@ -103,6 +103,7 @@ const ItemPage = (props) => {
     },
   }));
   const classes = useStyles();
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -222,4 +223,4 @@ const ItemPage = (props) => {
   );
 };
 
-export default ItemPage;
+export default ProfilePage;
