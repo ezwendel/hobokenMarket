@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
+import { AuthContext } from "../firebase/Auth";
 
 import {
   Container,
@@ -13,7 +14,7 @@ import {
 import ItemList from "./ItemList";
 import CreateListing from "./CreateListing";
 import Add from "@mui/icons-material/Add";
-import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import Searchbar from "./Searchbar";
 import Draggable from "react-draggable";
 
@@ -28,6 +29,7 @@ const ListingsPage = (props) => {
   const [searching, setSearching] = useState(false);
   const [filter, setFilter] = useState("");
   const [dragging, setDragging] = useState(false);
+  const { currentUser } = useContext(AuthContext);
 
   const prevPage = () => {
     props.history.push(`/items/${page - 1}`);
@@ -170,7 +172,7 @@ const ListingsPage = (props) => {
   };
 
   return (
-    <Container maxWidth="100%">
+    <Container style={{maxWidth:"100%"}}>
       {!searching && (
         <div style={{ width: "fit-content", margin: "1em auto" }}>
           {page > 0 ? (
@@ -202,7 +204,15 @@ const ListingsPage = (props) => {
           <small
             style={{ marginRight: "1em", color: theme.palette.primary.main }}
           >
-            <FilterAltIcon style={{width: "18px", height: "18px", position: "relative", bottom: "2px"}} /> FILTERS:
+            <FilterAltIcon
+              style={{
+                width: "18px",
+                height: "18px",
+                position: "relative",
+                bottom: "2px",
+              }}
+            />{" "}
+            FILTERS:
           </small>
           <ToggleButtonGroup
             color="primary"
@@ -233,15 +243,16 @@ const ListingsPage = (props) => {
           </ToggleButtonGroup>
         </div>
       )}
-      <ItemList items={items} loading={loading}/>
-      <CreateListing formOpen={formOpen} handleFormClose={handleFormClose} />
-      <Draggable
+      <ItemList items={items} loading={loading} />
+      <CreateListing formOpen={formOpen} handleFormClose={handleFormClose} history={props.history} />
+      {/*https://github.com/react-grid-layout/react-draggable/issues/49*/}
+      {currentUser && <Draggable
         onDrag={() => {
           setDragging(true);
         }}
         onStop={() => {
           if (!dragging) {
-            handleFormOpen()
+            handleFormOpen();
           }
           setDragging(false);
         }}
@@ -251,14 +262,12 @@ const ListingsPage = (props) => {
           variant="extended"
           aria-label="create-post"
           style={{ position: "fixed", right: "5em", bottom: "3em" }}
-          onClick={() => {
-            
-          }}
+          onClick={() => {}}
         >
           <Add sx={{ mr: 1 }} />
           Create Listing
         </Fab>
-      </Draggable>
+      </Draggable>}
     </Container>
   );
 };

@@ -23,6 +23,7 @@ import Placeholder from "../img/default.png";
 const Item = ({ item }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   // Get item
   useEffect(() => {
@@ -34,6 +35,7 @@ const Item = ({ item }) => {
         setUser(data);
       } catch (e) {
         setUser({ username: "?" });
+        setError(e);
       }
       setLoading(false);
     };
@@ -51,13 +53,13 @@ const Item = ({ item }) => {
 
   if (loading) {
     return (
-      <Card sx={{ minWidth: 250, height: 500 }}>
+      <Card sx={{ minWidth: 250, height: 600 }}>
         <CardContent
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "5em 0"
+            padding: "5em 0",
           }}
         >
           <CircularProgress />
@@ -65,15 +67,33 @@ const Item = ({ item }) => {
       </Card>
     );
   }
+  if (error) {
+    return (
+      <Card sx={{ minWidth: 250, height: 600 }}>
+        <CardContent
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "5em 0",
+          }}
+        >
+          {error.toString()}
+        </CardContent>
+      </Card>
+    );
+  }
   return (
-    <Card sx={{ minWidth: 250, height: 500 }}>
+    <Card sx={{ minWidth: 250, height: 600 }}>
       <CardHeader
         avatar={
-          <Tooltip title={user.username}>
-            <Avatar sx={{ bgcolor: "#EB5757" }}>
-              {user.username.charAt(0).toUpperCase()}
-            </Avatar>
-          </Tooltip>
+          <Link to={`/user/${user._id}`} className="item-avatar-link">
+            <Tooltip title={user.username}>
+              <Avatar sx={{ bgcolor: "#EB5757" }}>
+                {user.username.charAt(0).toUpperCase()}
+              </Avatar>
+            </Tooltip>
+          </Link>
         }
         title={item.name}
         subheader={new Date(item.listDate).toLocaleDateString("en-US", {
@@ -83,7 +103,19 @@ const Item = ({ item }) => {
         })}
         classes={{ title: classes.title }}
       />
-      <CardMedia component="img" height="194" image={Placeholder} />
+      <CardMedia
+        component="img"
+        height="300"
+        image={
+          item.itemPictures !== null
+            ? `http://localhost:4000/file/${item.itemPictures[0]}`
+            : Placeholder
+        }
+        onError={(e) => {
+          e.target.src = Placeholder;
+        }}
+        alt={`${item.name}-img`}
+      />
       <div style={{ padding: "1em 1em 0 1em" }}>
         <ul className="category-list">
           {item.categories.map((category) => (
@@ -115,19 +147,17 @@ const Item = ({ item }) => {
         </Typography>
       </CardContent>
       <CardActions>
-        <Link style={{ color: "inherit", textDecoration: "none" }}>
-          <Button color="secondary" size="small">
-            CONTACT
-          </Button>
-        </Link>
-        <Link
+        <Button color="secondary" size="small" component={Link}>
+          CONTACT
+        </Button>
+        <Button
+          color="secondary"
+          size="small"
+          component={Link}
           to={`/item/${item._id}`}
-          style={{ color: "inherit", textDecoration: "none" }}
         >
-          <Button color="secondary" size="small">
-            MORE INFO
-          </Button>
-        </Link>
+          MORE INFO
+        </Button>
       </CardActions>
     </Card>
   );

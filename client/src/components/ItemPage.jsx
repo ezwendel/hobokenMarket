@@ -27,6 +27,7 @@ import {
 import { Link } from "react-router-dom";
 
 import Placeholder from "../img/default.png";
+import Loading from "./Loading";
 
 const ItemPage = (props) => {
   const id = props.match.params.id;
@@ -58,13 +59,16 @@ const ItemPage = (props) => {
     const fetchData = async () => {
       try {
         if (item) {
+          setError(false);
           const { data: data2 } = await axios.get(
             `http://localhost:4000/user/${item.sellerId}`
           );
           console.log(data2);
           setUser(data2);
-          setLoading(false);
+        } else {
+          setError("404: item not found")
         }
+        setLoading(false);
       } catch (e) {
         setError(e);
         console.log(e);
@@ -84,22 +88,39 @@ const ItemPage = (props) => {
 
   if (loading) {
     return (
-      <Container maxWidth="100%">
-        <div style={{ margin: "0 auto", width: "fit-content" }}>Loading...</div>
+      <Loading />
+    );
+  }
+  if (error) {
+    return (
+      <Container>
+        <div style={{ margin: "0 auto", width: "fit-content" }}>{error.toString()}</div>
       </Container>
     );
   }
   return (
-    <Container maxWidth="100%">
+    <Container>
       <Card sx={{ minWidth: 250, maxWidth: "70%", margin: "0 auto" }}>
-        <CardMedia component="img" image={Placeholder} />
+        <CardMedia
+          component="img"
+          image={
+            item.itemPictures !== null
+              ? `http://localhost:4000/file/${item.itemPictures[0]}`
+              : Placeholder
+          }
+          onError={(e) => {
+            e.target.src = Placeholder;
+          }}
+        />
         <CardHeader
           avatar={
-            <Tooltip title={user.username}>
-              <Avatar sx={{ bgcolor: "#EB5757" }}>
-                {user.username.charAt(0).toUpperCase()}
-              </Avatar>
-            </Tooltip>
+            <Link to={`/user/${user._id}`}>
+              <Tooltip title={user.username}>
+                <Avatar sx={{ bgcolor: "#EB5757" }}>
+                  {user.username.charAt(0).toUpperCase()}
+                </Avatar>
+              </Tooltip>
+            </Link>
           }
           title={item.name}
           subheader={new Date(item.listDate).toLocaleDateString("en-US", {
@@ -198,18 +219,15 @@ const ItemPage = (props) => {
           </div>
         </CardContent>
         <CardActions>
-          <Link
+          <Button
+            color="secondary"
+            size="small"
+            component={Link}
             to={`/items/0`}
-            style={{
-              color: "inherit",
-              textDecoration: "none",
-              margin: "0 auto",
-            }}
+            sx={{margin: "0 auto"}}
           >
-            <Button color="secondary" size="small">
-              BACK TO LISTINGS
-            </Button>
-          </Link>
+            BACK TO LISTINGS
+          </Button>
         </CardActions>
       </Card>
     </Container>

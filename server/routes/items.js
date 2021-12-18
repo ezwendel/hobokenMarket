@@ -1,12 +1,19 @@
 const express = require("express"),
-      router = express.Router(),
-      data = require('../data'),
-      xss = require('xss')
+  router = express.Router(),
+  data = require('../data'),
+  xss = require('xss'),
+  gm = require('gm'),
+  fs = require('fs')
 
 const bluebird = require('bluebird');
 const redis = require('redis');
-const client = redis.createClient();
+const redisOptions = {
+  host: process.env.DOCKER_MODE ? 'redis' : 'localhost',
+  port: 6379,
+};
+const client = redis.createClient(redisOptions);
 const upload = require('../middleware/upload')
+
 
 bluebird.promisifyAll(redis.RedisClient.prototype);
 bluebird.promisifyAll(redis.Multi.prototype);
@@ -47,7 +54,7 @@ router.get('/:id', async (req, res) => {
 router.get('/', async (req, res) => {
   let searchStr = ""
   if (req.query.offset) {
-    searchStr += `offset:${req.query.offset}` 
+    searchStr += `offset:${req.query.offset}`
   }
   if (req.query.count) {
     searchStr += `count:${req.query.count}`
@@ -70,7 +77,7 @@ router.get('/', async (req, res) => {
       let offset = Number(req.query.offset);
       // console.log(skipNum);
       if (offset < 0) {
-        res.status(400).json({error: "offset query cannot be less than 0"});
+        res.status(400).json({ error: "offset query cannot be less than 0" });
         return;
       } else {
         items.splice(0, offset);
@@ -79,7 +86,7 @@ router.get('/', async (req, res) => {
     if (req.query.count) {
       let count = Number(req.query.count);
       if (count < 0) {
-        res.status(400).json({error: "Take query cannot be less than 0"});
+        res.status(400).json({ error: "Take query cannot be less than 0" });
         return;
       } else {
         items = items.slice(0, count);
@@ -91,11 +98,12 @@ router.get('/', async (req, res) => {
     let itemsDataCached = await client.hsetAsync("items", `${searchStr}`, JSON.stringify(items))
     res.json(items);
   } catch (e) {
-    return res.status(500).json({error: e});
+    return res.status(500).json({ error: e });
   }
 })
 
 router.post('/with_image', upload.single("file"), async (req, res) => {
+  console.log("good");
   if (req.file === undefined) return res.status(400).json({error: "must select a file."})
   console.log(req.file.id)
   // get body + xss body
@@ -105,6 +113,7 @@ router.post('/with_image', upload.single("file"), async (req, res) => {
   let sellerId = xss(body.sellerId);
   let itemPictures = [req.file.id];
   let categories = body.categories.split(","); // xss later
+  console.log(body);
   // error checking
   if (!name || name.trim().length == 0) {
     try {
@@ -185,7 +194,8 @@ router.post('/', async (req, res) => {
   let name = xss(body.name);
   let description = xss(body.description);
   let sellerId = xss(body.sellerId);
-  // let itemPictures = xss(body.itemPictures);
+  let itemPictures = xss(body.pictures);//xss(body.itemImage);
+
   let categories = body.categories; // xss later
   // error checking
   if (!name || name.trim().length == 0) { return res.status(400).json({ error: "name not valid" }) };
@@ -198,7 +208,7 @@ router.post('/', async (req, res) => {
     seller = await data.users.getUserById(sellerId);
   } catch (e) {
     console.log(e)
-    return res.status(404).json({ error: `user with id ${sellerId} does not exist` }) 
+    return res.status(404).json({ error: `user with id ${sellerId} does not exist` })
   }
   try {
     let item = await data.items.createItem({ name: name, description: description, sellerId: sellerId, categories: categories })
