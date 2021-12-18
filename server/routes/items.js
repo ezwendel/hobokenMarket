@@ -216,4 +216,17 @@ router.post('/', async (req, res) => {
   }
 })
 
+router.delete('/:id', async (req, res) => {
+  let id = req.params.id
+  if (!id || id.trim().length == 0) { return res.status(400).json({ error: "id not valid" }) };
+  try {
+    let delInfo = await data.items.deleteItemById(id);
+    let itemDataCached = await client.hdelAsync("item", `${id}`)
+    return res.json(delInfo);
+  } catch (e) {
+    console.log(e)
+    return res.status(404).json({ error: `item with id ${id} does not exist` })
+  }
+})
+
 module.exports = router;
