@@ -8,6 +8,13 @@ function containsDuplicates(arr) {
   return new Set(arr).size !== arr.length;
 }
 
+function sortArraysByListDate(arr) {
+  arr.sort((a,b) => {
+    return new Date(b.listDate) - new Date(a.listDate)
+  })
+  return arr;
+}
+
 async function createItem(body) {
   let name = body.name;
   let description = body.description;
@@ -94,7 +101,7 @@ async function getAllItems() {
     item._id = item._id.toString();
     item.sellerId = item.sellerId.toString();
   }
-  return itemsList;
+  return sortArraysByListDate(itemsList);
 }
 
 async function getItemById(id) {
@@ -155,7 +162,7 @@ async function getItemsByCategory(category) {
     item._id = item._id.toString();
     item.sellerId = item.sellerId.toString();
   }
-  return itemsList;
+  return sortArraysByListDate(itemsList);
 }
 
 async function getItemsBySeller(sellerId) {
@@ -173,7 +180,7 @@ async function getItemsBySeller(sellerId) {
     item._id = item._id.toString();
     item.sellerId = item.sellerId.toString();
   }
-  return itemsList;
+  return sortArraysByListDate(itemsList);
 }
 
 async function search(keyword) {
@@ -197,7 +204,7 @@ async function search(keyword) {
     item._id = item._id.toString();
     item.sellerId = item.sellerId.toString();
   }
-  return itemsList;
+  return sortArraysByListDate(itemsList);
 }
 
 module.exports = {
