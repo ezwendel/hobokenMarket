@@ -12,10 +12,11 @@ import {
   Button,
   Typography,
   Tooltip,
-  Chip
+  Chip,
 } from "@mui/material";
 
 import { Link } from "react-router-dom";
+import CircularProgress from "@mui/material/CircularProgress";
 
 import Placeholder from "../img/default.png";
 
@@ -27,17 +28,18 @@ const Item = ({ item }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data } = await axios.get(`http://localhost:4000/user/${item.sellerId}`);
+        const { data } = await axios.get(
+          `http://localhost:4000/user/${item.sellerId}`
+        );
         setUser(data);
       } catch (e) {
-        setUser({ username: "?"});
+        setUser({ username: "?" });
       }
       setLoading(false);
     };
     setLoading(true);
     fetchData();
   }, []);
-
 
   const useStyles = makeStyles(() => ({
     title: {
@@ -48,12 +50,31 @@ const Item = ({ item }) => {
   const classes = useStyles();
 
   if (loading) {
-    return null;
+    return (
+      <Card sx={{ minWidth: 250, height: 500 }}>
+        <CardContent
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "5em 0",
+          }}
+        >
+          <CircularProgress />
+        </CardContent>
+      </Card>
+    );
   }
   return (
-    <Card sx={{ minWidth: 250, maxHeight: 500, height: "fit-content" }}>
+    <Card sx={{ minWidth: 250, height: 500 }}>
       <CardHeader
-        avatar={<Tooltip title={user.username}><Avatar sx={{ bgcolor: "#EB5757" }}>{user.username.charAt(0).toUpperCase()}</Avatar></Tooltip>}
+        avatar={
+          <Tooltip title={user.username}>
+            <Avatar sx={{ bgcolor: "#EB5757" }}>
+              {user.username.charAt(0).toUpperCase()}
+            </Avatar>
+          </Tooltip>
+        }
         title={item.name}
         subheader={new Date(item.listDate).toLocaleDateString("en-US", {
           month: "long",
@@ -62,11 +83,25 @@ const Item = ({ item }) => {
         })}
         classes={{ title: classes.title }}
       />
-      <CardMedia component="img" height="194" image={Placeholder} />
-      <div style={{ padding: "1em 1em 0 1em"}}>
+      <CardMedia
+        component="img"
+        height="194"
+        image={item.itemPictures !== null ? `http://localhost:4000/file/${item.itemPictures[0]}` : Placeholder}
+        onError={(e) => {
+          e.target.src = Placeholder;
+        }}
+      />
+      <div style={{ padding: "1em 1em 0 1em" }}>
         <ul className="category-list">
           {item.categories.map((category) => (
-            <li><Chip label={category} size="small" color="primary" variant="outlined" /></li>
+            <li>
+              <Chip
+                label={category}
+                size="small"
+                color="primary"
+                variant="outlined"
+              />
+            </li>
           ))}
         </ul>
       </div>
@@ -79,7 +114,7 @@ const Item = ({ item }) => {
           height="100px"
           width="fit-content"
           style={{
-            overflowY: "scroll"
+            overflowY: "scroll",
           }}
           className="description"
         >

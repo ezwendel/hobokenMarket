@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect ,useContext} from "react";
+
 import { styled } from "@mui/styles";
 import { makeStyles } from "@mui/styles";
 import { useTheme } from "@mui/material/styles";
+import axios from "axios";
+import { AuthContext } from '../firebase/Auth';
 
 import {
   Container,
@@ -61,8 +64,12 @@ const ItemListing = () => {
   );
 };
 
-const ProfilePage = (props) => {
-  const theme = useTheme();
+
+const ItemPage = () => {
+
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const { currentUser } = useContext(AuthContext);
   const useStyles = makeStyles(() => ({
     title: {
       fontWeight: "bold",
@@ -70,61 +77,78 @@ const ProfilePage = (props) => {
     },
   }));
   const classes = useStyles();
-  const [account, setAccount] = useState(undefined);
-  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    async function fetch() {
-      console.log(props.match.params.id);
-      const { data: user } = await axios.get(`http://localhost:4000/user/${props.match.params.id}`);
-      setAccount(user);
+    const fetchData = async () => {
+      try {
+        const { data } = await axios.get(`http://localhost:4000/user/${currentUser.displayName}`);
+        setUser(data);
+      } catch (e) {
+        setUser({ username: "?"});
+      }
       setLoading(false);
-    }
-    fetch();
-  }, [props.match.params.id]);
+    };
+    setLoading(true);
+    fetchData();
+  }, []);
+
   if (loading) {
     return (
-      <div>
-        <h2>Loading....</h2>
-      </div>
-    );
-  } else {
-    return (
       <Container maxWidth="100%">
-        <Card sx={{ minWidth: 250, maxWidth: "70%", margin: "0 auto" }}>
-          <CardHeader
-            avatar={
-              <Avatar sx={{ bgcolor: "#EB5757", width: 50, height: 50 }}>
-                A
-              </Avatar>
-            }
-            title={account.username ? account.username : "jsmith1999"}
-            subheader="Member since: December 10, 2021"
-            action={
-              <Button aria-label="message" color="secondary">
-                Send a Message
-                <MessageIcon style={{ marginLeft: ".3em" }} />
-              </Button>
-            }
-            classes={{ title: classes.title }}
-          />
-          <Divider />
-          <CardContent>
-            <div style={{ margin: "1em 0" }}>
-              <Typography gutterBottom variant="h6" component="div">
-                Contact Information
-              </Typography>
-              <Typography gutterBottom variant="div" component="div">
-                <Label>Full Name:</Label> {account.name ? account.name.firstName + account.name.lastName : "John Smith"}
-              </Typography>
-              <Typography gutterBottom variant="div" component="div">
-                <Label>Cell Phone #:</Label> (123)-456-7890
-              </Typography>
-              <Typography gutterBottom variant="div" component="div">
-                <Label>Home Phone #:</Label> (123)-456-7890
-              </Typography>
-              <Typography gutterBottom variant="div" component="div">
-                <Label>Email Address:</Label> john.smith@gmail.com
-              </Typography>
+        <div style={{ margin: "0 auto", width: "fit-content" }}>Loading...</div>
+      </Container>
+    );
+  }
+  return (
+    <Container maxWidth="100%">
+      <Card sx={{ minWidth: 250, maxWidth: "70%", margin: "0 auto" }}>
+        <CardHeader
+          avatar={
+            <Avatar sx={{ bgcolor: "#EB5757", width: 50, height: 50 }}>
+              A
+            </Avatar>
+          }
+          title={user.username}
+          subheader={user.joinDate}
+          action={
+            <Button aria-label="message" color="secondary">
+              Send a Message
+              <MessageIcon style={{ marginLeft: ".3em" }} />
+            </Button>
+          }
+          classes={{ title: classes.title }}
+        />
+        <Divider />
+        <CardContent>
+          <div style={{ margin: "1em 0" }}>
+            <Typography gutterBottom variant="h6" component="div">
+              Contact Information
+            </Typography>
+            <Typography gutterBottom variant="div" component="div">
+              <Label>Full Name:</Label> {user.name.firstName}{user.name.lastName}
+            </Typography>
+            <Typography gutterBottom variant="div" component="div">
+              <Label>Cell Phone #:</Label> (123)-456-7890
+            </Typography>
+            <Typography gutterBottom variant="div" component="div">
+              <Label>Home Phone #:</Label> (123)-456-7890
+            </Typography>
+            <Typography gutterBottom variant="div" component="div">
+              <Label>Email Address:</Label> {user.emailAddress}
+            </Typography>
+          </div>
+          <div style={{ margin: "1em 0" }}>
+            <Typography variant="h6" component="div">
+              Listed Items
+            </Typography>
+            <div>
+              <List>
+                <Divider />
+                <ItemListing />
+                <ItemListing />
+                <ItemListing />
+                <ItemListing />
+              </List>
             </div>
             <div style={{ margin: "1em 0" }}>
               <Typography variant="h6" component="div">

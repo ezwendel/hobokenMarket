@@ -84,6 +84,7 @@ async function createUser(body) {
   const insertInfo = await userCollection.insertOne(newUser);
   if (insertInfo.insertedCount === 0) throw "createUser: Failed to create user";
   const id = insertInfo.insertedId.toString();
+
   return await getUserById(id);
 }
 
@@ -100,33 +101,37 @@ async function updateUser(body) {
   let oldUser = getUserById(_id);
 
   // Username Error Checking
-  if (!username) { username = oldUser.username };
-  if (typeof username !== "string") throw `createUser: username must be a string`;
+
+  if (!username) {username = oldUser.username};
+  if (typeof username !== "string") throw `updateUser: username must be a string`;
+
   if (username.trim().length === 0)
-    throw "createUser: username must not be an empty string";
+    throw "updateUser: username must not be an empty string";
   if (username.trim().length > 20)
-    throw "createUser: username must not exceed 20 characters";
+    throw "updateUser: username must not exceed 20 characters";
 
   // Name Error Checking
-  if (!name) { name = oldUser.name };
-  if (typeof (name) != 'object') throw 'createUser: name must be an object';
-  if (!name.firstName) throw 'createUser: Missing name.firstName';
-  if (!name.lastName) throw 'createUser: Missing name.lastName';
-  if (typeof (name.firstName) !== "string") throw `createUser: name.firstName must be a string`;
-  if (typeof (name.lastName) !== "string") throw `createUser: name.lastName must be a string`;
+
+  if (!name) {name = oldUser.name};
+  if (typeof(name) != 'object') throw 'updateUser: name must be an object';
+  if (!name.firstName) throw 'updateUser: Missing name.firstName';
+  if (!name.lastName) throw 'updateUser: Missing name.lastName';
+  if (typeof(name.firstName) !== "string") throw `updateUser: name.firstName must be a string`;
+  if (typeof(name.lastName) !== "string") throw `updateUser: name.lastName must be a string`;
+
   if (name.firstName.trim().length === 0)
-    throw "createUser: name.firstName must not be an empty string";
+    throw "updateUser: name.firstName must not be an empty string";
   if (name.lastName.trim().length === 0)
-    throw "createUser: name.lastName must not be an empty string";
+    throw "updateUser: name.lastName must not be an empty string";
 
   // Password Error Checking
   let passwordHash = '';
   if (password) {
-    if (typeof password !== "string") throw `createUser: password must be a string`;
+    if (typeof password !== "string") throw `updateUser: password must be a string`;
     if (password.trim().length === 0)
-      throw "createUser: password must not be an empty string";
+      throw "updateUser: password must not be an empty string";
     if (password.trim().length > 20)
-      throw "createUser: password must not exceed 20 characters";
+      throw "updateUser: password must not exceed 20 characters";
     passwordHash = await bcrypt.hash(password, saltRounds);
   } else {
     passwordHash = oldUser.passwordHash;
@@ -136,11 +141,13 @@ async function updateUser(body) {
 
   const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
-  if (!emailAddress) { emailAddress = oldUser.emailAddress };
-  if (typeof emailAddress !== "string") throw `createUser: emailAddress must be a string`;
+
+  if (!emailAddress) {emailAddress = oldUser.emailAddress};
+  if (typeof emailAddress !== "string") throw `updateUser: emailAddress must be a string`;
+
   if (emailAddress.trim().length === 0)
-    throw "createUser: emailAddress must not be an empty string";
-  if (emailRegex.test(emailAddress)) throw "createUser: emailAddress is not a vaild emailAddress";
+    throw "updateUser: emailAddress must not be an empty string";
+  if (emailRegex.test(emailAddress)) throw "updateUser: emailAddress is not a vaild emailAddress";
 
   // TODO: profilePicture error checking
 
@@ -148,7 +155,7 @@ async function updateUser(body) {
 
   // Check if duplicate name from same seller
   // let sameUsername = userCollection.find({ username: username }).toArray();
-  // if (sameUsername) throw `createUser: username "${username}" is taken`;
+  // if (sameUsername) throw `updateUser: username "${username}" is taken`;
 
   const newUser = {
     name: name.trim(),
@@ -161,7 +168,7 @@ async function updateUser(body) {
   };
 
   const updateInfo = await userCollection.updateOne({ _id: ObjectId(_id) }, { $set: newUser });
-  if (updateInfo.modifiedCount === 0) throw "createItem: Failed to update user";
+  if (updateInfo.modifiedCount === 0) throw "updateUser: Failed to update user";
   return await getUserById(_id);
 }
 
@@ -182,7 +189,7 @@ async function addItemToUser(userId, itemId) {
 
   oldUser.items = oldUser.items.map((x) => ObjectId(x));
   let items = oldUser.items
-  console.log(items);
+  // console.log(items);
   for (let item of items) {
     if (item.toString() == itemId.toString()) throw "addItemToUser: item already added to user"
   }
@@ -199,7 +206,26 @@ async function addItemToUser(userId, itemId) {
   };
 
   const updateInfo = await userCollection.updateOne({ _id: ObjectId(userId) }, { $set: newUser });
-  if (updateInfo.modifiedCount === 0) throw "createItem: Failed to update user";
+  if (updateInfo.modifiedCount === 0) throw "addItemToUser: Failed to update user";
+  return getUserById(userId);
+}
+
+async function updatePfp(userId, imageId) {
+  const userCollection = await users();
+  let oldUser = await getUserById(userId);
+
+  const newUser = {
+    name: oldUser.name,
+    username: oldUser.username,
+    passwordHash: oldUser.passwordHash,
+    profilePicture: imageId,
+    emailAddress: oldUser.emailAddress,
+    joinDate: oldUser.joinDate,
+    items: oldUser.items
+  };
+
+  const updateInfo = await userCollection.updateOne({ _id: ObjectId(userId) }, { $set: newUser });
+  if (updateInfo.modifiedCount === 0) throw "updatePfp: Failed to update user";
   return getUserById(userId);
 }
 
@@ -220,10 +246,28 @@ async function getUserById(id) {
   return user;
 }
 
+async function getUserByEmail(email) {
+  // ID Error Checking
+  if (!email) throw "getUserByEmail: Missing email";
+  if (typeof email !== "string")
+    throw "getUserByEmail: The provided email must be a string";
+  if (email.trim().length === 0)
+    throw "getUserByEmail: The provided email must not be an empty string";
+  
+  const userCollection = await users();
+  const user = await userCollection.findOne({ emailAddress: email });
+  if (user === null) throw `getUserByEmail: Failed to find user with email '${email}'`;
+  user._id = user._id.toString();
+  user.items = user.items.map((x) => x.toString());
+  return user;
+}
+
 module.exports = {
   createUser,
   updateUser,
   getAllUsers,
   addItemToUser,
-  getUserById
+  getUserById,
+  updatePfp,
+  getUserByEmail
 };
