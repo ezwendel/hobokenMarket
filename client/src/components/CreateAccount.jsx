@@ -20,6 +20,7 @@ import AccountCircle from "@mui/icons-material/AccountCircle";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import EmailIcon from "@mui/icons-material/Email";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
+import LocalPhoneIcon from '@mui/icons-material/LocalPhone';
 
 const CreateAccount = () => {
   const theme = useTheme();
@@ -40,7 +41,7 @@ const CreateAccount = () => {
   };
   const postData = async (e) => {
     try {
-      const { username, firstname,lastname,email, password } = e.target.elements;
+      const { username, firstname, lastname, email, password, cellnumber, homenumber } = e.target.elements;
       const { data }=await axios.post(`http://localhost:4000/user/`,{
         firstName: firstname.value,
         lastName: lastname.value,
@@ -48,7 +49,10 @@ const CreateAccount = () => {
         password: password.value,
         profilePicture: null,
         emailAddress: email.value,
-
+        numbers: {
+          cell: cellnumber.value,
+          home: homenumber.value
+        }
       });
       await doCreateUserWithEmailAndPassword(
         email.value,
@@ -134,6 +138,38 @@ const CreateAccount = () => {
                   ),
                 }}
                 placeholder="Enter email"
+                variant="standard"
+                sx={{ width: "36ch" }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                id="cellnumber"
+                label="Cell Phone Number (optional)"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LocalPhoneIcon />
+                    </InputAdornment>
+                  ),
+                }}
+                placeholder="XXX-XXX-XXXX"
+                variant="standard"
+                sx={{ width: "36ch" }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                id="homenumber"
+                label="Home Phone Number (optional)"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LocalPhoneIcon />
+                    </InputAdornment>
+                  ),
+                }}
+                placeholder="XXX-XXX-XXXX"
                 variant="standard"
                 sx={{ width: "36ch" }}
               />

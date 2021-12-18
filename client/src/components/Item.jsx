@@ -13,6 +13,7 @@ import {
   Typography,
   Tooltip,
   Chip,
+  Box,
 } from "@mui/material";
 
 import { Link } from "react-router-dom";
@@ -80,11 +81,24 @@ const Item = ({ item }) => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "5em 0",
           }}
         >
-          <Skeleton animation="wave" height={10} style={{ marginBottom: 6 }} />
-          <Skeleton animation="wave" height={10} width="80%" />
+          <Box width="100%">
+            <Skeleton animation="wave" variant="text" width={80} height={35} sx={{marginBottom: "1em"}} />
+            <Skeleton
+              animation="wave"
+              height={10}
+              width="100%"
+              style={{ marginBottom: 6 }}
+            />
+            <Skeleton
+              animation="wave"
+              height={10}
+              width="100%"
+              style={{ marginBottom: 6 }}
+            />
+            <Skeleton animation="wave" height={10} width="80%" />
+          </Box>
         </CardContent>
       </Card>
     );
@@ -145,7 +159,7 @@ const Item = ({ item }) => {
         component="img"
         height="300"
         image={
-          item.itemPictures !== null
+          !item.itemPictures
             ? `http://localhost:4000/file/${item.itemPictures[0]}`
             : Placeholder
         }
