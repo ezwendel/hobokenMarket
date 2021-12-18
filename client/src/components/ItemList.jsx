@@ -2,19 +2,13 @@ import React from "react";
 
 import Item from "./Item";
 import { Container, Grid, Typography } from "@mui/material";
-import LinearProgress from "@mui/material/LinearProgress";
+import CircularProgress from "@mui/material/CircularProgress";
+import Loading from "./Loading";
 
 const ItemList = ({ items, loading }) => {
   if (loading) {
     return (
-      <Container style={{maxWidth:"100%"}}>
-        <div style={{ textAlign: "center", margin: "0 auto", maxWidth: "750px", width: "75%" }}>
-          <Typography mb="1em" variant="p" component="div">
-            Loading...
-          </Typography>
-          <LinearProgress />
-        </div>
-      </Container>
+      <Loading />
     );
   }
   return items.length > 0 ? (

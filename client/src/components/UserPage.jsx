@@ -24,6 +24,7 @@ import { Link } from "react-router-dom";
 
 import MessageIcon from "@mui/icons-material/Message";
 import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
+import Loading from "./Loading";
 
 const Label = styled("span")(({ theme }) => ({
   fontWeight: 500,
@@ -32,45 +33,47 @@ const Label = styled("span")(({ theme }) => ({
 const ItemListing = (item) => {
   console.log(item);
   return (
-    <ListItem key={item._id}>
-      {/* <Link to={`/items/${item._id}`} style={{ color: "inherit", textDecoration: "none" }}> */}
-      <ListItemButton
-        component={Link}
-        to={`/items/${item._id}`}
-        style={{ color: "inherit", textDecoration: "none" }}
-      >
-        <ListItemIcon>
-          <ShoppingBasketIcon />
-        </ListItemIcon>
-        <ListItemText
-          primary={item.name}
-          secondary={
-            <div>
-              <div style={{ marginTop: ".5em" }}>
-                <ul className="category-list">
-                  {item.categories.map((category) => {
-                    return (
-                      <li key={category}>
-                        <Chip
-                          label={category}
-                          size="small"
-                          color="primary"
-                          variant="outlined"
-                        />
-                      </li>
-                    );
-                  })}
-                </ul>
+    <>
+      <ListItem key={item._id} sx={{ padding: 0 }}>
+        {/* <Link to={`/items/${item._id}`} style={{ color: "inherit", textDecoration: "none" }}> */}
+        <ListItemButton
+          component={Link}
+          to={`/item/${item._id}`}
+          style={{ color: "inherit", textDecoration: "none" }}
+        >
+          <ListItemIcon>
+            <ShoppingBasketIcon />
+          </ListItemIcon>
+          <ListItemText
+            primary={item.name}
+            secondary={
+              <div>
+                <div style={{ marginTop: ".5em" }}>
+                  <ul className="category-list">
+                    {item.categories.map((category) => {
+                      return (
+                        <li key={category}>
+                          <Chip
+                            label={category}
+                            size="small"
+                            color="primary"
+                            variant="outlined"
+                          />
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+                <div style={{ marginTop: ".5em" }}>{item.description}</div>
               </div>
-              <div style={{ marginTop: ".5em" }}>{item.description}</div>
-            </div>
-          }
-          secondaryTypographyProps={{ component: "div" }}
-        />
-      </ListItemButton>
+            }
+            secondaryTypographyProps={{ component: "div" }}
+          />
+        </ListItemButton>
+        {/* </Link> */}
+      </ListItem>
       <Divider />
-      {/* </Link> */}
-    </ListItem>
+    </>
   );
 };
 
@@ -117,15 +120,15 @@ const ItemPage = (props) => {
 
   if (loading) {
     return (
-      <div>
-        <h2>Loading....</h2>
-      </div>
+      <Loading />
     );
   } else if (errorHappened) {
     return (
-      <div>
-        <h2>{errorHappened.toString()}</h2>
-      </div>
+      <Container>
+        <div style={{ margin: "0 auto", width: "fit-content" }}>
+          {errorHappened.toString()}
+        </div>
+      </Container>
     );
   } else {
     // let itemListings = null;
@@ -196,8 +199,7 @@ const ItemPage = (props) => {
                 Listed Items
               </Typography>
               <div>
-                <Divider />
-                <List>{itemListings}</List>
+                <List sx={{ width: "100%" }}>{itemListings}</List>
               </div>
             </div>
           </CardContent>

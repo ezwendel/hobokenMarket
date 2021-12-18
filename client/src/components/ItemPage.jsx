@@ -27,6 +27,7 @@ import {
 import { Link } from "react-router-dom";
 
 import Placeholder from "../img/default.png";
+import Loading from "./Loading";
 
 const ItemPage = (props) => {
   const id = props.match.params.id;
@@ -58,13 +59,16 @@ const ItemPage = (props) => {
     const fetchData = async () => {
       try {
         if (item) {
+          setError(false);
           const { data: data2 } = await axios.get(
             `http://localhost:4000/user/${item.sellerId}`
           );
           console.log(data2);
           setUser(data2);
-          setLoading(false);
+        } else {
+          setError("404: item not found")
         }
+        setLoading(false);
       } catch (e) {
         setError(e);
         console.log(e);
@@ -84,8 +88,13 @@ const ItemPage = (props) => {
 
   if (loading) {
     return (
+      <Loading />
+    );
+  }
+  if (error) {
+    return (
       <Container>
-        <div style={{ margin: "0 auto", width: "fit-content" }}>Loading...</div>
+        <div style={{ margin: "0 auto", width: "fit-content" }}>{error.toString()}</div>
       </Container>
     );
   }
@@ -215,6 +224,7 @@ const ItemPage = (props) => {
             size="small"
             component={Link}
             to={`/items/0`}
+            sx={{margin: "0 auto"}}
           >
             BACK TO LISTINGS
           </Button>

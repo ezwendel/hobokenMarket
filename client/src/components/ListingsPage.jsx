@@ -245,6 +245,7 @@ const ListingsPage = (props) => {
       )}
       <ItemList items={items} loading={loading} />
       <CreateListing formOpen={formOpen} handleFormClose={handleFormClose} history={props.history} />
+      {/*https://github.com/react-grid-layout/react-draggable/issues/49*/}
       {currentUser && <Draggable
         onDrag={() => {
           setDragging(true);

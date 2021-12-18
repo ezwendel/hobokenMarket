@@ -4,6 +4,7 @@ import { makeStyles } from "@mui/styles";
 import { useTheme } from "@mui/material/styles";
 import axios from "axios";
 import { AuthContext } from "../firebase/Auth";
+import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 
 import {
   Container,
@@ -25,6 +26,8 @@ import { Link } from "react-router-dom";
 
 import MessageIcon from "@mui/icons-material/Message";
 import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
+import ChangeProfilePic from "./ChangeProfilePic";
+import Loading from "./Loading";
 
 const Label = styled("span")(({ theme }) => ({
   fontWeight: 500,
@@ -33,43 +36,47 @@ const Label = styled("span")(({ theme }) => ({
 const ItemListing = (item) => {
   console.log(item);
   return (
-    <ListItem key={item._id}>
-      {/* <Link to={`/items/${item._id}`} style={{ color: "inherit", textDecoration: "none" }}> */}
-      <ListItemButton
-        component={Link}
-        to={`/items/${item._id}`}
-        style={{ color: "inherit", textDecoration: "none" }}
-      >
-        <ListItemIcon>
-          <ShoppingBasketIcon />
-        </ListItemIcon>
-        <ListItemText
-          primary={item.name}
-          secondary={
-            <div>
-              <div style={{ marginTop: ".5em" }}>
-                <ul className="category-list">
-                  {item.categories.map((category) => {
-                    return <li key={category}>
-                      <Chip
-                        label={category}
-                        size="small"
-                        color="primary"
-                        variant="outlined"
-                      />
-                    </li>;
-                  })}
-                </ul>
+    <>
+      <ListItem key={item._id} sx={{ padding: 0 }}>
+        {/* <Link to={`/items/${item._id}`} style={{ color: "inherit", textDecoration: "none" }}> */}
+        <ListItemButton
+          component={Link}
+          to={`/item/${item._id}`}
+          style={{ color: "inherit", textDecoration: "none" }}
+        >
+          <ListItemIcon>
+            <ShoppingBasketIcon />
+          </ListItemIcon>
+          <ListItemText
+            primary={item.name}
+            secondary={
+              <div>
+                <div style={{ marginTop: ".5em" }}>
+                  <ul className="category-list">
+                    {item.categories.map((category) => {
+                      return (
+                        <li key={category}>
+                          <Chip
+                            label={category}
+                            size="small"
+                            color="primary"
+                            variant="outlined"
+                          />
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+                <div style={{ marginTop: ".5em" }}>{item.description}</div>
               </div>
-              <div style={{ marginTop: ".5em" }}>{item.description}</div>
-            </div>
-          }
-          secondaryTypographyProps={{ component: "div"}}
-        />
-      </ListItemButton>
+            }
+            secondaryTypographyProps={{ component: "div" }}
+          />
+        </ListItemButton>
+        {/* </Link> */}
+      </ListItem>
       <Divider />
-      {/* </Link> */}
-    </ListItem>
+    </>
   );
 };
 
@@ -79,6 +86,15 @@ const ItemPage = (props) => {
   const { currentUser } = useContext(AuthContext);
   const [items, setItemData] = useState(undefined);
   const [errorHappened, setError] = useState(undefined);
+  const [formOpen, setFormOpen] = useState(false);
+
+  const handleFormOpen = () => {
+    setFormOpen(true);
+  };
+
+  const handleFormClose = () => {
+    setFormOpen(false);
+  };
 
   const useStyles = makeStyles(() => ({
     title: {
@@ -114,15 +130,13 @@ const ItemPage = (props) => {
 
   if (loading) {
     return (
-      <Container style={{ maxWidth: "100%"}}>
-        <div style={{ margin: "0 auto", width: "fit-content" }}>Loading...</div>
-      </Container>
+      <Loading />
     );
   } else if (errorHappened) {
     return (
-      <div>
-        <h2>{errorHappened.toString()}</h2>
-      </div>
+      <Container>
+        <div style={{ margin: "0 auto", width: "fit-content" }}>{errorHappened.toString()}</div>
+      </Container>
     );
   }
   // let itemListings = null;
@@ -148,7 +162,7 @@ const ItemPage = (props) => {
   }
 
   return (
-    <Container style={{ maxWidth: "100%"}}>
+    <Container style={{ maxWidth: "100%" }}>
       <Card sx={{ minWidth: 250, maxWidth: "70%", margin: "0 auto" }}>
         <CardHeader
           avatar={avatarInternals}
@@ -161,9 +175,13 @@ const ItemPage = (props) => {
             year: "numeric",
           })}`}
           action={
-            <Button aria-label="message" color="secondary">
-              Send a Message
-              <MessageIcon style={{ marginLeft: ".3em" }} />
+            <Button
+              aria-label="message"
+              color="secondary"
+              onClick={handleFormOpen}
+            >
+              CHANGE PROFILE PICTURE
+              <AddAPhotoIcon style={{ marginLeft: ".3em" }} />
             </Button>
           }
           classes={{ title: classes.title }}
@@ -199,6 +217,7 @@ const ItemPage = (props) => {
           </div>
         </CardContent>
       </Card>
+      <ChangeProfilePic formOpen={formOpen} handleFormClose={handleFormClose} />
     </Container>
   );
 };

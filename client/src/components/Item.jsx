@@ -23,6 +23,7 @@ import Placeholder from "../img/default.png";
 const Item = ({ item }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   // Get item
   useEffect(() => {
@@ -34,6 +35,7 @@ const Item = ({ item }) => {
         setUser(data);
       } catch (e) {
         setUser({ username: "?" });
+        setError(e);
       }
       setLoading(false);
     };
@@ -51,7 +53,7 @@ const Item = ({ item }) => {
 
   if (loading) {
     return (
-      <Card sx={{ minWidth: 250, height: 500 }}>
+      <Card sx={{ minWidth: 250, height: 600 }}>
         <CardContent
           style={{
             display: "flex",
@@ -65,11 +67,27 @@ const Item = ({ item }) => {
       </Card>
     );
   }
+  if (error) {
+    return (
+      <Card sx={{ minWidth: 250, height: 600 }}>
+        <CardContent
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "5em 0",
+          }}
+        >
+          {error.toString()}
+        </CardContent>
+      </Card>
+    );
+  }
   return (
-    <Card sx={{ minWidth: 250, height: 500 }}>
+    <Card sx={{ minWidth: 250, height: 600 }}>
       <CardHeader
         avatar={
-          <Link to={`/user/${user._id}`}>
+          <Link to={`/user/${user._id}`} className="item-avatar-link">
             <Tooltip title={user.username}>
               <Avatar sx={{ bgcolor: "#EB5757" }}>
                 {user.username.charAt(0).toUpperCase()}
@@ -87,7 +105,7 @@ const Item = ({ item }) => {
       />
       <CardMedia
         component="img"
-        height="194"
+        height="300"
         image={
           item.itemPictures !== null
             ? `http://localhost:4000/file/${item.itemPictures[0]}`
