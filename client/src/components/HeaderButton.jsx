@@ -3,7 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Tooltip, IconButton, Box, Badge } from "@mui/material/";
 
-const HeaderButton = ({ to, title, icon }) => {
+const HeaderButton = ({ to, title, icon, func }) => {
   return (
     <Box>
       <Tooltip title={title}>
@@ -15,6 +15,7 @@ const HeaderButton = ({ to, title, icon }) => {
           component={Link}
           to={to}
           className="header-button"
+          onClick={func}
         >
           <Badge>{icon}</Badge>
         </IconButton>
