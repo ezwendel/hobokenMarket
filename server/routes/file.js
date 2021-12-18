@@ -36,7 +36,7 @@ router.post("/upload", upload.single("file"), (req, res) =>{
   console.log(req.file)
   const imgUrl = `http://localhost:4000/file/${req.file.id}`;
   return res.send(imgUrl);
-}
+});
 
 router.post("/profile_upload", upload.single("file"), async (req, res) =>{
   if (req.file === undefined) return res.json({error: "must select a file."})
