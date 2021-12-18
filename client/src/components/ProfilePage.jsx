@@ -1,4 +1,5 @@
 import React, { useState, useEffect ,useContext} from "react";
+
 import { styled } from "@mui/styles";
 import { makeStyles } from "@mui/styles";
 import { useTheme } from "@mui/material/styles";
@@ -24,6 +25,7 @@ import { Link } from "react-router-dom";
 
 import MessageIcon from "@mui/icons-material/Message";
 import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
+import axios from "axios";
 
 const Label = styled("span")(({ theme }) => ({
   fontWeight: 500,
@@ -40,7 +42,7 @@ const ItemListing = () => {
           primary="Item"
           secondary={
             <>
-              <div style={{marginTop: ".5em"}}>
+              <div style={{ marginTop: ".5em" }}>
                 <ul className="category-list">
                   <li>
                     <Chip
@@ -52,7 +54,7 @@ const ItemListing = () => {
                   </li>
                 </ul>
               </div>
-              <div style={{marginTop: ".5em"}}>Description</div>
+              <div style={{ marginTop: ".5em" }}>Description</div>
             </>
           }
         />
@@ -61,6 +63,7 @@ const ItemListing = () => {
     </Link>
   );
 };
+
 
 const ItemPage = () => {
 
@@ -74,6 +77,7 @@ const ItemPage = () => {
     },
   }));
   const classes = useStyles();
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -146,11 +150,25 @@ const ItemPage = () => {
                 <ItemListing />
               </List>
             </div>
-          </div>
-        </CardContent>
-      </Card>
-    </Container>
-  );
+            <div style={{ margin: "1em 0" }}>
+              <Typography variant="h6" component="div">
+                Listed Items
+              </Typography>
+              <div>
+                <List>
+                  <Divider />
+                  <ItemListing />
+                  <ItemListing />
+                  <ItemListing />
+                  <ItemListing />
+                </List>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </Container>
+    );
+  }
 };
 
-export default ItemPage;
+export default ProfilePage;

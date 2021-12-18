@@ -25,7 +25,9 @@ const CreateListing = (props) => {
     name: "",
     description: "",
   });
+
   const [selectedFile, setSelectedFile] = useState(null);
+
   const [formError, setFormError] = useState(false);
   const [nameError, setNameError] = useState(false);
   const [descError, setDescError] = useState(false);
@@ -67,6 +69,7 @@ const CreateListing = (props) => {
     }
     if (!submitError) {
       try {
+
         console.log("Image: ", selectedFile);
         let submitData = new FormData();
         submitData.append("name", formData.name.trim());
@@ -81,6 +84,7 @@ const CreateListing = (props) => {
         //   categories: categories,
         //   sellerId: currentUser.displayName,
         // };
+
         console.log(submitData);
         let { data } = await axios.post(
           "http://localhost:4000/items/with_image", submitData
@@ -103,9 +107,11 @@ const CreateListing = (props) => {
     }
   };
 
+
   const onFileChange = (e) => {
     setSelectedFile(e.target.files[0]);
   };
+
 
   // https://mui.com/components/selects/
   const handleCategoryChange = (event) => {
@@ -117,6 +123,24 @@ const CreateListing = (props) => {
       typeof value === "string" ? value.split(",") : value
     );
   };
+
+  const readFile = async (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.addEventListener('load', () => resolve(reader.result), false);
+      reader.readAsDataURL(file);
+    })
+  }
+
+  const onFileChange = async (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      let imageDataUrl = await readFile(file);
+      console.log(file);
+      setImage(file);
+      setImagePreview(imageDataUrl);
+    }
+  }
 
   const categoryNames = [
     "Furniture",
@@ -189,6 +213,7 @@ const CreateListing = (props) => {
         </FormControl>
         {catError && <Alert severity="error">{catError}</Alert>}
         <FormControl sx={{ mt: 1, width: "35ch" }}>
+
           <label htmlFor="image">Upload Image</label>
           <Input
             accept="image/*"
@@ -197,6 +222,7 @@ const CreateListing = (props) => {
             type="file"
             onChange={onFileChange}
           />
+
         </FormControl>
         {imageError && <Alert severity="error">{imageError}</Alert>}
       </DialogContent>

@@ -9,6 +9,7 @@ const { ObjectId } = require("mongodb");
 const main = async () => {
   console.log("Connection to database...");
   const db = await dbConnection.connectToDb();
+  console.log(db);
   await db.dropDatabase(); // Drop the database before initalizing data to avoid duplicate data.
 
   console.log("Seeding database...\n");

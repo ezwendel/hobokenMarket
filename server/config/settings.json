@@ -1,5 +1,6 @@
 {
   "mongoConfig": {
+    "dockerUrl": "mongodb://mongo:27017/",
     "serverUrl": "mongodb://localhost:27017/",
     "database": "hobokenMarketDB"
   }

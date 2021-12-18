@@ -9,7 +9,7 @@ import ListingsPage from "./ListingsPage";
 import ItemPage from "./ItemPage";
 import UserPage from "./UserPage";
 import ProfilePage from "./ProfilePage";
-import {AuthProvider} from '../firebase/Auth'
+import { AuthProvider } from '../firebase/Auth'
 import PrivateRoute from './PrivateRoute';
 import Home from "./Home";
 import Logout from "./Logout";
@@ -35,6 +35,7 @@ const theme = createTheme({
 function App() {
   return (
     <AuthProvider>
+
     <ThemeProvider theme={theme}>
       <Router>
         <div className="App">
@@ -56,9 +57,8 @@ function App() {
               <PrivateRoute exact path="/profile" component={ProfilePage}/>
             </Switch>
           </div>
-        </div>
-      </Router>
-    </ThemeProvider>
+        </Router>
+      </ThemeProvider>
     </AuthProvider>
   );
 }
