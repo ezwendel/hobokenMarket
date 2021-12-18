@@ -157,7 +157,7 @@ const ProfilePage = () => {
   } else {
     avatarInternals = (
       <Avatar sx={{ bgcolor: "#EB5757", width: 50, height: 50 }}>
-        {user.username[0]}
+        {user.username[0].toUpperCase()}
       </Avatar>
     );
   }

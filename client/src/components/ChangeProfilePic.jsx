@@ -38,10 +38,10 @@ const ChangeProfilePic = (props) => {
         console.log("Image: ", selectedFile);
         let submitData = new FormData();
         submitData.append("file", selectedFile);
-        submitData.append("sellerId", currentUser.displayName);
+        submitData.append("userId", currentUser.displayName);
         console.log(submitData);
         let { data } = await axios.post(
-          "http://localhost:4000/items/with_image",
+          "http://localhost:4000/file/profile_upload",
           submitData
         );
         console.log(data);
