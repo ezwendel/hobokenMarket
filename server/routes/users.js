@@ -52,6 +52,8 @@ router.post('/', async (req, res) => {
   let firstName = xss(body.firstName)
   let lastName = xss(body.lastName)
   let emailAddress = xss(body.emailAddress)
+  let cell = xss(body.numbers.cell);
+  let home = xss(body.numbers.home);
   // console.log(password)
   // error checking
   if (!password || password.trim().length == 0) { return res.status(400).json({ error: "password not valid" }) };
@@ -59,6 +61,33 @@ router.post('/', async (req, res) => {
   if (!firstName || firstName.trim().length == 0) { return res.status(400).json({ error: "firstName not valid" }) };
   if (!lastName || lastName.trim().length == 0) { return res.status(400).json({ error: "lastName not valid" }) };
   if (!emailAddress || emailAddress.trim().length == 0) { return res.status(400).json({ error: "emailAddress not valid" }) };
+  if (!body.numbers) { return res.status(400).json({ error: "missing numbers" })};
+  const numberRegex = /^\(?([0-9]{3})\)?[-]?([0-9]{3})[-]?([0-9]{4})$/;
+  if (cell === undefined) {
+    return res.status(400).json({ error: "missing cell number" });
+  } else {
+    if (cell !== "") {
+      if (cell.trim().length === 0)
+        return res.status(400).json({ error: "cell number is not valid" });
+      if (!numberRegex.test(cell))
+        return res.status(400).json({ error: "cell number is not valid" });
+    } else {
+      cell = null;
+    }
+  }
+  if (home === undefined) {
+    return res.status(400).json({ error: "home number is not valid" });
+  } else {
+    if (home !== "") {
+      if (home.trim().length === 0)
+        return res.status(400).json({ error: "home number is not valid" });
+      if (!numberRegex.test(home))
+        return res.status(400).json({ error: "home number is not valid" });
+    } else {
+      home = null;
+    }
+  }
+
   // check if username already exists
   let allUsers = await data.users.getAllUsers();
   for (i of allUsers) {
@@ -71,7 +100,7 @@ router.post('/', async (req, res) => {
   }
   // try to create user
   try {
-    let user = await data.users.createUser({ name: { firstName: firstName, lastName: lastName }, password: password, username: username, emailAddress: emailAddress })
+    let user = await data.users.createUser({ name: { firstName: firstName, lastName: lastName }, password: password, username: username, emailAddress: emailAddress, numbers: { cell: cell, home: home } })
     delete user.passwordHash
     return res.json(user);
   } catch (e) {

@@ -127,7 +127,7 @@ const ItemPage = (props) => {
         <CardMedia
           component="img"
           image={
-            item.itemPictures !== null
+            !item.itemPictures
               ? `http://localhost:4000/file/${item.itemPictures[0]}`
               : Placeholder
           }
@@ -207,8 +207,8 @@ const ItemPage = (props) => {
                       Cell Phone #:
                     </TableCell>
                     <TableCell style={{ width: 160 }} align="right">
-                      {user.number && user.number.cell !== null
-                        ? user.number.cell
+                      {user.numbers && user.numbers.cell !== null
+                        ? user.numbers.cell
                         : "N/A"}
                     </TableCell>
                   </TableRow>
@@ -217,8 +217,8 @@ const ItemPage = (props) => {
                       Home Phone #:
                     </TableCell>
                     <TableCell style={{ width: 160 }} align="right">
-                      {user.number && user.number.home !== null
-                        ? user.number.home
+                      {user.numbers && user.numbers.home !== null
+                        ? user.numbers.home
                         : "N/A"}
                     </TableCell>
                   </TableRow>

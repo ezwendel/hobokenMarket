@@ -21,6 +21,7 @@ import {
   ListItemText,
   Divider,
   Chip,
+  Rating,
 } from "@mui/material";
 import { Link } from "react-router-dom";
 
@@ -130,13 +131,13 @@ const ProfilePage = () => {
   }, []);
 
   if (loading) {
-    return (
-      <Loading />
-    );
+    return <Loading />;
   } else if (errorHappened) {
     return (
       <Container>
-        <div style={{ margin: "0 auto", width: "fit-content" }}>{errorHappened.toString()}</div>
+        <div style={{ margin: "0 auto", width: "fit-content" }}>
+          {errorHappened.toString()}
+        </div>
       </Container>
     );
   }
@@ -151,12 +152,12 @@ const ProfilePage = () => {
       <Avatar
         alt={`${user.name.firstName} ${user.name.lastName}`}
         src={`http://localhost:4000/file/${user.profilePicture}`}
-        sx={{ width: 50, height: 50 }}
+        sx={{ width: 75, height: 75 }}
       />
     );
   } else {
     avatarInternals = (
-      <Avatar sx={{ bgcolor: "#EB5757", width: 50, height: 50 }}>
+      <Avatar sx={{ bgcolor: "#EB5757", width: 75, height: 75, fontSize: 34 }}>
         {user.username[0].toUpperCase()}
       </Avatar>
     );
@@ -168,13 +169,24 @@ const ProfilePage = () => {
         <CardHeader
           avatar={avatarInternals}
           title={user.username}
-          subheader={`Member since: ${new Date(
-            user.joinDate
-          ).toLocaleDateString("en-US", {
-            month: "long",
-            day: "numeric",
-            year: "numeric",
-          })}`}
+          subheader={
+            <>
+              <div>
+                Member since:{" "}
+                {new Date(user.joinDate).toLocaleDateString("en-US", {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </div>
+              <Rating
+                name="seller-rating"
+                value={5}
+                readOnly
+                sx={{ m: "3px", position: "relative", left: "-6px" }}
+              />
+            </>
+          }
           action={
             <Button
               aria-label="message"
@@ -199,10 +211,16 @@ const ProfilePage = () => {
               ${user.name.lastName}`}
             </Typography>
             <Typography gutterBottom variant="div" component="div">
-              <Label>Cell Phone #:</Label> (123)-456-7890
+              <Label>Cell Phone #:</Label>{" "}
+              {user.numbers && user.numbers.cell !== null
+                ? user.numbers.cell
+                : "N/A"}
             </Typography>
             <Typography gutterBottom variant="div" component="div">
-              <Label>Home Phone #:</Label> (123)-456-7890
+              <Label>Home Phone #:</Label>{" "}
+              {user.numbers && user.numbers.home !== null
+                ? user.numbers.home
+                : "N/A"}
             </Typography>
             <Typography gutterBottom variant="div" component="div">
               <Label>Email Address:</Label> {user.emailAddress}

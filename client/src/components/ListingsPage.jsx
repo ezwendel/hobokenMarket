@@ -77,7 +77,7 @@ const ListingsPage = (props) => {
           setLast(page);
         }
       } catch (e) {
-        if (e.response.status === 404) {
+        if (e) {
           setLast(page);
         }
       }
@@ -180,21 +180,6 @@ const ListingsPage = (props) => {
       setLast(page);
     }
   };
-
-  const compare = (a, b) => {
-    if (a.listDate < b.listDate) {
-      return 1;
-    }
-    if (a.listDate > b.listDate) {
-      return -1;
-    }
-    return 0;
-  }
-
-  let sorted_items;
-  if (sortedBy == "Latest") {
-    sorted_items = items.sort(compare);
-  }
 
   return (
     <Container style={{ maxWidth: "100%" }}>
@@ -299,7 +284,7 @@ const ListingsPage = (props) => {
           </FormControl>
         </div>
       )}
-      <ItemList items={sorted_items} loading={loading} />
+      <ItemList items={items} loading={loading} />
       <CreateListing
         formOpen={formOpen}
         handleFormClose={handleFormClose}
