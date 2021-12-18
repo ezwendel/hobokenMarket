@@ -83,3 +83,12 @@
 .title {
   font-family: Montserrat;
 }
+
+.header-button:hover {
+  color: inherit;
+}
+
+.item-avatar-link:hover {
+  color: inherit;
+  text-decoration: none;
+}

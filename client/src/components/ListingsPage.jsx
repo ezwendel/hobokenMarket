@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
+import { AuthContext } from "../firebase/Auth";
 
 import {
   Container,
@@ -28,6 +29,7 @@ const ListingsPage = (props) => {
   const [searching, setSearching] = useState(false);
   const [filter, setFilter] = useState("");
   const [dragging, setDragging] = useState(false);
+  const { currentUser } = useContext(AuthContext);
 
   const prevPage = () => {
     props.history.push(`/items/${page - 1}`);
@@ -170,7 +172,7 @@ const ListingsPage = (props) => {
   };
 
   return (
-    <Container maxWidth="100%">
+    <Container style={{maxWidth:"100%"}}>
       {!searching && (
         <div style={{ width: "fit-content", margin: "1em auto" }}>
           {page > 0 ? (
@@ -243,7 +245,8 @@ const ListingsPage = (props) => {
       )}
       <ItemList items={items} loading={loading} />
       <CreateListing formOpen={formOpen} handleFormClose={handleFormClose} history={props.history} />
-      <Draggable
+      {/*https://github.com/react-grid-layout/react-draggable/issues/49*/}
+      {currentUser && <Draggable
         onDrag={() => {
           setDragging(true);
         }}
@@ -264,7 +267,7 @@ const ListingsPage = (props) => {
           <Add sx={{ mr: 1 }} />
           Create Listing
         </Fab>
-      </Draggable>
+      </Draggable>}
     </Container>
   );
 };

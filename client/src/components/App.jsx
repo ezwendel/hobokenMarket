@@ -32,26 +32,22 @@ const theme = createTheme({
 function App() {
   return (
     <AuthProvider>
-      <ThemeProvider theme={theme}>
-        <Router>
-          <div className="App">
-            <Header />
-            <div style={{ margin: "2em" }}>
-              <Switch>
-                <PrivateRoute exact path="/" component={Home} />
-                <Route exact path="/items/:page" component={ListingsPage} />
-                <Route exact path="/item/:id" component={ItemPage} />
-
-                <Route exact path="/user/:id" component={UserPage} />
-
-                <Route exact path="/logout" component={Logout} />
-
-                <PrivateRoute exact path="/messages" component={Messages} />
-
-                <Route exact path="/login" component={Login} />
-                <Route exact path="/create-account" component={CreateAccount} />
-                <PrivateRoute exact path="/profile" component={ProfilePage} />
-              </Switch>
+    <ThemeProvider theme={theme}>
+      <Router>
+        <div className="App">
+          <Header />
+          <div style={{ margin: "2em" }}>
+            <Switch>
+              <PrivateRoute exact path="/" component={Home} />
+              <Route exact path="/items/:page" component={ListingsPage} />
+              <Route exact path="/item/:id" component={ItemPage} />
+              <Route exact path="/user/:id" component={UserPage} />
+	            <Route exact path="/logout" component={Logout} />
+              <PrivateRoute exact path="/messages" component={Messages}/>
+              <Route exact path="/login" component={Login} />
+              <Route exact path="/create-account" component={CreateAccount} />
+              <PrivateRoute exact path="/profile" component={ProfilePage}/>
+            </Switch>
             </div>
           </div>
         </Router>

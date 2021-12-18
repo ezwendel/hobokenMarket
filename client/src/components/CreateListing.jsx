@@ -64,7 +64,7 @@ const CreateListing = (props) => {
       submitError = true;
     }
     if (imageField.value.trim() === "") {
-      setImageError("Missing image.")
+      setImageError("Missing image.");
       submitError = true;
     }
     if (!submitError) {
@@ -87,7 +87,8 @@ const CreateListing = (props) => {
 
         console.log(submitData);
         let { data } = await axios.post(
-          "http://localhost:4000/items/with_image", submitData
+          "http://localhost:4000/items/with_image",
+          submitData
         );
         console.log(data);
         nameField.value = "";
@@ -228,14 +229,26 @@ const CreateListing = (props) => {
       </DialogContent>
       <DialogActions>
         <Button onClick={props.handleFormClose}>Cancel</Button>
-        <Button
-          onClick={(e) => {
-            addItem(e);
-          }}
-          type="submit"
-        >
-          Submit Listing
-        </Button>
+        {currentUser ? (
+          <Button
+            onClick={(e) => {
+              addItem(e);
+            }}
+            type="submit"
+          >
+            Submit Listing
+          </Button>
+        ) : (
+          <Button
+            onClick={(e) => {
+              addItem(e);
+            }}
+            type="submit"
+            disabled
+          >
+            Submit Listing
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );
