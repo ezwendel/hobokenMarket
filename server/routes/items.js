@@ -162,6 +162,17 @@ router.post('/with_image', upload.single("file"), async (req, res) => {
       return res.status(400).json({ error: "categories not valid" })
     }
   };
+
+  if (!req.currentUser || req.currentUser.email.toString() !== sellerEmail.toString()) {
+    try {
+      await data.images.deleteImage(req.file.id.toString()); 
+      return res.status(403).json({ error: "cannot post a different person's item" })
+    } catch (e) {
+      console.log(e);
+      return res.status(403).json({ error: "cannot post a different person's item" })
+    }
+  };
+
   // see if seller exists
   let seller = null;
   try {
@@ -241,6 +252,13 @@ router.delete('/:id', async (req, res) => {
   if (!id || id.trim().length == 0) { return res.status(400).json({ error: "id not valid" }) };
   try {
     let itemInfo=await data.items.getItemById(id);
+    if (!req.currentUser) {
+      return res.status(401).json({ error: "cannot delete an item without being logged in" })
+    }
+    let loggedInInfo = await data.users.getUserByEmail(req.currentUser.email) 
+    if (itemInfo.sellerId.toString() !== loggedInInfo._id.toString()) {
+      return res.status(403).json({ error: "cannot delete a different person's item" })
+    }
     let delInfo = await data.items.deleteItemById(id);
     let deluserInfo= await data.users.deleteItemToUser(itemInfo.sellerId,id);
     let itemDataCached = await client.hdelAsync("item", `${id}`)
