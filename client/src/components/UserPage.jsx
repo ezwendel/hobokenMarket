@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { styled } from "@mui/styles";
 import { makeStyles } from "@mui/styles";
 import { useTheme } from "@mui/material/styles";
 import axios from "axios";
 import { createToken } from "../firebase/AuthBackend";
+import { AuthContext } from "../firebase/Auth";
 
 import {
   Container,
@@ -21,19 +22,23 @@ import {
   Chip,
   ListItem,
   Rating,
+  Box,
+  Tooltip,
 } from "@mui/material";
 import { Link } from "react-router-dom";
 
 import MessageIcon from "@mui/icons-material/Message";
 import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
 import Loading from "./Loading";
+import StarBorderIcon from '@mui/icons-material/StarBorder';
+import RatingForm from "./RatingForm";
 
 const Label = styled("span")(({ theme }) => ({
   fontWeight: 500,
 }));
 
 const ItemListing = (item) => {
-  console.log(item);
+  // console.log(item);
   return (
     <>
       <ListItem key={item._id} sx={{ padding: 0 }}>
@@ -92,6 +97,17 @@ const UserPage = (props) => {
   const [user, setUserData] = useState(undefined);
   const [items, setItemData] = useState(undefined);
   const [errorHappened, setError] = useState(undefined);
+  const [formOpen, setFormOpen] = useState(false);
+  const [rating, setRating] = useState(0);
+  const { currentUser } = useContext(AuthContext);
+
+  const handleFormOpen = () => {
+    setFormOpen(true);
+  };
+
+  const handleFormClose = () => {
+    setFormOpen(false);
+  };
 
   useEffect(() => {
     console.log("useEffect fired");
@@ -108,9 +124,16 @@ const UserPage = (props) => {
             return item.data;
           })
         );
+        let total_rating = 0;
+        for (const r of data.ratings) {
+          total_rating += r.rating;
+        }
+        let avg_rating =
+          data.ratings.length > 0 ? total_rating / data.ratings.length : 0;
         console.log(data);
         setUserData(data);
         setItemData(itemData);
+        setRating(avg_rating);
         setError(undefined);
         setLoading(false);
       } catch (e) {
@@ -173,19 +196,47 @@ const UserPage = (props) => {
                     year: "numeric",
                   })}
                 </div>
+                <Box
+                  sx={{
+                    display: "inline-block",
+                    position: "relative",
+                    bottom: "6px",
+                    fontSize: "14x",
+                    marginRight: "0.5em",
+                  }}
+                >
+                  Rating:
+                </Box>
                 <Rating
                   name="seller-rating"
-                  value={5}
+                  value={rating}
                   readOnly
+                  precision={0.5}
                   sx={{ m: "3px", position: "relative", left: "-6px" }}
                 />
+                <Box
+                  sx={{
+                    display: "inline-block",
+                    position: "relative",
+                    bottom: "6px",
+                    color: "#2F80ED",
+                  }}
+                >
+                  {user.ratings.length}
+                </Box>
               </>
             }
-            action={
-              <Button aria-label="message" color="secondary">
-                Send a Message
-                <MessageIcon style={{ marginLeft: ".3em" }} />
-              </Button>
+            action={ currentUser ? 
+              <div style={{ textAlign: "right" }}>
+                <Button aria-label="message" color="secondary" sx={{display: "block"}}>
+                  Send a Message
+                  <MessageIcon style={{ marginLeft: ".3em" }} />
+                </Button>
+                <Button aria-label="message" color="secondary" onClick={handleFormOpen}>
+                  Rate this User
+                  <StarBorderIcon style={{ marginLeft: ".3em", position: "relative", bottom: "1px" }} />
+                </Button>
+              </div> : null
             }
             classes={{ title: classes.title }}
           />
@@ -220,11 +271,16 @@ const UserPage = (props) => {
                 Listed Items
               </Typography>
               <div>
-                <List sx={{ width: "100%" }}>{itemListings}</List>
+                {user.items.length > 0 ? (
+                  <List sx={{ width: "100%" }}>{itemListings}</List>
+                ) : (
+                  "No items listed."
+                )}
               </div>
             </div>
           </CardContent>
         </Card>
+        <RatingForm setRating={setRating} user={user} formOpen={formOpen} handleFormClose={handleFormClose} />
       </Container>
     );
   }

@@ -67,13 +67,13 @@
   margin-right: 1em;
 }
 
-.forgotPassword {
+/* .forgotPassword {
 	background: none !important;
 	border: none !important;
 	text-decoration: underline;
 	margin-left: 5px;
 	color: #069;
-}
+} */
 
 .forgotPassword:hover {
 	text-decoration: none;
