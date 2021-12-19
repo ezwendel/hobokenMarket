@@ -71,6 +71,10 @@ router.post('/read_message/:id', async (req, res) => {
   }
 })
 
+router.post('/close/:id', (req, res) => {
+  
+}) 
+
 router.post('/:seller', async (req, res) => {
   let body = req.body;
   let buyer = xss(body.buyer);
