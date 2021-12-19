@@ -86,7 +86,7 @@ const ItemListing = (item) => {
             secondaryTypographyProps={{ component: "div" }}
           />
         </ListItemButton>
-        <Button onClick={()=>deleteItem(item._id)} variant="outlined" startIcon={<DeleteIcon />}>Delete</Button>
+        <Button onClick={()=>deleteItem(item._id)} variant="outlined" >Delete</Button>
         {/* </Link> */}
       </ListItem>
       <Divider />

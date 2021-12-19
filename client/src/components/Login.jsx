@@ -104,7 +104,6 @@ const Login = () => {
               <Button variant="contained" width="100%" endIcon={<LoginIcon />} type="submit">
                 Login
               </Button>
-              <SocialSignIn/>
 
             </Grid>
             <Grid item xs={6}>
