@@ -120,7 +120,7 @@ router.post('/with_image', upload.single("file"), async (req, res) => {
   let name = xss(body.name);
   let description = xss(body.description);
   let sellerEmail = xss(body.sellerId);
-  let itemPictures = [req.file.id];
+  let itemPictures = [req.file.id.toString()];
   console.log(req.file)
   let categories = body.categories.split(","); // xss later
   console.log(body);
