@@ -39,17 +39,17 @@ const main = async () => {
     const user2_id = user2._id.toString();
     console.log("Created user 2");
 
-    const messageThread1 = await messageThreadData.createMessageThread([user1_id, user2_id])
-    const messageThread1_id = messageThread1._id.toString();
-    const user1_message = await usersData.addMessageThreadToUser(user1_id, messageThread1_id)
-    const user2_message = await usersData.addMessageThreadToUser(user2_id, messageThread1_id)
+    // const messageThread1 = await messageThreadData.createMessageThread([user1_id, user2_id])
+    // const messageThread1_id = messageThread1._id.toString();
+    // const user1_message = await usersData.addMessageThreadToUser(user1_id, messageThread1_id)
+    // const user2_message = await usersData.addMessageThreadToUser(user2_id, messageThread1_id)
 
-    console.log(user1_message);
-    console.log(user2_message);
+    // console.log(user1_message);
+    // console.log(user2_message);
 
-    const newMessage = messageThreadData.addMessageToThread(messageThread1_id, user1_id, "hello")
+    // const newMessage = messageThreadData.addMessageToThread(messageThread1_id, user1_id, "hello")
 
-    console.log(newMessage);
+    // console.log(newMessage);
 
     const user3 = await usersData.createUser({
       name: { firstName: "Derrick", lastName: "Rose" },
