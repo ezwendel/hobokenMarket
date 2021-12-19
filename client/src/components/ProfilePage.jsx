@@ -65,7 +65,9 @@ const ItemListing = (item) => {
     }
     window.location.reload();
   };
-  let picture = item.itemPictures[0] ? `http://localhost:4000/file/${item.itemPictures[0]}` : Placeholder;
+  let picture = item.itemPictures[0]
+    ? `http://localhost:4000/file/${item.itemPictures[0]}`
+    : Placeholder;
   // console.log(item);
   return (
     <>
@@ -85,11 +87,13 @@ const ItemListing = (item) => {
               sx={{ width: 75, height: 75 }}
               src={picture}
               variant="square"
-              onError={(e) => {
-                e.target.src = Placeholder;
-              }}
+              alt={item.name}
             >
-              N
+              <img
+                src={Placeholder}
+                alt={item.name}
+                style={{ height: 75, width: "auto" }}
+              />
             </Avatar>
           </ListItemIcon>
           <ListItemText

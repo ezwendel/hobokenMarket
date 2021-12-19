@@ -49,7 +49,9 @@ const StyledRating = styled(Rating)({
 
 const ItemListing = (item) => {
   // console.log(item);
-  let picture = item.itemPictures[0] ? `http://localhost:4000/file/${item.itemPictures[0]}` : Placeholder;
+  let picture = item.itemPictures[0]
+    ? `http://localhost:4000/file/${item.itemPictures[0]}`
+    : Placeholder;
   return (
     <>
       <ListItem key={item._id} sx={{ padding: 0 }}>
@@ -57,18 +59,19 @@ const ItemListing = (item) => {
         <ListItemButton
           component={Link}
           to={`/item/${item._id}`}
-          style={{ color: "inherit", textDecoration: "none" }}
+          style={{ color: "inherit", textDecoration: "none", borderBottom: "1px solid #ccc", }}
         >
           <ListItemIcon sx={{ marginRight: "2em" }}>
             <Avatar
               sx={{ width: 75, height: 75 }}
               src={picture}
               variant="square"
-              onError={(e) => {
-                e.target.src = Placeholder;
-              }}
             >
-              N
+              <img
+                src={Placeholder}
+                alt={item.name}
+                style={{ height: 75, width: "auto" }}
+              />
             </Avatar>
           </ListItemIcon>
           <ListItemText
@@ -250,7 +253,7 @@ const UserPage = (props) => {
               </>
             }
             action={
-              currentUser ? (
+              currentUser && currentUser.email !== user.emailAddress ? (
                 <div style={{ textAlign: "right" }}>
                   <Button
                     aria-label="message"
