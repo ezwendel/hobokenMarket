@@ -1,49 +1,151 @@
-const { messageThreads, users } = require("../config/mongoCollections");
-const { createMessage } = require("./messages")
+const { messageThreads } = require("../config/mongoCollections");
 const moment = require("moment"); // for date checking
 const { ObjectId } = require("mongodb");
+const { deleteImage } = require('./images')
 
-async function createMessageThread(recipients) {
-  //let message = body.message;
+function sortArraysByLastMessageSent(arr) {
+  arr.sort((a,b) => {
+    return new Date(b.mostRecentMessageTime) - new Date(a.mostRecentMessageTime)
+  })
+  return arr;
+}
 
-  // Recipients Error Checking
-  if (!recipients) throw "createMessage: Missing recipients";
-  if (!Array.isArray(recipients)) throw `createMessage: recipients must be an array`;
-  if (recipients.length === 0)
-    throw "createMessage: recipients must not be empty";
+async function createMessageThread(body) {
+  let buyer = body.buyer;
+  let seller = body.seller;
+  let message = body.message;
 
-  // Message Error Checking
-  // if (!message) throw "createMessage: Missing message";
-  // if (typeof message !== "string")
-  //   throw `createMessage: message must be a string`;
-  // if (message.trim().length === 0)
-  //   throw "createMessage: message must not be an empty string";
+  // Buyer Error Checking
+  if (!buyer) throw "createMessageThread: Missing buyer";
+  if (typeof buyer !== "string") throw `createMessageThread: buyer must be a string`;
+  if (buyer.trim().length === 0)
+    throw "createMessageThread: buyer must not be an empty string";
+
+  // Seller Error Checking
+  if (!seller) throw "createMessageThread: Missing description";
+  if (typeof seller !== "string")
+    throw `createMessageThread: description must be a string`;
+  if (seller.trim().length === 0)
+    throw "createMessageThread: description must not be an empty string";
+
+  // First Message Error Checking
+  if (!message) throw "createMessageThread: Missing message";
+  if (typeof message !== "string")
+    throw `createMessageThread: message must be a string`;
+  if (message.trim().length === 0)
+    throw "createMessageThread: message must not be an empty string";
+
+  const meassageThreadsCollection = await messageThreads();
+
+  if (buyer.toString() === seller.toString()) throw 'createMessageThread: buyer and seller cannot be the same'
+
+  const firstMessage = {
+    _id: ObjectId(),
+    sender: buyer,
+    message: message,
+    read: false,
+    time: new Date()
+  }
 
   const newMessageThread = {
-    recipients: recipients,
-    threadDate: new Date(),
-    messageThread: [],
+    buyer: ObjectId(buyer),
+    seller: ObjectId(seller),
+    messages: [firstMessage],
+    open: true,
+    mostRecentMessageTime: new Date()
   };
 
-  const messageThreadsCollection = await messageThreads();
-
-  const insertInfo = await messageThreadsCollection.insertOne(newMessageThread);
-  if (insertInfo.insertedCount === 0) throw "createMessage: Failed to create item";
+  const insertInfo = await meassageThreadsCollection.insertOne(newMessageThread);
+  if (insertInfo.insertedCount === 0) throw "createMessageThread: Failed to create messageThread";
   const id = insertInfo.insertedId.toString();
-  console.log('message here')
   return await getMessageThreadById(id);
 }
 
-async function getAllMessageThreads() {
-  const messageThreadsCollection = await messageThreads();
-  const messageThreadList = await messageThreadsCollection.find({}).toArray();
-  if (messageThreadList.length === 0) return [];
-  for (let message of messageThreadList) {
-    message._id = message._id.toString();
-    message.recipients[0] = message.recipients[0].toString();
-    message.recipients[1] = message.recipients[1].toString();
+async function createMessage(body) {
+  let messageThreadId = body.messageThreadId
+  let sender = body.sender
+  let message = body.message
+
+  // Message Error Checking
+  if (!messageThreadId) throw "createMessage: Missing messageThreadId";
+  if (typeof messageThreadId !== "string")
+    throw `createMessage: messageThreadId must be a string`;
+  if (messageThreadId.trim().length === 0)
+    throw "createMessage: messageThreadId must not be an empty string";
+
+  // Seller Error Checking
+  if (!sender) throw "createMessage: Missing sender";
+  if (typeof sender !== "string")
+    throw `createMessage: sender must be a string`;
+  if (sender.trim().length === 0)
+    throw "createMessage: sender must not be an empty string";
+
+  // Message Error Checking
+  if (!message) throw "createMessage: Missing message";
+  if (typeof message !== "string")
+    throw `createMessage: message must be a string`;
+  if (message.trim().length === 0)
+    throw "createMessage: message must not be an empty string";
+
+  const newMessage = {
+    _id: ObjectId(),
+    sender: sender,
+    message: message,
+    read: false,
+    time: new Date()
   }
-  return messageThreadList;
+
+  const meassageThreadsCollection = await messageThreads();
+
+  let messageThread = await getMessageThreadById(messageThreadId);
+  messageThread.push(newMessage)
+
+  delete messageThread._id
+
+  messageThread.mostRecentMessageTime = new Date() 
+
+  const updateInfo = await meassageThreadsCollection.updateOne(
+    { _id: ObjectId(messageThreadId) },
+    { $set: messageThread }
+  );
+
+  if (updateInfo.modifiedCount === 0) throw "createMessage: Failed to update messageThread with new message";
+  return await getMessageThreadById(messageThreadId);
+}
+
+async function readMessage(id) {
+  // ID Error Checking
+  if (!id) throw "getMessageById: Missing id";
+  if (typeof id !== "string")
+    throw "getMessageById: The provided id must be a string";
+  if (id.trim().length === 0)
+    throw "getMessageById: The provided id must not be an empty string";
+  
+  let messageThread = getParentMessageThreadByMessageId(id);
+
+  let messageThreadId = messageThread._id
+
+  newMessages = []
+  for (message of messageThread.messages) {
+    if (message._id.toString() === id) {
+      message.read = true;
+      newMessages.push(message)
+    } else {
+      newMessages.push(message)
+    }
+  }
+
+  messageThread.messages = newMessages
+
+  delete messageThread._id
+
+  const updateInfo = await meassageThreadsCollection.updateOne(
+    { _id: ObjectId(messageThreadId) },
+    { $set: messageThread }
+  );
+
+  if (updateInfo.modifiedCount === 0) throw "createMessage: Failed to update messageThread with new message";
+  return await getMessageThreadById(messageThreadId);
 }
 
 async function getMessageThreadById(id) {
@@ -55,89 +157,145 @@ async function getMessageThreadById(id) {
     throw "getMessageThreadById: The provided id must not be an empty string";
   const parsedId = ObjectId(id.trim());
 
-  const messageThreadsCollection = await messageThreads();
-  const messageThread = await messageThreadsCollection.findOne({ _id: parsedId });
-  console.log(messageThread)
+  const meassageThreadsCollection = await messageThreads();
+  const messageThread = await meassageThreadsCollection.findOne({ _id: parsedId });
   if (messageThread === null) throw `getMessageThreadById: Failed to find messageThread with id '${id}'`;
   messageThread._id = messageThread._id.toString();
-  messageThread.recipients[0] = messageThread.recipients[0].toString();
-  messageThread.recipients[1] = messageThread.recipients[1].toString();
+
+  for (message of messageThread.messages) {
+    message._id = message._id.toString()
+  }
+
   return messageThread;
 }
 
-async function deleteMessageThreadById(id) {
-  if (!id) throw "deleteMessageThreadById: Missing id";
+async function getParentMessageThreadByMessageId(id) {
+  // ID Error Checking
+  if (!id) throw "getMessageById: Missing id";
   if (typeof id !== "string")
-    throw "deleteMessageThreadById: The provided id must be a string";
+    throw "getMessageById: The provided id must be a string";
   if (id.trim().length === 0)
-    throw "deleteMessageThreadById: The provided id must not be an empty string";
+    throw "getMessageById: The provided id must not be an empty string";
   const parsedId = ObjectId(id.trim());
 
-  const messageThreadsCollection = await items();
-  const deletionInfo = await messageThreadsCollection.deleteOne({ _id: parsedId });
-  if (deletionInfo.deletedCount === 0) {
-    throw "deleteMessageThreadById: Failed to delete item";
+  const meassageThreadsCollection = await messageThreads();
+  const messageThread = await meassageThreadsCollection.findOne({ "message._id": parsedId });
+  if (messageThread === null) throw `getMessageById: Failed to find messageThread containing message with id '${id}'`;
+  messageThread._id = messageThread._id.toString();
+  
+  for (message of messageThread.messages) {
+    message._id = message._id.toString()
   }
-  return { deleted: true };
+  return messageThread;
 }
 
-// async function getItemsByCategory(category) {
-//   if (!category) throw "getItemsByCategory: Missing category";
-//   if (typeof category !== "string")
-//     throw "getItemsByCategory: The provided category must be a string";
-//   if (category.trim().length === 0)
-//     throw "getItemsByCategory: The provided category must not be an empty string";
+async function getMessageById(id) {
+  // ID Error Checking
+  if (!id) throw "getMessageById: Missing id";
+  if (typeof id !== "string")
+    throw "getMessageById: The provided id must be a string";
+  if (id.trim().length === 0)
+    throw "getMessageById: The provided id must not be an empty string";
+  const parsedId = ObjectId(id.trim());
 
-//   const itemCollection = await items();
-//   const itemsList = await itemCollection.find({ categories: category }).toArray();
-//   for (let item of itemsList) {
-//     item._id = item._id.toString();
-//     item.sellerId = item.sellerId.toString();
-//   }
-//   return itemsList;
-// }
+  const meassageThreadsCollection = await messageThreads();
+  const messageThread = await meassageThreadsCollection.findOne({ "message._id": parsedId });
+  if (messageThread === null) throw `getMessageById: Failed to find messageThread containing message with id '${id}'`;
+  messageThread._id = messageThread._id.toString();
 
-async function addMessageToThread(messageThreadId, senderId, message) {
-  const messageThreadsCollection = await messageThreads();
-  let oldThread = await getMessageThreadById(messageThreadId);
-
-  let messageThread = oldThread.messageThread
-  let newMessage = await createMessage(senderId, message)
-  messageThread.push(newMessage)
-  console.log(messageThread)
-
-  const newMessageThread = {
-    recipients: oldThread.recipients,
-    threadDate: oldThread.threadDate,
-    messageThread: messageThread,
-  };
-
-  const updateInfo = await messageThreadsCollection.updateOne({ _id: ObjectId(messageThreadId) }, { $set: newMessageThread });
-  if (updateInfo.modifiedCount === 0) throw "addMessageToThread: Failed to add message";
-  return getMessageThreadById(messageThreadId);
+  for (message of messageThread.messages) {
+    if (message._id.toString() == id) {
+      message._id = message._id.toString()
+      return message;
+    }
+  }
+  throw `Failed to find message with id '${id}'`;
 }
 
-async function getItemsBySeller(sellerId) {
-  if (!sellerId) throw "getItemsBySeller: Missing sellerId";
-  if (typeof sellerId !== "string")
-    throw "getItemsBySeller: The provided sellerId must be a string";
-  if (sellerId.trim().length === 0)
-    throw "getItemsBySeller: The provided sellerId must not be an empty string";
+async function getSellerMessageThreads(id) {
+  if (!id) throw "getSellerMessageThreads: Missing id";
+  if (typeof id !== "string")
+    throw "getSellerMessageThreads: The provided id must be a string";
+  if (id.trim().length === 0)
+    throw "getSellerMessageThreads: The provided id must not be an empty string";
+  const parsedId = ObjectId(id.trim());
 
-  const itemCollection = await items();
-  const itemsList = await itemCollection.find({ sellerId: ObjectId(sellerId.trim()) }).toArray();
-  for (let item of itemsList) {
-    item._id = item._id.toString();
-    item.sellerId = item.sellerId.toString();
+  const meassageThreadsCollection = await messageThreads();
+  const messageThreadList = await meassageThreadsCollection.find({ "seller": parsedId }).toArray();
+  for (messageThread of messageThreadList) {
+    messageThread._id = messageThread._id.toString()
+    for (message of messageThread) {
+      message._id = message._id.toString();
+    }
   }
-  return itemsList;
+  return sortArraysByLastMessageSent(messageThreadList)
+}
+
+async function getBuyerMessageThreads(id) {
+  if (!id) throw "getBuyerMessageThreads: Missing id";
+  if (typeof id !== "string")
+    throw "getBuyerMessageThreads: The provided id must be a string";
+  if (id.trim().length === 0)
+    throw "getBuyerMessageThreads: The provided id must not be an empty string";
+  const parsedId = ObjectId(id.trim());
+
+  const meassageThreadsCollection = await messageThreads();
+  const messageThreadList = await meassageThreadsCollection.find({ "buyer": parsedId }).toArray();
+  for (messageThread of messageThreadList) {
+    messageThread._id = messageThread._id.toString()
+    for (message of messageThread) {
+      message._id = message._id.toString();
+    }
+  }
+  return sortArraysByLastMessageSent(messageThreadList)
+}
+
+async function getUserMessageThreads(id) {
+  if (!id) throw "getUserMessageThreads: Missing id";
+  if (typeof id !== "string")
+    throw "getUserMessageThreads: The provided id must be a string";
+  if (id.trim().length === 0)
+    throw "getUserMessageThreads: The provided id must not be an empty string";
+  
+  let sellerMessageThreads = await getSellerMessageThreads(id);
+  let buyerMessageThreads = await getBuyerMessageThreads(id);
+
+  return sortArraysByLastMessageSent(sellerMessageThreads.concat(buyerMessageThreads))
+}
+
+async function closeMessageThread(id) {
+  if (!id) throw "closeMessageThread: Missing id";
+  if (typeof id !== "string")
+    throw "closeMessageThread: The provided id must be a string";
+  if (id.trim().length === 0)
+    throw "closeMessageThread: The provided id must not be an empty string";
+
+  const meassageThreadsCollection = await messageThreads();
+
+  let messageThread = await getMessageThreadById(id);
+
+  delete messageThread._id
+
+  messageThread.open = false;
+
+  const updateInfo = await meassageThreadsCollection.updateOne(
+    { _id: ObjectId(id) },
+    { $set: messageThread }
+  );
+
+  if (updateInfo.modifiedCount === 0) throw "closeMessageThread: Failed to close messageThread";
+  return await getMessageThreadById(id);
 }
 
 module.exports = {
+  createMessage, 
   createMessageThread,
-  getAllMessageThreads,
+  readMessage,
+  getMessageById,
   getMessageThreadById,
-  deleteMessageThreadById,
-  addMessageToThread,
-  getItemsBySeller
-};
+  getParentMessageThreadByMessageId,
+  getSellerMessageThreads,
+  getBuyerMessageThreads,
+  getUserMessageThreads,
+  closeMessageThread,
+}

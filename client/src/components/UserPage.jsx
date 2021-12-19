@@ -84,7 +84,7 @@ const ItemListing = (item) => {
   );
 };
 
-const ItemPage = (props) => {
+const UserPage = (props) => {
   const theme = useTheme();
   const useStyles = makeStyles(() => ({
     title: {
@@ -286,4 +286,4 @@ const ItemPage = (props) => {
   }
 };
 
-export default ItemPage;
+export default UserPage;
