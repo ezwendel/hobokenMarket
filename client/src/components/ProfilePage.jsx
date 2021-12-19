@@ -106,6 +106,7 @@ const ProfilePage = () => {
   const [items, setItemData] = useState(undefined);
   const [errorHappened, setError] = useState(undefined);
   const [formOpen, setFormOpen] = useState(false);
+  const [profilePic, setProfilePic] = useState(null);
 
   const handleFormOpen = () => {
     setFormOpen(true);
@@ -139,6 +140,7 @@ const ProfilePage = () => {
           })
         );
         setUser(data);
+        setProfilePic(`http://localhost:4000/file/${data.profilePicture}`);
         setItemData(itemData);
         setError(undefined);
       } catch (e) {
@@ -168,11 +170,11 @@ const ProfilePage = () => {
   });
 
   let avatarInternals = null;
-  if (user.profilePicture) {
+  if (profilePic) {
     avatarInternals = (
       <Avatar
         alt={`${user.name.firstName} ${user.name.lastName}`}
-        src={`http://localhost:4000/file/${user.profilePicture}`}
+        src={profilePic}
         sx={{ width: 75, height: 75 }}
       />
     );
@@ -288,7 +290,7 @@ const ProfilePage = () => {
           </div>
         </CardContent>
       </Card>
-      <ChangeProfilePic formOpen={formOpen} handleFormClose={handleFormClose} />
+      <ChangeProfilePic setProfilePic={setProfilePic} formOpen={formOpen} handleFormClose={handleFormClose} />
     </Container>
   );
 };

@@ -97,6 +97,7 @@ const ItemPage = (props) => {
   const [items, setItemData] = useState(undefined);
   const [errorHappened, setError] = useState(undefined);
   const [formOpen, setFormOpen] = useState(false);
+  const [rating, setRating] = useState(0);
 
   const handleFormOpen = () => {
     setFormOpen(true);
@@ -121,9 +122,16 @@ const ItemPage = (props) => {
             return item.data;
           })
         );
+        let total_rating = 0;
+        for (const r of data.ratings) {
+          total_rating += r.rating;
+        }
+        let avg_rating =
+          data.ratings.length > 0 ? total_rating / data.ratings.length : 0;
         console.log(data);
         setUserData(data);
         setItemData(itemData);
+        setRating(avg_rating);
         setError(undefined);
         setLoading(false);
       } catch (e) {
@@ -169,12 +177,6 @@ const ItemPage = (props) => {
         </Avatar>
       );
     }
-    let total_rating = 0;
-    for (const r of user.ratings) {
-      total_rating += r.rating;
-    }
-    let rating =
-      user.ratings.length > 0 ? total_rating / user.ratings.length : 0;
 
     return (
       <Container>
@@ -276,7 +278,7 @@ const ItemPage = (props) => {
             </div>
           </CardContent>
         </Card>
-        <RatingForm userId={user._id} formOpen={formOpen} handleFormClose={handleFormClose} />
+        <RatingForm setRating={setRating} user={user} formOpen={formOpen} handleFormClose={handleFormClose} />
       </Container>
     );
   }

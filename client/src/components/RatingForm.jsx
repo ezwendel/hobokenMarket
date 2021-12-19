@@ -22,21 +22,26 @@ const RatingForm = (props) => {
   const addRating = async (e) => {
     try {
       let submitData = {
-        userId: props.userId,
+        userId: props.user._id,
         raterEmail: currentUser.email,
         rating: value.toString(),
       };
-      // submitData.append("userId", props.userId);
-      // submitData.append("raterEmail", currentUser.email); // formerly currentUser.displayName
-      // submitData.append("rating", value.toString());
       const header = await createToken();
       let { data } = await axios.post(
         "http://localhost:4000/user/rating",
         submitData,
         header
       );
+      console.log(data);
+      let total_rating = 0;
+      for (const r of props.user.ratings) {
+        total_rating += r.rating;
+      }
+      total_rating += value; 
+      let avg_rating =
+        data.ratings.length > 0 ? total_rating / data.ratings.length : 0;
+      props.setRating(avg_rating);
       props.handleFormClose();
-      // TODO: Make rating update more responsive
     } catch (error) {
       console.log(error);
       if (error.error) {

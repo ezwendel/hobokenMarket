@@ -372,7 +372,7 @@ async function updatePfp(userId, imageId) {
     joinDate: oldUser.joinDate,
     numbers: oldUser.numbers,
     items: oldUser.items,
-    ratings: olderUser.ratings
+    ratings: oldUser.ratings
   };
 
   const updateInfo = await userCollection.updateOne(
