@@ -45,4 +45,72 @@ router.post('/:seller', async (req, res) => {
   }
 })
 
+router.post('/message/:id', async (req, res) => {
+  let id = xss(req.params.id);
+  let sender = xss(req.body.message); // should be an email
+  let message = xss(req.body.message); 
+
+  if (!id || id.trim().length == 0) { return res.status(400).json({ error: "id not valid" }) };
+  if (!sender || sender.trim().length == 0) { return res.status(400).json({ error: "sender not valid" }) };
+  if (!message || message.trim().length == 0) { return res.status(400).json({ error: "message not valid" }) };
+
+  let senderObj = {}
+  try {
+    senderObj = await data.users.getUserByEmail(sender)
+  } catch (e) {
+    return res.status(404).json({ error: "sender doesn't exist" })
+  }
+
+  if (!req.currentUser || req.currentUser.email.toString() != sender.toString()) {
+    return res.status(403).json({ error: "can't message from a different account" })
+  }
+
+  try {
+    let newMessage = await data.messageThreads.createMessage({messageThreadId: id.toString(), sender: senderObj._id.toString(), message: message.toString()})
+    return res.json(newMessage)
+  } catch (e) {
+    return res.status(500).json({ error: e })
+  }
+})
+
+router.post('/read_message/:id', async (req, res) => {
+  let id = xss(req.params.id);
+
+  if (!id || id.trim().length == 0) { return res.status(400).json({ error: "id not valid" }) };
+
+  let message = null;
+  let messageThread = null;
+  try {
+    message = await data.messageThreads.getMessageById(id.toString())
+    messageThread = await data.messageThreads.getParentMessageThreadByMessageId(id.toString())
+  } catch (e) {
+    return res.status(404).json({error: "message doesn't exist"})
+  }
+
+  let currentUserObj = null;
+  try {
+    currentUserObj = await data.users.getUserByEmail(req.currentUser.email.toString())
+  } catch (e) {
+    return res.status(401).json({error: "can't read a message without being logged in"})
+  }
+
+  let receiver = null;
+  if (messageThread.seller.toString() === message.sender.toString()) {
+    receiver = messageThread.buyer.toString()
+  } else {
+    receiver = messageThread.seller.toString()
+  }
+
+  if (!req.currentUser || currentUserObj._id.toString() != receiver.toString()) {
+    return res.status(403).json({ error: "can't read message from a different account" })
+  }
+
+  try {
+    let newMessageThread = await data.messageThreads.readMessage(id.toString())
+    return res.json(newMessageThread);
+  } catch (e) {
+    return res.status(500).json({error: e})
+  }
+})
+
 module.exports = router;
