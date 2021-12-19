@@ -43,10 +43,9 @@ const ItemListing = (item) => {
       const { data }=await axios.delete(`http://localhost:4000/items/${id}`);
 
     } catch (e) {
-      setLoading(false);
       alert(e);
     }
-    setLoading(false);
+    window.location.reload();
   };
   console.log(item);
   return (
