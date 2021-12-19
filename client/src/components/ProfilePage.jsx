@@ -4,6 +4,7 @@ import { makeStyles } from "@mui/styles";
 import { useTheme } from "@mui/material/styles";
 import axios from "axios";
 import { AuthContext } from "../firebase/Auth";
+import { Redirect } from 'react-router-dom';
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 
 import {
@@ -23,18 +24,30 @@ import {
   Chip,
   Rating,
 } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { Link } from "react-router-dom";
 
 import MessageIcon from "@mui/icons-material/Message";
 import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
 import ChangeProfilePic from "./ChangeProfilePic";
 import Loading from "./Loading";
+// import firebase from 'firebase/app';
 
 const Label = styled("span")(({ theme }) => ({
   fontWeight: 500,
 }));
 
 const ItemListing = (item) => {
+  const deleteItem = async (id) => {
+    try {
+      const { data }=await axios.delete(`http://localhost:4000/items/${id}`);
+
+    } catch (e) {
+      setLoading(false);
+      alert(e);
+    }
+    setLoading(false);
+  };
   console.log(item);
   return (
     <>
@@ -74,6 +87,7 @@ const ItemListing = (item) => {
             secondaryTypographyProps={{ component: "div" }}
           />
         </ListItemButton>
+        <Button onClick={()=>deleteItem(item._id)} variant="outlined" startIcon={<DeleteIcon />}>Delete</Button>
         {/* </Link> */}
       </ListItem>
       <Divider />
@@ -108,6 +122,7 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // firebase.auth().currentUser.updateProfile({ displayName: '61be75a0bfcf8443bbd1279e' })
         const { data } = await axios.get(
           `http://localhost:4000/user/${currentUser.displayName}`
         );
