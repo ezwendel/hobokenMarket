@@ -276,7 +276,7 @@ const ItemPage = (props) => {
             </div>
           </CardContent>
         </Card>
-        <RatingForm formOpen={formOpen} handleFormClose={handleFormClose} />
+        <RatingForm userId={user._id} formOpen={formOpen} handleFormClose={handleFormClose} />
       </Container>
     );
   }
