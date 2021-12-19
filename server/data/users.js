@@ -356,7 +356,7 @@ async function updatePfp(userId, imageId) {
     { $set: newUser }
   );
   if (updateInfo.modifiedCount === 0) throw "updatePfp: Failed to update user";
-  return getUserById(userId);
+  return await getUserById(userId);
 }
 
 async function updateRating(userId, newRating) {
