@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 import { AuthContext } from "../firebase/Auth";
 import axios from "axios";
+import { createToken } from "../firebase/AuthBackend";
 
 import {
   Dialog,
@@ -38,11 +39,15 @@ const ChangeProfilePic = (props) => {
         console.log("Image: ", selectedFile);
         let submitData = new FormData();
         submitData.append("file", selectedFile);
-        submitData.append("userId", currentUser.displayName);
+        submitData.append("userId", currentUser.email); // formerly currentUser.displayName
         console.log(submitData);
+
+        const header = await createToken();
+
         let { data } = await axios.post(
           "http://localhost:4000/file/profile_upload",
-          submitData
+          submitData,
+          header
         );
         console.log(data);
         setSelectedFile(null);

@@ -3,6 +3,7 @@ import { styled } from "@mui/styles";
 import { makeStyles } from "@mui/styles";
 import { useTheme } from "@mui/material/styles";
 import axios from "axios";
+import { createToken } from "../firebase/AuthBackend";
 
 import {
   Container,
@@ -96,12 +97,14 @@ const ItemPage = (props) => {
     console.log("useEffect fired");
     async function fetchData() {
       try {
+        const header = await createToken();
+
         const { data } = await axios.get(
-          `http://localhost:4000/user/${props.match.params.id}`
+          `http://localhost:4000/user/${props.match.params.id}`, header
         );
         const itemData = await Promise.all(
           data.items.map(async (itemId) => {
-            let item = await axios.get(`http://localhost:4000/items/${itemId}`);
+            let item = await axios.get(`http://localhost:4000/items/${itemId}`, header);
             return item.data;
           })
         );

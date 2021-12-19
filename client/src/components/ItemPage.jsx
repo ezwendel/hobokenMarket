@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { makeStyles } from "@mui/styles";
 import { useTheme } from "@mui/material/styles";
 import axios from "axios";
+import { createToken } from "../firebase/AuthBackend";
 
 import {
   Container,
@@ -42,7 +43,9 @@ const ItemPage = (props) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data } = await axios.get(`http://localhost:4000/items/${id}`);
+        const header = await createToken();
+
+        const { data } = await axios.get(`http://localhost:4000/items/${id}`, header);
         console.log(data);
         setItem(data);
       } catch (e) {
@@ -60,8 +63,10 @@ const ItemPage = (props) => {
       try {
         if (item) {
           setError(false);
+          const header = await createToken();
+
           const { data: data2 } = await axios.get(
-            `http://localhost:4000/user/${item.sellerId}`
+            `http://localhost:4000/user/${item.sellerId}`, header
           );
           console.log(data2);
           setUser(data2);
@@ -127,7 +132,7 @@ const ItemPage = (props) => {
         <CardMedia
           component="img"
           image={
-            !item.itemPictures
+            item.itemPictures[0]
               ? `http://localhost:4000/file/${item.itemPictures[0]}`
               : Placeholder
           }
