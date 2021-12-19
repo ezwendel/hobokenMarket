@@ -5,6 +5,7 @@ import { useTheme } from "@mui/material/styles";
 import axios from "axios";
 import { createToken } from "../firebase/AuthBackend";
 import { AuthContext } from "../firebase/Auth";
+import Placeholder from "../img/default.png";
 
 import {
   Container,
@@ -48,6 +49,7 @@ const StyledRating = styled(Rating)({
 
 const ItemListing = (item) => {
   // console.log(item);
+  let picture = item.itemPictures[0] ? `http://localhost:4000/file/${item.itemPictures[0]}` : Placeholder;
   return (
     <>
       <ListItem key={item._id} sx={{ padding: 0 }}>
@@ -57,8 +59,17 @@ const ItemListing = (item) => {
           to={`/item/${item._id}`}
           style={{ color: "inherit", textDecoration: "none" }}
         >
-          <ListItemIcon>
-            <ShoppingBasketIcon />
+          <ListItemIcon sx={{ marginRight: "2em" }}>
+            <Avatar
+              sx={{ width: 75, height: 75 }}
+              src={picture}
+              variant="square"
+              onError={(e) => {
+                e.target.src = Placeholder;
+              }}
+            >
+              N
+            </Avatar>
           </ListItemIcon>
           <ListItemText
             primary={item.name}
