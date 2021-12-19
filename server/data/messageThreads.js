@@ -39,10 +39,18 @@ async function createMessageThread(body) {
 
   if (buyer.toString() === seller.toString()) throw 'createMessageThread: buyer and seller cannot be the same'
 
+  const firstMessage = {
+    _id: ObjectId(),
+    sender: buyer,
+    message: message,
+    read: false,
+    time: new Date()
+  }
+
   const newMessageThread = {
     buyer: ObjectId(buyer),
     seller: ObjectId(seller),
-    messages: [message],
+    messages: [firstMessage],
     open: true,
     mostRecentMessageTime: new Date()
   };
@@ -80,6 +88,7 @@ async function createMessage(body) {
     throw "createMessage: message must not be an empty string";
 
   const newMessage = {
+    _id: ObjectId(),
     sender: sender,
     message: message,
     read: false,
