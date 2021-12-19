@@ -7,6 +7,7 @@ const mongo = require('mongodb')
 const mongoose = require('mongoose')
 const mongoConfig = require('../config/settings');
 const e = require('express');
+const xss = require('xss')
 
 const url = process.env.DOCKER_MODE ? 'mongodb://mongo:27017/hobokenMarketDB' : 'mongodb://localhost:27017/hobokenMarketDB';
 
@@ -52,9 +53,28 @@ conn.once('open', () => {
 router.post("/profile_upload", upload.single("file"), async (req, res) =>{
   if (req.file === undefined) return res.json({error: "must select a file."})
   console.log(req.body.userId)
+  let userId = xss(req.body.userId)
+  if (!userId || userId.trim().length == 0) {
+    try {
+      await data.images.deleteImage(req.file.id.toString()); 
+      return res.status(400).json({ error: "userId not valid" })
+    } catch (e) {
+      console.log(e);
+      return res.status(400).json({ error: "userId not valid" })
+    }
+  };
   console.log(req.file)
   try {
-    let user = await data.users.getUserByEmail(req.body.userId); // changed from id to email
+    let user = await data.users.getUserByEmail(userId); // changed from id to email
+    if (!req.currentUser || req.body.userId.toString() != req.currentUser.email.toString()) {
+      try {
+        await data.images.deleteImage(req.file.id.toString()); 
+        return res.status(400).json({ error: "cannot change another user's pfp" })
+      } catch (e) {
+        console.log(e);
+        return res.status(400).json({ error: "cannot change another user's pfp" })
+      }
+    }
     let updatedUser = await data.users.updatePfp(user._id.toString(), req.file.id.toString())
     let userDataCached = await client.hsetAsync("user", `${req.body.userId}`, JSON.stringify(updatedUser));
     const imgUrl = `http://localhost:4000/file/${req.file.id}`;
