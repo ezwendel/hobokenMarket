@@ -7,16 +7,15 @@ import Login from "./Login";
 import CreateAccount from "./CreateAccount";
 import ListingsPage from "./ListingsPage";
 import ItemPage from "./ItemPage";
+import UserPage from "./UserPage";
 import ProfilePage from "./ProfilePage";
-import {AuthProvider} from '../firebase/Auth'
-import PrivateRoute from './PrivateRoute';
+import { AuthProvider } from "../firebase/Auth";
+import PrivateRoute from "./PrivateRoute";
 import Home from "./Home";
 import Logout from "./Logout";
+import Messages from "./Messages";
 
-import {
-  createTheme,
-  ThemeProvider,
-} from "@mui/material";
+import { createTheme, ThemeProvider } from "@mui/material";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 
 const theme = createTheme({
@@ -42,21 +41,17 @@ function App() {
               <PrivateRoute exact path="/" component={Home} />
               <Route exact path="/items/:page" component={ListingsPage} />
               <Route exact path="/item/:id" component={ItemPage} />
-              <Route exact path="/messages">
-                <div>Messages</div>
-              </Route>
+              <Route exact path="/user/:id" component={UserPage} />
 	            <Route exact path="/logout" component={Logout} />
+              <PrivateRoute exact path="/messages" component={Messages}/>
               <Route exact path="/login" component={Login} />
               <Route exact path="/create-account" component={CreateAccount} />
-              <Route exact path="/profile">
-                <ProfilePage />
-              
-              </Route>
+              <PrivateRoute exact path="/profile" component={ProfilePage}/>
             </Switch>
+            </div>
           </div>
-        </div>
-      </Router>
-    </ThemeProvider>
+        </Router>
+      </ThemeProvider>
     </AuthProvider>
   );
 }

@@ -1,4 +1,7 @@
-import React from "react";
+import React, { useState, useContext } from "react";
+import axios from "axios";
+import { AuthContext } from "../firebase/Auth";
+import { createToken } from "../firebase/AuthBackend";
 
 import {
   Dialog,
@@ -14,10 +17,107 @@ import {
   Select,
   OutlinedInput,
   MenuItem,
+  Alert,
 } from "@mui/material";
 
-const CreateListing = ({formOpen, handleFormClose}) => {
-  const [categories, setCategories] = React.useState([]);
+const CreateListing = (props) => {
+  const [categories, setCategories] = useState([]);
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+  });
+
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  const [formError, setFormError] = useState(false);
+  const [nameError, setNameError] = useState(false);
+  const [descError, setDescError] = useState(false);
+  const [catError, setCatError] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  const { currentUser } = useContext(AuthContext);
+
+  const handleChange = (e) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const addItem = async (e) => {
+    e.preventDefault();
+    setFormError(false);
+    setNameError(false);
+    setDescError(false);
+    setCatError(false);
+    setImageError(false);
+    let submitError = false;
+    let nameField = document.getElementById("name");
+    let descriptionField = document.getElementById("description");
+    let imageField = document.getElementById("image");
+    if (nameField.value.trim().length === 0) {
+      setNameError("Missing item name.");
+      submitError = true;
+    }
+    if (descriptionField.value.trim().length === 0) {
+      setDescError("Missing item description.");
+      submitError = true;
+    }
+    if (categories.length === 0) {
+      setCatError("Must include at least one category.");
+      submitError = true;
+    }
+    if (imageField.value.trim() === "") {
+      setImageError("Missing image.");
+      submitError = true;
+    }
+    if (!submitError) {
+      try {
+
+        console.log("Image: ", selectedFile);
+        let submitData = new FormData();
+        submitData.append("name", formData.name.trim());
+        submitData.append("description", formData.description.trim());
+        submitData.append("file", selectedFile);
+        submitData.append("categories", categories);
+        submitData.append("sellerId", currentUser.email);
+        // const submitData = {
+        //   name: formData.name.trim(),
+        //   description: formData.description.trim(),
+        //   file: selectedFile,
+        //   categories: categories,
+        //   sellerId: currentUser.displayName,
+        // };
+
+        console.log(submitData);
+
+        const header = await createToken();
+
+        let { data } = await axios.post(
+          "http://localhost:4000/items/with_image",
+          submitData,
+          header
+        );
+        console.log(data);
+        nameField.value = "";
+        descriptionField.value = "";
+        setCategories([]);
+        setSelectedFile(null);
+        props.handleFormClose();
+        props.history.push(`/item/${data._id}`);
+      } catch (e) {
+        console.log(e);
+        if (e.error) {
+          setFormError(e.error.toString());
+        } else {
+          setFormError(e.toString());
+        }
+      }
+    }
+  };
+
+
+  const onFileChange = (e) => {
+    setSelectedFile(e.target.files[0]);
+  };
+
 
   // https://mui.com/components/selects/
   const handleCategoryChange = (event) => {
@@ -30,6 +130,24 @@ const CreateListing = ({formOpen, handleFormClose}) => {
     );
   };
 
+  const readFile = async (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.addEventListener('load', () => resolve(reader.result), false);
+      reader.readAsDataURL(file);
+    })
+  }
+
+  // const onFileChange = async (e) => {
+  //   if (e.target.files && e.target.files.length > 0) {
+  //     const file = e.target.files[0];
+  //     let imageDataUrl = await readFile(file);
+  //     console.log(file);
+  //     setImage(file);
+  //     setImagePreview(imageDataUrl);
+  //   }
+  // }
+
   const categoryNames = [
     "Furniture",
     "Electronics",
@@ -40,8 +158,9 @@ const CreateListing = ({formOpen, handleFormClose}) => {
   ];
 
   return (
-    <Dialog open={formOpen} onClose={handleFormClose}>
+    <Dialog open={props.formOpen} onClose={props.handleFormClose} scroll="body">
       <DialogTitle>Add New Listing</DialogTitle>
+      {formError && <Alert severity="error">{formError}</Alert>}
       <DialogContent sx={{ width: 500 }}>
         <DialogContentText>
           Enter all of the details for your new listing.
@@ -49,29 +168,35 @@ const CreateListing = ({formOpen, handleFormClose}) => {
         <TextField
           autoFocus
           margin="dense"
-          id="item-name"
+          id="name"
+          name="name"
           label="Item Name"
           type="text"
           fullWidth
           placeholder="Enter a name for your item"
           variant="standard"
+          onChange={(e) => handleChange(e)}
         />
+        {nameError && <Alert severity="error">{nameError}</Alert>}
         <TextField
           margin="dense"
-          id="item-description"
+          id="description"
           label="Item Description"
+          name="description"
           type="text"
           fullWidth
           multiline
           rows={6}
           placeholder="Describe your item"
           variant="standard"
+          onChange={(e) => handleChange(e)}
         />
+        {descError && <Alert severity="error">{descError}</Alert>}
         <FormControl sx={{ mt: 1, mb: 1, width: "100%" }}>
-          <InputLabel id="item-categories">Categories</InputLabel>
+          <InputLabel id="categories">Categories</InputLabel>
           <Select
-            labelId="item-categories"
-            id="item-categories"
+            labelId="categories"
+            id="categories"
             multiple
             value={categories}
             onChange={handleCategoryChange}
@@ -92,14 +217,43 @@ const CreateListing = ({formOpen, handleFormClose}) => {
             ))}
           </Select>
         </FormControl>
+        {catError && <Alert severity="error">{catError}</Alert>}
         <FormControl sx={{ mt: 1, width: "35ch" }}>
-          <label htmlFor="item-image">Upload Image</label>
-          <Input accept="image/*" id="item-image" multiple type="file" />
+
+          <label htmlFor="image">Upload Image</label>
+          <Input
+            accept="image/*"
+            id="image"
+            multiple
+            type="file"
+            onChange={onFileChange}
+          />
+
         </FormControl>
+        {imageError && <Alert severity="error">{imageError}</Alert>}
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleFormClose}>Cancel</Button>
-        <Button onClick={handleFormClose}>Submit Listing</Button>
+        <Button onClick={props.handleFormClose}>Cancel</Button>
+        {currentUser ? (
+          <Button
+            onClick={(e) => {
+              addItem(e);
+            }}
+            type="submit"
+          >
+            Submit Listing
+          </Button>
+        ) : (
+          <Button
+            onClick={(e) => {
+              addItem(e);
+            }}
+            type="submit"
+            disabled
+          >
+            Submit Listing
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );

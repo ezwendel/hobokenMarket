@@ -1,9 +1,16 @@
 import React from "react";
 
 import Item from "./Item";
-import { Grid } from "@mui/material";
+import { Container, Grid, Typography } from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress";
+import Loading from "./Loading";
 
-const ItemList = ({ items }) => {
+const ItemList = ({ items, loading }) => {
+  if (loading) {
+    return (
+      <Loading />
+    );
+  }
   return items.length > 0 ? (
     <Grid container spacing={2} alignItems="center">
       {items.map((item) => (
@@ -13,7 +20,9 @@ const ItemList = ({ items }) => {
       ))}
     </Grid>
   ) : (
-    <div style={{ margin: "0 auto", width: "fit-content" }}>No listings found.</div>
+    <div style={{ margin: "0 auto", width: "fit-content" }}>
+      404: No listings found.
+    </div>
   );
 };
 

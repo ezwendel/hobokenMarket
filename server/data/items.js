@@ -1,6 +1,19 @@
 const { items, users } = require("../config/mongoCollections");
 const moment = require("moment"); // for date checking
 const { ObjectId } = require("mongodb");
+const { deleteImage } = require('./images')
+
+// https://stackoverflow.com/questions/7376598/in-javascript-how-do-i-check-if-an-array-has-duplicate-values
+function containsDuplicates(arr) {
+  return new Set(arr).size !== arr.length;
+}
+
+function sortArraysByListDate(arr) {
+  arr.sort((a,b) => {
+    return new Date(b.listDate) - new Date(a.listDate)
+  })
+  return arr;
+}
 
 async function createItem(body) {
   let name = body.name;
@@ -32,6 +45,12 @@ async function createItem(body) {
     throw "createItem: sellerId must not be an empty string";
 
   // TODO: Item Pictures error checking
+  let itemPicturesIds = []
+  if (itemPictures) {
+    for (i of itemPictures) {
+      itemPicturesIds.push(ObjectId(i))
+    }
+  }
 
   // Categories Error Checking
   if (!categories) throw "createItem: Missing categories";
@@ -46,6 +65,11 @@ async function createItem(body) {
       throw "createItem: Each category must be a string";
     categoriesTrim.push(category.trim());
   }
+  // Check if categories has duplicates
+  if (containsDuplicates(categories)) {
+    console.log(categories);
+    throw `createItem: Each category must be unique`;
+  }
 
   const itemsCollection = await items();
 
@@ -58,7 +82,7 @@ async function createItem(body) {
     name: name.trim(),
     description: description.trim(),
     sellerId: ObjectId(sellerId.trim()),
-    itemPictures: itemPictures,
+    itemPictures: itemPicturesIds,
     listDate: new Date(),
     categories: categories,
   };
@@ -77,7 +101,7 @@ async function getAllItems() {
     item._id = item._id.toString();
     item.sellerId = item.sellerId.toString();
   }
-  return itemsList;
+  return sortArraysByListDate(itemsList);
 }
 
 async function getItemById(id) {
@@ -105,6 +129,12 @@ async function deleteItemById(id) {
     throw "deleteItemById: The provided id must not be an empty string";
   const parsedId = ObjectId(id.trim());
 
+  let itemToDelete = await getItemById(id);
+
+  for (i of itemToDelete.itemPictures) {
+    await deleteImage(i.toString())
+  }
+
   const itemCollection = await items();
   const deletionInfo = await itemCollection.deleteOne({ _id: parsedId });
   if (deletionInfo.deletedCount === 0) {
@@ -121,12 +151,18 @@ async function getItemsByCategory(category) {
     throw "getItemsByCategory: The provided category must not be an empty string";
 
   const itemCollection = await items();
-  const itemsList = await itemCollection.find({ categories: category }).toArray();
+  // const itemsList = await itemCollection.find({ categories: category }).toArray();
+  await itemCollection.createIndex({ categories: "text" }); // case insensitive
+  const itemsList = await itemCollection
+    .find({ $text: { $search: category } })
+    .toArray();
+  await itemCollection.dropIndexes();
+  // itemsList.reverse() // this makes oldest first
   for (let item of itemsList) {
     item._id = item._id.toString();
     item.sellerId = item.sellerId.toString();
   }
-  return itemsList;
+  return sortArraysByListDate(itemsList);
 }
 
 async function getItemsBySeller(sellerId) {
@@ -137,12 +173,38 @@ async function getItemsBySeller(sellerId) {
     throw "getItemsBySeller: The provided sellerId must not be an empty string";
 
   const itemCollection = await items();
-  const itemsList = await itemCollection.find({ sellerId: ObjectId(sellerId.trim()) }).toArray();
+  const itemsList = await itemCollection
+    .find({ sellerId: ObjectId(sellerId.trim()) })
+    .toArray();
   for (let item of itemsList) {
     item._id = item._id.toString();
     item.sellerId = item.sellerId.toString();
   }
-  return itemsList;
+  return sortArraysByListDate(itemsList);
+}
+
+async function search(keyword) {
+  if (!keyword) throw "search: Missing keyword";
+  if (typeof keyword !== "string")
+    throw "search: The provided keyword must be a string";
+  if (keyword.trim().length === 0)
+    throw "search: The provided keyword must not be an empty string";
+
+  const itemCollection = await items();
+  await itemCollection.createIndex({
+    name: "text",
+    description: "text",
+    categories: "text",
+  });
+  let itemsList = await itemCollection
+    .find({ $text: { $search: keyword } })
+    .toArray();
+  await itemCollection.dropIndexes();
+  for (let item of itemsList) {
+    item._id = item._id.toString();
+    item.sellerId = item.sellerId.toString();
+  }
+  return sortArraysByListDate(itemsList);
 }
 
 module.exports = {
@@ -151,5 +213,6 @@ module.exports = {
   getItemById,
   deleteItemById,
   getItemsByCategory,
-  getItemsBySeller
+  getItemsBySeller,
+  search,
 };

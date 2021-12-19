@@ -21,4 +21,6 @@ module.exports = {
   users: getCollectionFn('USERS'),
   items: getCollectionFn('ITEMS'),
   messageThreads: getCollectionFn('MESSAGETHREADS'),
+  imageChunks: getCollectionFn('images.chunks'),
+  imageFiles: getCollectionFn('images.files')
 };

@@ -1,7 +1,12 @@
-import React from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { styled } from "@mui/styles";
 import { makeStyles } from "@mui/styles";
 import { useTheme } from "@mui/material/styles";
+import axios from "axios";
+import { AuthContext } from "../firebase/Auth";
+import { Redirect } from "react-router-dom";
+import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
+import { createToken } from "../firebase/AuthBackend";
 
 import {
   Container,
@@ -12,56 +17,105 @@ import {
   Typography,
   Button,
   List,
+  ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
   Divider,
   Chip,
+  Rating,
+  Box,
 } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { Link } from "react-router-dom";
 
 import MessageIcon from "@mui/icons-material/Message";
 import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
+import ChangeProfilePic from "./ChangeProfilePic";
+import Loading from "./Loading";
+// import firebase from 'firebase/app';
 
 const Label = styled("span")(({ theme }) => ({
   fontWeight: 500,
 }));
 
-const ItemListing = () => {
+const ItemListing = (item) => {
+  const deleteItem = async (id) => {
+    try {
+      const header = await createToken();
+
+      const { data }=await axios.delete(`http://localhost:4000/items/${id}`, header);
+    } catch (e) {
+      alert(e);
+    }
+    window.location.reload();
+  };
+  console.log(item);
   return (
-    <Link to="/items/0" style={{ color: "inherit", textDecoration: "none" }}>
-      <ListItemButton>
-        <ListItemIcon>
-          <ShoppingBasketIcon />
-        </ListItemIcon>
-        <ListItemText
-          primary="Item"
-          secondary={
-            <>
-              <div style={{marginTop: ".5em"}}>
-                <ul className="category-list">
-                  <li>
-                    <Chip
-                      label="Category"
-                      size="small"
-                      color="primary"
-                      variant="outlined"
-                    />
-                  </li>
-                </ul>
+    <>
+      <ListItem key={item._id} sx={{ padding: 0 }}>
+        {/* <Link to={`/items/${item._id}`} style={{ color: "inherit", textDecoration: "none" }}> */}
+        <ListItemButton
+          component={Link}
+          to={`/item/${item._id}`}
+          style={{ color: "inherit", textDecoration: "none" }}
+        >
+          <ListItemIcon>
+            <ShoppingBasketIcon />
+          </ListItemIcon>
+          <ListItemText
+            primary={item.name}
+            secondary={
+              <div>
+                <div style={{ marginTop: ".5em" }}>
+                  <ul className="category-list">
+                    {item.categories.map((category) => {
+                      return (
+                        <li key={category}>
+                          <Chip
+                            label={category}
+                            size="small"
+                            color="primary"
+                            variant="outlined"
+                          />
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+                <div style={{ marginTop: ".5em" }}>{item.description}</div>
               </div>
-              <div style={{marginTop: ".5em"}}>Description</div>
-            </>
-          }
-        />
-      </ListItemButton>
+            }
+            secondaryTypographyProps={{ component: "div" }}
+          />
+        </ListItemButton>
+        <Button onClick={() => deleteItem(item._id)} variant="outlined">
+          Delete
+        </Button>
+        {/* </Link> */}
+      </ListItem>
       <Divider />
-    </Link>
+    </>
   );
 };
 
-const ItemPage = () => {
-  const theme = useTheme();
+const ProfilePage = () => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const { currentUser } = useContext(AuthContext);
+  const [items, setItemData] = useState(undefined);
+  const [errorHappened, setError] = useState(undefined);
+  const [formOpen, setFormOpen] = useState(false);
+  const [profilePic, setProfilePic] = useState(null);
+
+  const handleFormOpen = () => {
+    setFormOpen(true);
+  };
+
+  const handleFormClose = () => {
+    setFormOpen(false);
+  };
+
   const useStyles = makeStyles(() => ({
     title: {
       fontWeight: "bold",
@@ -70,21 +124,127 @@ const ItemPage = () => {
   }));
   const classes = useStyles();
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // firebase.auth().currentUser.updateProfile({ displayName: '61be75a0bfcf8443bbd1279e' })
+        const header = await createToken();
+
+        const { data } = await axios.get( // formerly currentUser.displayName
+          `http://localhost:4000/user/email/${currentUser.email}`, header 
+        );
+        const itemData = await Promise.all(
+          data.items.map(async (itemId) => {
+            let item = await axios.get(`http://localhost:4000/items/${itemId}`, header);
+            return item.data;
+          })
+        );
+        setUser(data);
+        setProfilePic(`http://localhost:4000/file/${data.profilePicture}`);
+        setItemData(itemData);
+        setError(undefined);
+      } catch (e) {
+        setUser({ username: "?" });
+        setError(e);
+      }
+      setLoading(false);
+    };
+    setLoading(true);
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return <Loading />;
+  } else if (errorHappened) {
+    return (
+      <Container>
+        <div style={{ margin: "0 auto", width: "fit-content" }}>
+          {errorHappened.toString()}
+        </div>
+      </Container>
+    );
+  }
+  // let itemListings = null;
+  let itemListings = items.map((item) => {
+    return ItemListing(item);
+  });
+
+  let avatarInternals = null;
+  if (user.profilePicture || profilePic) {
+    avatarInternals = (
+      <Avatar
+        alt={`${user.name.firstName} ${user.name.lastName}`}
+        src={profilePic}
+        sx={{ width: 75, height: 75 }}
+      />
+    );
+  } else {
+    avatarInternals = (
+      <Avatar sx={{ bgcolor: "#EB5757", width: 75, height: 75, fontSize: 34 }}>
+        {user.username[0].toUpperCase()}
+      </Avatar>
+    );
+  }
+  let total_rating = 0;
+  for (const r of user.ratings) {
+    total_rating += r.rating;
+  }
+  let rating = user.ratings.length > 0 ? total_rating / user.ratings.length : 0;
+  console.log("rating", rating);
+
   return (
-    <Container maxWidth="100%">
+    <Container style={{ maxWidth: "100%" }}>
       <Card sx={{ minWidth: 250, maxWidth: "70%", margin: "0 auto" }}>
         <CardHeader
-          avatar={
-            <Avatar sx={{ bgcolor: "#EB5757", width: 50, height: 50 }}>
-              A
-            </Avatar>
+          avatar={avatarInternals}
+          title={user.username}
+          subheader={
+            <>
+              <div>
+                Member since:{" "}
+                {new Date(user.joinDate).toLocaleDateString("en-US", {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </div>
+              <Box
+                sx={{
+                  display: "inline-block",
+                  position: "relative",
+                  bottom: "6px",
+                  fontSize: "14x",
+                  marginRight: "0.5em"
+                }}
+              >
+                Rating:
+              </Box>
+              <Rating
+                name="seller-rating"
+                value={rating}
+                readOnly
+                sx={{ m: "3px", position: "relative", left: "-6px" }}
+              />
+              <Box
+                sx={{
+                  display: "inline-block",
+                  position: "relative",
+                  bottom: "6px",
+                  color: "#2F80ED",
+                }}
+              >
+                {user.ratings.length}
+              </Box>
+            </>
           }
-          title="jsmith1999"
-          subheader="Member since: December 10, 2021"
           action={
-            <Button aria-label="message" color="secondary">
-              Send a Message
-              <MessageIcon style={{ marginLeft: ".3em" }} />
+            <Button
+              aria-label="message"
+              color="secondary"
+              onClick={handleFormOpen}
+            >
+              CHANGE PROFILE PICTURE
+              <AddAPhotoIcon style={{ marginLeft: ".3em" }} />
             </Button>
           }
           classes={{ title: classes.title }}
@@ -96,16 +256,24 @@ const ItemPage = () => {
               Contact Information
             </Typography>
             <Typography gutterBottom variant="div" component="div">
-              <Label>Full Name:</Label> John Smith
+              <Label>Full Name:</Label>{" "}
+              {`${user.name.firstName}
+              ${user.name.lastName}`}
             </Typography>
             <Typography gutterBottom variant="div" component="div">
-              <Label>Cell Phone #:</Label> (123)-456-7890
+              <Label>Cell Phone #:</Label>{" "}
+              {user.numbers && user.numbers.cell !== null
+                ? user.numbers.cell
+                : "N/A"}
             </Typography>
             <Typography gutterBottom variant="div" component="div">
-              <Label>Home Phone #:</Label> (123)-456-7890
+              <Label>Home Phone #:</Label>{" "}
+              {user.numbers && user.numbers.home !== null
+                ? user.numbers.home
+                : "N/A"}
             </Typography>
             <Typography gutterBottom variant="div" component="div">
-              <Label>Email Address:</Label> john.smith@gmail.com
+              <Label>Email Address:</Label> {user.emailAddress}
             </Typography>
           </div>
           <div style={{ margin: "1em 0" }}>
@@ -113,19 +281,18 @@ const ItemPage = () => {
               Listed Items
             </Typography>
             <div>
-              <List>
-                <Divider />
-                <ItemListing />
-                <ItemListing />
-                <ItemListing />
-                <ItemListing />
-              </List>
+              {user.items.length > 0 ? (
+                <List sx={{ width: "100%" }}>{itemListings}</List>
+              ) : (
+                "No items listed."
+              )}
             </div>
           </div>
         </CardContent>
       </Card>
+      <ChangeProfilePic setProfilePic={setProfilePic} formOpen={formOpen} handleFormClose={handleFormClose} />
     </Container>
   );
 };
 
-export default ItemPage;
+export default ProfilePage;

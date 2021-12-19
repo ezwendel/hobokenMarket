@@ -10,6 +10,7 @@ const { ObjectId } = require("mongodb");
 const main = async () => {
   console.log("Connection to database...");
   const db = await dbConnection.connectToDb();
+  console.log(db);
   await db.dropDatabase(); // Drop the database before initalizing data to avoid duplicate data.
 
   console.log("Seeding database...\n");
@@ -22,8 +23,10 @@ const main = async () => {
       password: "password",
       profilePicture: null,
       emailAddress: "jrandle30@gmail.com",
+      numbers: { cell: "123-123-1234", home: null}
     });
     const user1_id = user1._id.toString();
+    console.log("Created user 1");
 
     const user2 = await usersData.createUser({
       name: { firstName: "RJ", lastName: "Barrett" },
@@ -31,8 +34,10 @@ const main = async () => {
       password: "password2",
       profilePicture: null,
       emailAddress: "rjbarrett@gmail.com",
+      numbers: { cell: "000-000-0000", home: "789-789-7890"}
     });
     const user2_id = user2._id.toString();
+    console.log("Created user 2");
 
     const messageThread1 = await messageThreadData.createMessageThread([user1_id, user2_id])
     const messageThread1_id = messageThread1._id.toString();
@@ -52,8 +57,10 @@ const main = async () => {
       password: "password3",
       profilePicture: null,
       emailAddress: "drose@gmail.com",
+      numbers: { cell: null, home: "123-456-7890"}
     });
     const user3_id = user3._id.toString();
+    console.log("Created user 3");
 
     const user4 = await usersData.createUser({
       name: { firstName: "Mitchell", lastName: "Robinson" },
@@ -61,8 +68,10 @@ const main = async () => {
       password: "password4",
       profilePicture: null,
       emailAddress: "mrobinson23@gmail.com",
+      numbers: { cell: "111-222-3333", home: null }
     });
     const user4_id = user4._id.toString();
+    console.log("Created user 4");
 
     console.log("getUserById:", await usersData.getUserById(user1_id));
     console.log("getAllUsers:", await usersData.getAllUsers());
@@ -96,7 +105,7 @@ const main = async () => {
       "Other",
     ];
     let user_id;
-    for (let i = 1; i <= 50; i++) {
+    for (let i = 1; i <= 100; i++) {
       if (count == 1) {
         count++;
         user_id = user1_id;
@@ -110,6 +119,16 @@ const main = async () => {
         count = 1;
         user_id = user4_id;
       }
+      // https://stackoverflow.com/questions/4550505/getting-a-random-value-from-a-javascript-array
+      let rand1 = Math.floor(Math.random() * categories.length);
+      let rand2 = Math.floor(Math.random() * categories.length);
+      if (rand1 === rand2) {
+        if (rand2 !== 0) {
+          rand2--;
+        } else {
+          rand2++;
+        }
+      }
       let new_item = await itemsData.createItem({
         name: `Item ${i}`,
         description:
@@ -117,9 +136,9 @@ const main = async () => {
         sellerId: user_id,
         itemPictures: null,
         categories: [
-          categories[Math.floor(Math.random() * categories.length)],
-          categories[Math.floor(Math.random() * categories.length)],
-        ], // https://stackoverflow.com/questions/4550505/getting-a-random-value-from-a-javascript-array
+          categories[rand1],
+          categories[rand2],
+        ],
       });
       const new_item_id = new_item._id.toString();
       console.log(
