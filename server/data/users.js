@@ -119,7 +119,7 @@ async function createUser(body) {
     joinDate: new Date(),
     items: [],
     numbers: { cell: numbers.cell, home: numbers.home },
-    rating: 0,
+    ratings: [],
   };
 
   // console.log(newUser)
@@ -210,30 +210,30 @@ async function updateUser(body) {
   // Phone Error Checking
   const numberRegex = /^\(?([0-9]{3})\)?[-]?([0-9]{3})[-]?([0-9]{4})$/;
   // numbers are optional, but should be of the correct form
-  if (!numbers) throw "createUser: Missing numbers object";
-  if (typeof numbers !== "object") throw "createUser: number must be an object";
+  if (!numbers) throw "updateUser: Missing numbers object";
+  if (typeof numbers !== "object") throw "updateUser: number must be an object";
   if (numbers.cell === undefined) {
-    throw "createUser: Missing cell number; must be null or a string";
+    throw "updateUser: Missing cell number; must be null or a string";
   } else {
     if (numbers.cell !== null) {
       if (typeof numbers.cell !== "string")
-        throw `createUser: cell number must be a string`;
+        throw `updateUser: cell number must be a string`;
       if (numbers.cell.trim().length === 0)
-        throw "createUser: cell number must not be an empty string";
+        throw "updateUser: cell number must not be an empty string";
       if (!numberRegex.test(numbers.cell))
-        throw "createUser: cell number must be of the form XXX-XXX-XXXX";
+        throw "updateUser: cell number must be of the form XXX-XXX-XXXX";
     }
   }
   if (numbers.home === undefined) {
-    throw "createUser: Missing home number; must be null or a string";
+    throw "updateUser: Missing home number; must be null or a string";
   } else {
     if (numbers.home !== null) {
       if (typeof numbers.home !== "string")
-        throw `createUser: home number must be a string`;
+        throw `updateUser: home number must be a string`;
       if (numbers.home.trim().length === 0)
-        throw "createUser: home number must not be an empty string";
+        throw "updateUser: home number must not be an empty string";
       if (!numberRegex.test(numbers.home))
-        throw "createUser: home number must be of the form XXX-XXX-XXXX";
+        throw "updateUser: home number must be of the form XXX-XXX-XXXX";
     }
   }
 
@@ -252,7 +252,7 @@ async function updateUser(body) {
     joinDate: oldUser.joinDate,
     numbers: { cell: numbers.cell, home: numbers.home },
     items: oldUser.items,
-    rating: oldUser.rating
+    ratings: oldUser.ratings
   };
 
   const updateInfo = await userCollection.updateOne(
@@ -275,6 +275,14 @@ async function getAllUsers() {
 }
 
 async function addItemToUser(userId, itemId) {
+  if (!userId) throw "addItemToUser: Missing userId";
+  if (typeof userId !== "string")
+    throw `addItemToUser: userId must be a string`;
+
+  if (!itemId) throw "addItemToUser: Missing itemId";
+  if (typeof itemId !== "string")
+    throw `addItemToUser: itemId must be a string`;
+
   const userCollection = await users();
   let oldUser = await getUserById(userId);
 
@@ -296,7 +304,7 @@ async function addItemToUser(userId, itemId) {
     joinDate: oldUser.joinDate,
     numbers: oldUser.numbers,
     items: items,
-    rating: oldUser.rating
+    ratings: oldUser.ratings
   };
 
   const updateInfo = await userCollection.updateOne(
@@ -308,6 +316,14 @@ async function addItemToUser(userId, itemId) {
   return getUserById(userId);
 }
 async function deleteItemToUser(userId, itemId) {
+  if (!userId) throw "deleteItemToUser: Missing userId";
+  if (typeof userId !== "string")
+    throw `deleteItemToUser: userId must be a string`;
+
+  if (!itemId) throw "deleteItemToUser: Missing itemId";
+  if (typeof itemId !== "string")
+    throw `deleteItemToUser: itemId must be a string`;
+
   const userCollection = await users();
   const flag=false;
   let oldUser = await getUserById(userId);
@@ -336,6 +352,14 @@ async function deleteItemToUser(userId, itemId) {
   return getUserById(userId);
 }
 async function updatePfp(userId, imageId) {
+  if (!userId) throw "updatePfp: Missing userId";
+  if (typeof userId !== "string")
+    throw `updatePfp: userId must be a string`;
+
+  if (!imageId) throw "updatePfp: Missing imageId";
+  if (typeof imageId !== "string")
+    throw `updatePfp: imageId must be a string`;
+
   const userCollection = await users();
   let oldUser = await getUserById(userId);
 
@@ -348,7 +372,7 @@ async function updatePfp(userId, imageId) {
     joinDate: oldUser.joinDate,
     numbers: oldUser.numbers,
     items: oldUser.items,
-    rating: olderUser.rating
+    ratings: olderUser.ratings
   };
 
   const updateInfo = await userCollection.updateOne(
@@ -359,8 +383,47 @@ async function updatePfp(userId, imageId) {
   return getUserById(userId);
 }
 
-async function updateRating(userId, newRating) {
+async function addRatingToUser(userId, raterId, rating) {
+  if (!userId) throw "addRatingToUser: Missing userId";
+  if (typeof userId !== "string")
+    throw `addRatingToUser: userId must be a string`;
+
+  if (!raterId) throw "addRatingToUser: Missing raterId";
+  if (typeof raterId !== "string")
+    throw `addRatingToUser: raterId must be a string`;
+
+  if (rating === undefined) throw "addRatingToUser: Missing raterId";
+  if (typeof rating !== "number")
+    throw `addRatingToUser: rating must be a number`;
+  if (rating < 0 || rating > 5) throw "addRatingToUser: rating must be between 0 and 5";
+
   const userCollection = await users();
+  let oldUser = await getUserById(userId);
+  let index = oldUser.ratings.findIndex((elem) => elem.raterId === raterId);
+  // console.log(index);
+  if (index === -1) {
+    oldUser.ratings.push({ raterId: raterId, rating: rating });
+  } else {
+    oldUser.ratings[index] = { raterId: raterId, rating: rating };
+  }
+  const newUser = {
+    name: oldUser.name,
+    username: oldUser.username,
+    passwordHash: oldUser.passwordHash,
+    profilePicture: oldUser.profilePicture,
+    emailAddress: oldUser.emailAddress,
+    joinDate: oldUser.joinDate,
+    numbers: oldUser.numbers,
+    items: oldUser.items,
+    ratings: oldUser.ratings
+  };
+  const updateInfo = await userCollection.updateOne(
+    { _id: ObjectId(userId) },
+    { $set: newUser }
+  );
+
+  if (updateInfo.modifiedCount === 0) throw "addRatingToUser: Failed to update user";
+  return getUserById(userId);
 }
 
 async function getUserById(id) {
@@ -405,5 +468,6 @@ module.exports = {
   deleteItemToUser,
   getUserById,
   updatePfp,
-  getUserByEmail
+  getUserByEmail,
+  addRatingToUser
 };

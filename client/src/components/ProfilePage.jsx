@@ -4,7 +4,7 @@ import { makeStyles } from "@mui/styles";
 import { useTheme } from "@mui/material/styles";
 import axios from "axios";
 import { AuthContext } from "../firebase/Auth";
-import { Redirect } from 'react-router-dom';
+import { Redirect } from "react-router-dom";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 
 import {
@@ -23,6 +23,7 @@ import {
   Divider,
   Chip,
   Rating,
+  Box,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Link } from "react-router-dom";
@@ -40,8 +41,7 @@ const Label = styled("span")(({ theme }) => ({
 const ItemListing = (item) => {
   const deleteItem = async (id) => {
     try {
-      const { data }=await axios.delete(`http://localhost:4000/items/${id}`);
-
+      const { data } = await axios.delete(`http://localhost:4000/items/${id}`);
     } catch (e) {
       alert(e);
     }
@@ -86,7 +86,9 @@ const ItemListing = (item) => {
             secondaryTypographyProps={{ component: "div" }}
           />
         </ListItemButton>
-        <Button onClick={()=>deleteItem(item._id)} variant="outlined" >Delete</Button>
+        <Button onClick={() => deleteItem(item._id)} variant="outlined">
+          Delete
+        </Button>
         {/* </Link> */}
       </ListItem>
       <Divider />
@@ -176,6 +178,12 @@ const ProfilePage = () => {
       </Avatar>
     );
   }
+  let total_rating = 0;
+  for (const r of user.ratings) {
+    total_rating += r.rating;
+  }
+  let rating = user.ratings.length > 0 ? total_rating / user.ratings.length : 0;
+  console.log("rating", rating);
 
   return (
     <Container style={{ maxWidth: "100%" }}>
@@ -193,12 +201,33 @@ const ProfilePage = () => {
                   year: "numeric",
                 })}
               </div>
+              <Box
+                sx={{
+                  display: "inline-block",
+                  position: "relative",
+                  bottom: "6px",
+                  fontSize: "14x",
+                  marginRight: "0.5em"
+                }}
+              >
+                Rating:
+              </Box>
               <Rating
                 name="seller-rating"
-                value={5}
+                value={rating}
                 readOnly
                 sx={{ m: "3px", position: "relative", left: "-6px" }}
               />
+              <Box
+                sx={{
+                  display: "inline-block",
+                  position: "relative",
+                  bottom: "6px",
+                  color: "#2F80ED",
+                }}
+              >
+                {user.ratings.length}
+              </Box>
             </>
           }
           action={
@@ -245,7 +274,11 @@ const ProfilePage = () => {
               Listed Items
             </Typography>
             <div>
-              <List>{itemListings}</List>
+              {user.items.length > 0 ? (
+                <List sx={{ width: "100%" }}>{itemListings}</List>
+              ) : (
+                "No items listed."
+              )}
             </div>
           </div>
         </CardContent>

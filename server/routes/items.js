@@ -63,7 +63,7 @@ router.get('/', async (req, res) => {
   if (req.query.filter) {
     searchStr += `filter:${req.query.filter}`
   }
-  if (req.query.latest.toLowerCase() === 'false') {
+  if (req.query.latest && req.query.latest.toLowerCase() === 'false') {
     searchStr += `latest:false`
   }
   searchStr = searchStr.toLowerCase()
@@ -77,7 +77,7 @@ router.get('/', async (req, res) => {
       items = await data.items.getItemsByCategory(req.query.filter);
     }
     // console.log(req.query);
-    if (req.query.latest.toLowerCase() === 'false') {
+    if (req.query.latest && req.query.latest.toLowerCase() === 'false') {
       items.reverse()
     }
     if (req.query.offset) {

@@ -14,6 +14,13 @@ const client = redis.createClient(redisOptions);
 bluebird.promisifyAll(redis.RedisClient.prototype);
 bluebird.promisifyAll(redis.Multi.prototype);
 
+// https://stackoverflow.com/questions/175739/how-can-i-check-if-a-string-is-a-valid-number
+function isNumeric(str) {
+  if (typeof str != "string") return false;
+  return !isNaN(str) && 
+         !isNaN(parseFloat(str));
+}
+
 router.get('/email/', async (req, res) => {
   let body = req.body;
   let emailAddress = xss(req.body.emailAddress)
@@ -106,6 +113,34 @@ router.post('/', async (req, res) => {
   } catch (e) {
     console.log("server error", e)
     return res.status(500).json({ error: e })
+  }
+})
+
+router.post('/rating', async (req, res) => {
+  // get body + xss body
+  let body = req.body;
+  let userId = xss(body.userId);
+  let raterId = xss(body.raterId);
+  let rating = xss(body.rating);
+  if (!userId || userId.trim().length == 0) { return res.status(400).json({ error: "userId not valid" }) };
+  if (!raterId || raterId.trim().length == 0) { return res.status(400).json({ error: "raterId not valid" }) };
+  if (rating === undefined || !isNumeric(rating)) { return res.status(400).json({ error: "rating not valid" }) };
+  let parsed_rating = parseInt(rating);
+  if (parsed_rating < 0 || parsed_rating > 5) { return res.status(400).json({ error: "rating must be between 0 and 5" }) };
+
+  // Check if rater exists
+  try {
+    let rater = await data.users.getUserById(raterId);
+  } catch (e) {
+    return res.status(404).json({ error: `user with id ${raterId} does not exist` })
+  }
+  try {
+    let user = await data.users.addRatingToUser(userId, raterId, parsed_rating);
+    let userDataCached = await client.hsetAsync("user", `${userId}`, JSON.stringify(user));
+    return res.json(user);
+  } catch (e) {
+    console.log(e);
+    return res.status(404).json({ error: `failed to add rating to user with id ${userId}` })
   }
 })
 

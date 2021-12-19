@@ -20,19 +20,23 @@ import {
   Chip,
   ListItem,
   Rating,
+  Box,
+  Tooltip,
 } from "@mui/material";
 import { Link } from "react-router-dom";
 
 import MessageIcon from "@mui/icons-material/Message";
 import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
 import Loading from "./Loading";
+import StarBorderIcon from '@mui/icons-material/StarBorder';
+import RatingForm from "./RatingForm";
 
 const Label = styled("span")(({ theme }) => ({
   fontWeight: 500,
 }));
 
 const ItemListing = (item) => {
-  console.log(item);
+  // console.log(item);
   return (
     <>
       <ListItem key={item._id} sx={{ padding: 0 }}>
@@ -91,6 +95,15 @@ const ItemPage = (props) => {
   const [user, setUserData] = useState(undefined);
   const [items, setItemData] = useState(undefined);
   const [errorHappened, setError] = useState(undefined);
+  const [formOpen, setFormOpen] = useState(false);
+
+  const handleFormOpen = () => {
+    setFormOpen(true);
+  };
+
+  const handleFormClose = () => {
+    setFormOpen(false);
+  };
 
   useEffect(() => {
     console.log("useEffect fired");
@@ -153,6 +166,12 @@ const ItemPage = (props) => {
         </Avatar>
       );
     }
+    let total_rating = 0;
+    for (const r of user.ratings) {
+      total_rating += r.rating;
+    }
+    let rating =
+      user.ratings.length > 0 ? total_rating / user.ratings.length : 0;
 
     return (
       <Container>
@@ -170,19 +189,47 @@ const ItemPage = (props) => {
                     year: "numeric",
                   })}
                 </div>
+                <Box
+                  sx={{
+                    display: "inline-block",
+                    position: "relative",
+                    bottom: "6px",
+                    fontSize: "14x",
+                    marginRight: "0.5em",
+                  }}
+                >
+                  Rating:
+                </Box>
                 <Rating
                   name="seller-rating"
-                  value={5}
+                  value={rating}
                   readOnly
+                  precision={0.5}
                   sx={{ m: "3px", position: "relative", left: "-6px" }}
                 />
+                <Box
+                  sx={{
+                    display: "inline-block",
+                    position: "relative",
+                    bottom: "6px",
+                    color: "#2F80ED",
+                  }}
+                >
+                  {user.ratings.length}
+                </Box>
               </>
             }
             action={
-              <Button aria-label="message" color="secondary">
-                Send a Message
-                <MessageIcon style={{ marginLeft: ".3em" }} />
-              </Button>
+              <div style={{ textAlign: "right" }}>
+                <Button aria-label="message" color="secondary" sx={{display: "block"}}>
+                  Send a Message
+                  <MessageIcon style={{ marginLeft: ".3em" }} />
+                </Button>
+                <Button aria-label="message" color="secondary" onClick={handleFormOpen}>
+                  Rate this User
+                  <StarBorderIcon style={{ marginLeft: ".3em", position: "relative", bottom: "1px" }} />
+                </Button>
+              </div>
             }
             classes={{ title: classes.title }}
           />
@@ -217,11 +264,16 @@ const ItemPage = (props) => {
                 Listed Items
               </Typography>
               <div>
-                <List sx={{ width: "100%" }}>{itemListings}</List>
+                {user.items.length > 0 ? (
+                  <List sx={{ width: "100%" }}>{itemListings}</List>
+                ) : (
+                  "No items listed."
+                )}
               </div>
             </div>
           </CardContent>
         </Card>
+        <RatingForm formOpen={formOpen} handleFormClose={handleFormClose} />
       </Container>
     );
   }
