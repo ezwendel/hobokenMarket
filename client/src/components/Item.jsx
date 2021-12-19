@@ -150,7 +150,7 @@ const Item = ({ item }) => {
 
 
   return (
-    <Card sx={{ minWidth: 250, height: 600 }}>
+    <Card sx={{ minWidth: 250, height: 600 }} key={item._id}>
       <CardHeader
         avatar={avatarInternals}
         title={item.name}
@@ -177,7 +177,7 @@ const Item = ({ item }) => {
       <div style={{ padding: "1em 1em 0 1em" }}>
         <ul className="category-list">
           {item.categories.map((category) => (
-            <li>
+            <li key={category}>
               <Chip
                 label={category}
                 size="small"
