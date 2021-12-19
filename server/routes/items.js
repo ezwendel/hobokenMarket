@@ -105,7 +105,7 @@ router.get('/', async (req, res) => {
     let itemsDataCached = await client.hsetAsync("items", `${searchStr}`, JSON.stringify(items))
     res.json(items);
   } catch (e) {
-    return res.status(500).json({ error: e });
+    return res.status(500).json({ error: e.toString() });
   }
 })
 
