@@ -14,9 +14,15 @@ const client = redis.createClient(redisOptions);
 bluebird.promisifyAll(redis.RedisClient.prototype);
 bluebird.promisifyAll(redis.Multi.prototype);
 
-router.get('/email/', async (req, res) => {
-  let body = req.body;
-  let emailAddress = xss(req.body.emailAddress)
+// https://stackoverflow.com/questions/175739/how-can-i-check-if-a-string-is-a-valid-number
+function isNumeric(str) {
+  if (typeof str != "string") return false;
+  return !isNaN(str) && 
+         !isNaN(parseFloat(str));
+}
+
+router.get('/email/:email', async (req, res) => {
+  let emailAddress = req.params.email;
   if (!emailAddress || emailAddress.trim().length == 0) { return res.status(400).json({ error: "emailAddress not valid" }) };
   try {
     let user = await data.users.getUserByEmail(emailAddress);
@@ -52,6 +58,8 @@ router.post('/', async (req, res) => {
   let firstName = xss(body.firstName)
   let lastName = xss(body.lastName)
   let emailAddress = xss(body.emailAddress)
+  let cell = xss(body.numbers.cell);
+  let home = xss(body.numbers.home);
   // console.log(password)
   // error checking
   if (!password || password.trim().length == 0) { return res.status(400).json({ error: "password not valid" }) };
@@ -59,6 +67,33 @@ router.post('/', async (req, res) => {
   if (!firstName || firstName.trim().length == 0) { return res.status(400).json({ error: "firstName not valid" }) };
   if (!lastName || lastName.trim().length == 0) { return res.status(400).json({ error: "lastName not valid" }) };
   if (!emailAddress || emailAddress.trim().length == 0) { return res.status(400).json({ error: "emailAddress not valid" }) };
+  if (!body.numbers) { return res.status(400).json({ error: "missing numbers" })};
+  const numberRegex = /^\(?([0-9]{3})\)?[-]?([0-9]{3})[-]?([0-9]{4})$/;
+  if (cell === undefined) {
+    return res.status(400).json({ error: "missing cell number" });
+  } else {
+    if (cell !== "") {
+      if (cell.trim().length === 0)
+        return res.status(400).json({ error: "cell number is not valid" });
+      if (!numberRegex.test(cell))
+        return res.status(400).json({ error: "cell number is not valid" });
+    } else {
+      cell = null;
+    }
+  }
+  if (home === undefined) {
+    return res.status(400).json({ error: "home number is not valid" });
+  } else {
+    if (home !== "") {
+      if (home.trim().length === 0)
+        return res.status(400).json({ error: "home number is not valid" });
+      if (!numberRegex.test(home))
+        return res.status(400).json({ error: "home number is not valid" });
+    } else {
+      home = null;
+    }
+  }
+
   // check if username already exists
   let allUsers = await data.users.getAllUsers();
   for (i of allUsers) {
@@ -71,12 +106,43 @@ router.post('/', async (req, res) => {
   }
   // try to create user
   try {
-    let user = await data.users.createUser({ name: { firstName: firstName, lastName: lastName }, password: password, username: username, emailAddress: emailAddress })
+    let user = await data.users.createUser({ name: { firstName: firstName, lastName: lastName }, password: password, username: username, emailAddress: emailAddress, numbers: { cell: cell, home: home } })
     delete user.passwordHash
     return res.json(user);
   } catch (e) {
     console.log("server error", e)
     return res.status(500).json({ error: e })
+  }
+})
+
+router.post('/rating', async (req, res) => {
+  // get body + xss body
+  let body = req.body;
+  let userId = xss(body.userId);
+  let raterEmail = xss(body.raterEmail);
+  let rating = xss(body.rating);
+  if (!userId || userId.trim().length == 0) { return res.status(400).json({ error: "userId not valid" }) };
+  if (!raterEmail || raterEmail.trim().length == 0) { return res.status(400).json({ error: "raterId not valid" }) };
+  if (rating === undefined || !isNumeric(rating)) { return res.status(400).json({ error: "rating not valid" }) };
+  let parsed_rating = parseInt(rating);
+  if (parsed_rating < 0 || parsed_rating > 5) { return res.status(400).json({ error: "rating must be between 0 and 5" }) };
+
+  // TODO: Check if user being rated and the rater are the same
+
+  // Check if rater exists
+  let rater;
+  try {
+    rater = await data.users.getUserByEmail(raterEmail);
+  } catch (e) {
+    return res.status(404).json({ error: `user with email ${raterEmail} does not exist` })
+  }
+  try {
+    let user = await data.users.addRatingToUser(userId, rater._id.toString(), parsed_rating);
+    let userDataCached = await client.hsetAsync("user", `${userId}`, JSON.stringify(user));
+    return res.json(user);
+  } catch (e) {
+    console.log(e);
+    return res.status(404).json({ error: `failed to add rating to user with id ${userId}` })
   }
 })
 

@@ -1,6 +1,7 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, Profiler } from "react";
 import { AuthContext } from "../firebase/Auth";
 import axios from "axios";
+import { createToken } from "../firebase/AuthBackend";
 
 import {
   Dialog,
@@ -12,6 +13,7 @@ import {
   FormControl,
   Alert,
 } from "@mui/material";
+import { propsToClassKey } from "@mui/styles";
 
 const ChangeProfilePic = (props) => {
   const [imageError, setImageError] = useState(false);
@@ -35,16 +37,21 @@ const ChangeProfilePic = (props) => {
     }
     if (!submitError) {
       try {
-        console.log("Image: ", selectedFile);
+        // console.log("Image: ", selectedFile);
         let submitData = new FormData();
         submitData.append("file", selectedFile);
-        submitData.append("sellerId", currentUser.displayName);
-        console.log(submitData);
+        submitData.append("userId", currentUser.email); // formerly currentUser.displayName
+        // console.log(submitData);
+
+        const header = await createToken();
+
         let { data } = await axios.post(
-          "http://localhost:4000/items/with_image",
-          submitData
+          "http://localhost:4000/file/profile_upload",
+          submitData,
+          header
         );
-        console.log(data);
+        // console.log("post data", data);
+        props.setProfilePic(data.imgUrl)
         setSelectedFile(null);
         props.handleFormClose();
       } catch (e) {
@@ -60,9 +67,9 @@ const ChangeProfilePic = (props) => {
 
   return (
     <Dialog open={props.formOpen} onClose={props.handleFormClose} scroll="body">
-      <DialogTitle>Change Profile Pic</DialogTitle>
+      <DialogTitle component="h1">Change Profile Pic</DialogTitle>
       {formError && <Alert severity="error">{formError}</Alert>}
-      <DialogContent sx={{ width: 500, justfiy: "center" }}>
+      <DialogContent sx={{ width: 500, justifyContent: "center" }}>
         <FormControl sx={{ mt: 1, width: "35ch" }}>
           <label htmlFor="image">Upload an image below:</label>
           <Input

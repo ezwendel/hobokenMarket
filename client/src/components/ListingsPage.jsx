@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../firebase/Auth";
+import { createToken } from "../firebase/AuthBackend";
 
 import {
   Container,
@@ -44,47 +45,100 @@ const ListingsPage = (props) => {
     props.history.push(`/items/${page + 1}`);
   };
 
+  const fetchListings = async () => {
+    // Check if the next page has items
+    try {
+      const header = await createToken();
+      let query;
+      if (sortedBy === "Latest") {
+        if (!filter) {
+          query = await axios.get(
+            `http://localhost:4000/items?offset=${(page + 1) * 20}`,
+            header
+          );
+        } else {
+          query = await axios.get(
+            `http://localhost:4000/items?offset=${
+              (page + 1) * 20
+            }&filter=${filter}`,
+            header
+          );
+        }
+      } else {
+        if (!filter) {
+          query = await axios.get(
+            `http://localhost:4000/items?offset=${
+              (page + 1) * 20
+            }&latest=false`,
+            header
+          );
+        } else {
+          query = await axios.get(
+            `http://localhost:4000/items?offset=${
+              (page + 1) * 20
+            }&filter=${filter}&latest=false`,
+            header
+          );
+        }
+      }
+      const { data } = query;
+      if (data.length === 0) {
+        setLast(page);
+      }
+    } catch (e) {
+      if (e) {
+        setLast(page);
+      }
+    }
+    // Get current page's data
+    try {
+      const header = await createToken();
+      let query;
+      if (sortedBy === "Latest") {
+        if (!filter) {
+          query = await axios.get(
+            `http://localhost:4000/items?offset=${page * 20}`,
+            header
+          );
+        } else {
+          query = await axios.get(
+            `http://localhost:4000/items?offset=${
+              page * 20
+            }&filter=${filter}`,
+            header
+          );
+        }
+      } else {
+        if (!filter) {
+          query = await axios.get(
+            `http://localhost:4000/items?offset=${page * 20}&latest=false`,
+            header
+          );
+        } else {
+          query = await axios.get(
+            `http://localhost:4000/items?offset=${
+              page * 20
+            }&filter=${filter}&latest=false`,
+            header
+          );
+        }
+      }
+      const { data } = query;
+      // console.log(data);
+      setItems(data);
+      setLoading(false);
+    } catch (e) {
+      setError(e);
+      setLoading(false);
+    }
+  };
+
   // Get item
   useEffect(() => {
     console.log(`Loading Page ${page}...`);
-    const fetchData = async () => {
-      try {
-        const { data } = !filter
-          ? await axios.get(`http://localhost:4000/items?offset=${page * 20}`)
-          : await axios.get(
-              `http://localhost:4000/items?offset=${page * 20}&filter=${filter}`
-            );
-        console.log(data);
-        setItems(data);
-        setLoading(false);
-      } catch (e) {
-        setError(e);
-        setLoading(false);
-      }
-
-      // Check if the next page has items
-      try {
-        const { data } = !filter
-          ? await axios.get(
-              `http://localhost:4000/items?offset=${(page + 1) * 20}`
-            )
-          : await axios.get(
-              `http://localhost:4000/items?offset=${
-                (page + 1) * 20
-              }&filter=${filter}`
-            );
-        if (data.length === 0) {
-          setLast(page);
-        }
-      } catch (e) {
-        if (e.response.status === 404) {
-          setLast(page);
-        }
-      }
-    };
     setLoading(true);
-    fetchData();
-  }, [page, props.history, props.match.params.page, filter]);
+    fetchListings();
+  }, [page, props.history, props.match.params.page, filter, sortedBy]);
 
   const [formOpen, setFormOpen] = useState(false);
 
@@ -102,12 +156,15 @@ const ListingsPage = (props) => {
     let searchTerm = document.getElementById("search").value.trim();
     if (searchTerm.trim() !== "") {
       setSearching(searchTerm);
-      console.log("here");
+      // console.log("here");
       try {
+        const header = await createToken();
+
         const { data } = await axios.get(
-          `http://localhost:4000/items/search/${searchTerm}`
+          `http://localhost:4000/items/search/${searchTerm}`,
+          header
         );
-        console.log(data);
+        // console.log(data);
         setItems(data);
         setLoading(false);
       } catch (e) {
@@ -117,10 +174,13 @@ const ListingsPage = (props) => {
     } else {
       setSearching(false);
       try {
+        const header = await createToken();
+
         const { data } = await axios.get(
-          `http://localhost:4000/items?offset=${page * 20}`
+          `http://localhost:4000/items?offset=${page * 20}`,
+          header
         );
-        console.log(data);
+        // console.log(data);
         setItems(data);
         setLoading(false);
       } catch (e) {
@@ -130,8 +190,11 @@ const ListingsPage = (props) => {
 
       // Check if the next page has items
       try {
+        const header = await createToken();
+
         const { data } = await axios.get(
-          `http://localhost:4000/items?offset=${(page + 1) * 20}`
+          `http://localhost:4000/items?offset=${(page + 1) * 20}`,
+          header
         );
         if (data.length === 0) {
           setLast(page);
@@ -156,45 +219,8 @@ const ListingsPage = (props) => {
   const handleSearchDelete = async () => {
     setLoading(true);
     setSearching(false);
-    try {
-      const { data } = await axios.get(
-        `http://localhost:4000/items?offset=${page * 20}`
-      );
-      console.log(data);
-      setItems(data);
-      setLoading(false);
-    } catch (e) {
-      setError(e);
-      setLoading(false);
-    }
-
-    // Check if the next page has items
-    try {
-      const { data } = await axios.get(
-        `http://localhost:4000/items?offset=${(page + 1) * 20}`
-      );
-      if (data.length === 0) {
-        setLast(page);
-      }
-    } catch (e) {
-      setLast(page);
-    }
+    fetchListings();
   };
-
-  const compare = (a, b) => {
-    if (a.listDate < b.listDate) {
-      return 1;
-    }
-    if (a.listDate > b.listDate) {
-      return -1;
-    }
-    return 0;
-  }
-
-  let sorted_items;
-  if (sortedBy == "Latest") {
-    sorted_items = items.sort(compare);
-  }
 
   return (
     <Container style={{ maxWidth: "100%" }}>
@@ -203,13 +229,13 @@ const ListingsPage = (props) => {
           {page > 0 ? (
             <Button onClick={() => prevPage()}>Previous</Button>
           ) : (
-            <Button disabled>Previous</Button>
+            null
           )}
           <Chip style={{ margin: "0 1em" }} label={page} />
           {!searching && page !== last ? (
             <Button onClick={() => nextPage()}>Next</Button>
           ) : (
-            <Button disabled>Next</Button>
+            null
           )}
         </div>
       )}
@@ -268,12 +294,15 @@ const ListingsPage = (props) => {
           </ToggleButtonGroup>
           <FormControl
             variant="standard"
-            sx={{ minWidth: 120, position: "relative", bottom: "0.2em", marginLeft: "1em" }}
+            sx={{
+              minWidth: 120,
+              position: "relative",
+              bottom: "0.2em",
+              marginLeft: "1em",
+            }}
           >
             <InputLabel id="sorted_by_label" sx={{ fontSize: 14 }}>
-              <small
-                style={{ color: theme.palette.primary.main }}
-              >
+              <small style={{ color: theme.palette.primary.main }}>
                 <SortIcon
                   style={{
                     width: "18px",
@@ -299,7 +328,7 @@ const ListingsPage = (props) => {
           </FormControl>
         </div>
       )}
-      <ItemList items={sorted_items} loading={loading} />
+      <ItemList items={items} loading={loading} />
       <CreateListing
         formOpen={formOpen}
         handleFormClose={handleFormClose}

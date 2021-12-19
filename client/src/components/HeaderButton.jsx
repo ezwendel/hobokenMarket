@@ -1,13 +1,13 @@
 import React from "react";
 
 import { Link } from "react-router-dom";
-import { Tooltip, IconButton, Box, Badge } from "@mui/material/";
+import { Tooltip, IconButton, Box, Badge, Button } from "@mui/material/";
 
 const HeaderButton = ({ to, title, icon, func }) => {
   return (
     <Box>
       <Tooltip title={title}>
-        <IconButton
+        <Button
           size="large"
           color="inherit"
           aria-label={title}
@@ -17,8 +17,9 @@ const HeaderButton = ({ to, title, icon, func }) => {
           className="header-button"
           onClick={func}
         >
+          <Box className="header-link-text" fontSize="12px" mr="1em">{title}</Box>
           <Badge>{icon}</Badge>
-        </IconButton>
+        </Button>
       </Tooltip>
     </Box>
   );

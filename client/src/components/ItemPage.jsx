@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { makeStyles } from "@mui/styles";
 import { useTheme } from "@mui/material/styles";
 import axios from "axios";
+import { createToken } from "../firebase/AuthBackend";
 
 import {
   Container,
@@ -42,8 +43,10 @@ const ItemPage = (props) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data } = await axios.get(`http://localhost:4000/items/${id}`);
-        console.log(data);
+        const header = await createToken();
+
+        const { data } = await axios.get(`http://localhost:4000/items/${id}`, header);
+        // console.log(data);
         setItem(data);
       } catch (e) {
         setError(e);
@@ -60,10 +63,12 @@ const ItemPage = (props) => {
       try {
         if (item) {
           setError(false);
+          const header = await createToken();
+
           const { data: data2 } = await axios.get(
-            `http://localhost:4000/user/${item.sellerId}`
+            `http://localhost:4000/user/${item.sellerId}`, header
           );
-          console.log(data2);
+          // console.log(data2);
           setUser(data2);
         } else {
           setError("404: item not found")
@@ -98,13 +103,36 @@ const ItemPage = (props) => {
       </Container>
     );
   }
+  let avatarInternals = null;
+  if (user.profilePicture) {
+    avatarInternals = (
+      <Link to={`/user/${user._id}`} className="item-avatar-link">
+        <Tooltip title={user.username}>
+          <Avatar
+            alt={`${user.name.firstName} ${user.name.lastName}`}
+            src={`http://localhost:4000/file/${user.profilePicture}`}
+          />
+        </Tooltip>
+      </Link>
+    );
+  } else {
+    avatarInternals = (
+      <Link to={`/user/${user._id}`} className="item-avatar-link">
+        <Tooltip title={user.username}>
+          <Avatar sx={{ bgcolor: "#EB5757" }}>
+            {user.username[0].toUpperCase()}
+          </Avatar>
+        </Tooltip>
+      </Link>
+    );
+  }
   return (
     <Container>
       <Card sx={{ minWidth: 250, maxWidth: "70%", margin: "0 auto" }}>
         <CardMedia
           component="img"
           image={
-            item.itemPictures !== null
+            item.itemPictures[0]
               ? `http://localhost:4000/file/${item.itemPictures[0]}`
               : Placeholder
           }
@@ -114,13 +142,7 @@ const ItemPage = (props) => {
         />
         <CardHeader
           avatar={
-            <Link to={`/user/${user._id}`}>
-              <Tooltip title={user.username}>
-                <Avatar sx={{ bgcolor: "#EB5757" }}>
-                  {user.username.charAt(0).toUpperCase()}
-                </Avatar>
-              </Tooltip>
-            </Link>
+            avatarInternals
           }
           title={item.name}
           subheader={new Date(item.listDate).toLocaleDateString("en-US", {
@@ -142,7 +164,7 @@ const ItemPage = (props) => {
           </Typography>
           <ul className="category-list">
             {item.categories.map((category) => (
-              <li>
+              <li key={category}>
                 <Chip
                   label={category}
                   size="small"
@@ -190,8 +212,8 @@ const ItemPage = (props) => {
                       Cell Phone #:
                     </TableCell>
                     <TableCell style={{ width: 160 }} align="right">
-                      {user.number && user.number.cell !== null
-                        ? user.number.cell
+                      {user.numbers && user.numbers.cell !== null
+                        ? user.numbers.cell
                         : "N/A"}
                     </TableCell>
                   </TableRow>
@@ -200,8 +222,8 @@ const ItemPage = (props) => {
                       Home Phone #:
                     </TableCell>
                     <TableCell style={{ width: 160 }} align="right">
-                      {user.number && user.number.home !== null
-                        ? user.number.home
+                      {user.numbers && user.numbers.home !== null
+                        ? user.numbers.home
                         : "N/A"}
                     </TableCell>
                   </TableRow>

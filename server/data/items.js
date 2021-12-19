@@ -1,10 +1,18 @@
 const { items, users } = require("../config/mongoCollections");
 const moment = require("moment"); // for date checking
 const { ObjectId } = require("mongodb");
+const { deleteImage } = require('./images')
 
 // https://stackoverflow.com/questions/7376598/in-javascript-how-do-i-check-if-an-array-has-duplicate-values
 function containsDuplicates(arr) {
   return new Set(arr).size !== arr.length;
+}
+
+function sortArraysByListDate(arr) {
+  arr.sort((a,b) => {
+    return new Date(b.listDate) - new Date(a.listDate)
+  })
+  return arr;
 }
 
 async function createItem(body) {
@@ -82,7 +90,7 @@ async function createItem(body) {
   const insertInfo = await itemsCollection.insertOne(newItem);
   if (insertInfo.insertedCount === 0) throw "createItem: Failed to create item";
   const id = insertInfo.insertedId.toString();
-  return getItemById(id);
+  return await getItemById(id);
 }
 
 async function getAllItems() {
@@ -93,7 +101,7 @@ async function getAllItems() {
     item._id = item._id.toString();
     item.sellerId = item.sellerId.toString();
   }
-  return itemsList;
+  return sortArraysByListDate(itemsList);
 }
 
 async function getItemById(id) {
@@ -120,6 +128,12 @@ async function deleteItemById(id) {
   if (id.trim().length === 0)
     throw "deleteItemById: The provided id must not be an empty string";
   const parsedId = ObjectId(id.trim());
+
+  let itemToDelete = await getItemById(id);
+
+  for (i of itemToDelete.itemPictures) {
+    await deleteImage(i.toString())
+  }
 
   const itemCollection = await items();
   const deletionInfo = await itemCollection.deleteOne({ _id: parsedId });
@@ -148,7 +162,7 @@ async function getItemsByCategory(category) {
     item._id = item._id.toString();
     item.sellerId = item.sellerId.toString();
   }
-  return itemsList;
+  return sortArraysByListDate(itemsList);
 }
 
 async function getItemsBySeller(sellerId) {
@@ -166,7 +180,7 @@ async function getItemsBySeller(sellerId) {
     item._id = item._id.toString();
     item.sellerId = item.sellerId.toString();
   }
-  return itemsList;
+  return sortArraysByListDate(itemsList);
 }
 
 async function search(keyword) {
@@ -190,7 +204,7 @@ async function search(keyword) {
     item._id = item._id.toString();
     item.sellerId = item.sellerId.toString();
   }
-  return itemsList;
+  return sortArraysByListDate(itemsList);
 }
 
 module.exports = {
