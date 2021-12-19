@@ -107,7 +107,8 @@ const Login = () => {
 
             </Grid>
             <Grid item xs={6}>
-            <Link classname="forgotPassword"  onClick={(e) => {passwordReset(e)}}>
+              {/* FIX LINK HERE */}
+            <Link classname="forgotPassword" onClick={(e) => {passwordReset(e)}}>
                 Forget Password
               </Link>
               <br />

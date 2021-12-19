@@ -205,7 +205,8 @@ const Item = ({ item }) => {
         </Typography>
       </CardContent>
       <CardActions>
-        <Button color="secondary" size="small" component={Link}>
+        {/* FIX LINK HERE */}
+        <Button color="secondary" size="small" component={Link}> 
           CONTACT
         </Button>
         <Button
