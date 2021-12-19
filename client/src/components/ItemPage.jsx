@@ -164,7 +164,7 @@ const ItemPage = (props) => {
           </Typography>
           <ul className="category-list">
             {item.categories.map((category) => (
-              <li>
+              <li key={category}>
                 <Chip
                   label={category}
                   size="small"

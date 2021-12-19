@@ -90,7 +90,7 @@ async function createItem(body) {
   const insertInfo = await itemsCollection.insertOne(newItem);
   if (insertInfo.insertedCount === 0) throw "createItem: Failed to create item";
   const id = insertInfo.insertedId.toString();
-  return getItemById(id);
+  return await getItemById(id);
 }
 
 async function getAllItems() {
