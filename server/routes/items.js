@@ -32,6 +32,7 @@ router.get('/search/:keyword', async (req, res) => {
     let searchResultsCached = await client.hsetAsync("search", `${keyword}`, JSON.stringify(searchResults))
     return res.json(searchResults);
   } catch (e) {
+    console.log(e)
     return res.status(500).json({ error: e })
   }
 })
@@ -62,6 +63,9 @@ router.get('/', async (req, res) => {
   if (req.query.filter) {
     searchStr += `filter:${req.query.filter}`
   }
+  if (req.query.latest.toLowerCase() === 'false') {
+    searchStr += `latest:false`
+  }
   searchStr = searchStr.toLowerCase()
   let itemsData = await client.hgetAsync("items", `${searchStr}`);
   if (itemsData) { return res.json(JSON.parse(itemsData)) }
@@ -73,6 +77,9 @@ router.get('/', async (req, res) => {
       items = await data.items.getItemsByCategory(req.query.filter);
     }
     // console.log(req.query);
+    if (req.query.latest.toLowerCase() === 'false') {
+      items.reverse()
+    }
     if (req.query.offset) {
       let offset = Number(req.query.offset);
       // console.log(skipNum);
@@ -105,7 +112,7 @@ router.get('/', async (req, res) => {
 router.post('/with_image', upload.single("file"), async (req, res) => {
   console.log("good");
   if (req.file === undefined) return res.status(400).json({error: "must select a file."})
-
+  console.log(req.file.id)
   // get body + xss body
   let body = req.body
   let name = xss(body.name);
@@ -115,18 +122,56 @@ router.post('/with_image', upload.single("file"), async (req, res) => {
   let categories = body.categories.split(","); // xss later
   console.log(body);
   // error checking
-  if (!name || name.trim().length == 0) { return res.status(400).json({ error: "name not valid" }) };
-  if (!description || description.trim().length == 0) { return res.status(400).json({ error: "description not valid" }) };
-  if (!sellerId || sellerId.trim().length == 0) { return res.status(400).json({ error: "sellerId not valid" }) };
+  if (!name || name.trim().length == 0) {
+    try {
+      await data.images.deleteImage(req.file.id.toString()); 
+      return res.status(400).json({ error: "name not valid" })
+    } catch (e) {
+      console.log(e);
+      return res.status(400).json({ error: "name not valid" })
+    }
+  };
+  if (!description || description.trim().length == 0) {
+    try {
+      await data.images.deleteImage(req.file.id.toString()); 
+      return res.status(400).json({ error: "description not valid" })
+    } catch (e) {
+      console.log(e);
+      return res.status(400).json({ error: "description not valid" })
+    }
+  };
+  if (!sellerId || sellerId.trim().length == 0) {
+    try {
+      await data.images.deleteImage(req.file.id.toString()); 
+      return res.status(400).json({ error: "sellerId not valid" })
+    } catch (e) {
+      console.log(e);
+      return res.status(400).json({ error: "sellerId not valid" })
+    }
+  };
 
-  if (!categories || !Array.isArray(categories) || categories.length == 0) { return res.status(400).json({ error: "categories not valid" }) };
+  if (!categories || !Array.isArray(categories) || categories.length == 0) {
+    try {
+      await data.images.deleteImage(req.file.id.toString()); 
+      return res.status(400).json({ error: "categories not valid" })
+    } catch (e) {
+      console.log(e);
+      return res.status(400).json({ error: "categories not valid" })
+    }
+  };
   // see if seller exists
   let seller = null;
   try {
     seller = await data.users.getUserById(sellerId);
   } catch (e) {
     console.log(e)
-    return res.status(404).json({ error: `user with id ${sellerId} does not exist` }) 
+    try {
+      await data.images.deleteImage(req.file.id.toString()); 
+      return res.status(404).json({ error: `user with id ${sellerId} does not exist` })
+    } catch (e) {
+      console.log(e);
+      return res.status(404).json({ error: `user with id ${sellerId} does not exist` })
+    }
   }
   try {
     let item = await data.items.createItem({ name: name, description: description, sellerId: sellerId, categories: categories, itemPictures: itemPictures })
@@ -140,7 +185,13 @@ router.post('/with_image', upload.single("file"), async (req, res) => {
     return res.json(item);
   } catch (e) {
     console.log("server error", e)
-    return res.status(500).json({ error: e })
+    try {
+      await data.images.deleteImage(req.file.id.toString()); 
+      return res.status(500).json({ error: e })
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({ error: e })
+    }
   }
 })
 
@@ -179,6 +230,22 @@ router.post('/', async (req, res) => {
   } catch (e) {
     console.log("server error", e)
     return res.status(500).json({ error: e })
+  }
+})
+
+router.delete('/:id', async (req, res) => {
+  let id = req.params.id
+  if (!id || id.trim().length == 0) { return res.status(400).json({ error: "id not valid" }) };
+  try {
+    let itemInfo=await data.items.getItemById(id);
+    let delInfo = await data.items.deleteItemById(id);
+    let deluserInfo= await data.users.deleteItemToUser(itemInfo.sellerId,id);
+    let itemDataCached = await client.hdelAsync("item", `${id}`)
+    let userDataCached = await client.hsetAsync("user", `${itemInfo.sellerId}`, JSON.stringify(deluserInfo));
+    return res.json(deluserInfo);
+  } catch (e) {
+    console.log(e)
+    return res.status(404).json({ error: `item with id ${id} does not exist` })
   }
 })
 

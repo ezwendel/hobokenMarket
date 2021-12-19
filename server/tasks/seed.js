@@ -22,8 +22,10 @@ const main = async () => {
       password: "password",
       profilePicture: null,
       emailAddress: "jrandle30@gmail.com",
+      numbers: { cell: "123-123-1234", home: null}
     });
     const user1_id = user1._id.toString();
+    console.log("Created user 1");
 
     const user2 = await usersData.createUser({
       name: { firstName: "RJ", lastName: "Barrett" },
@@ -31,8 +33,10 @@ const main = async () => {
       password: "password2",
       profilePicture: null,
       emailAddress: "rjbarrett@gmail.com",
+      numbers: { cell: "000-000-0000", home: "789-789-7890"}
     });
     const user2_id = user2._id.toString();
+    console.log("Created user 2");
 
     const user3 = await usersData.createUser({
       name: { firstName: "Derrick", lastName: "Rose" },
@@ -40,8 +44,10 @@ const main = async () => {
       password: "password3",
       profilePicture: null,
       emailAddress: "drose@gmail.com",
+      numbers: { cell: null, home: "123-456-7890"}
     });
     const user3_id = user3._id.toString();
+    console.log("Created user 3");
 
     const user4 = await usersData.createUser({
       name: { firstName: "Mitchell", lastName: "Robinson" },
@@ -49,8 +55,10 @@ const main = async () => {
       password: "password4",
       profilePicture: null,
       emailAddress: "mrobinson23@gmail.com",
+      numbers: { cell: "111-222-3333", home: null }
     });
     const user4_id = user4._id.toString();
+    console.log("Created user 4");
 
     console.log("getUserById:", await usersData.getUserById(user1_id));
     console.log("getAllUsers:", await usersData.getAllUsers());

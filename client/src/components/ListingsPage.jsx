@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
+import { AuthContext } from "../firebase/Auth";
 
 import {
   Container,
@@ -9,11 +10,16 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   useTheme,
+  FormControl,
+  MenuItem,
+  Select,
+  InputLabel,
 } from "@mui/material";
 import ItemList from "./ItemList";
 import CreateListing from "./CreateListing";
 import Add from "@mui/icons-material/Add";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
+import SortIcon from "@mui/icons-material/Sort";
 import Searchbar from "./Searchbar";
 import Draggable from "react-draggable";
 
@@ -27,7 +33,9 @@ const ListingsPage = (props) => {
   const [last, setLast] = useState(null);
   const [searching, setSearching] = useState(false);
   const [filter, setFilter] = useState("");
+  const [sortedBy, setSortedBy] = useState("Latest");
   const [dragging, setDragging] = useState(false);
+  const { currentUser } = useContext(AuthContext);
 
   const prevPage = () => {
     props.history.push(`/items/${page - 1}`);
@@ -69,7 +77,7 @@ const ListingsPage = (props) => {
           setLast(page);
         }
       } catch (e) {
-        if (e.response.status === 404) {
+        if (e) {
           setLast(page);
         }
       }
@@ -141,7 +149,11 @@ const ListingsPage = (props) => {
     console.log(newFilter);
   };
 
-  const handleDelete = async () => {
+  const handleSortedBy = (e) => {
+    setSortedBy(e.target.value);
+  };
+
+  const handleSearchDelete = async () => {
     setLoading(true);
     setSearching(false);
     try {
@@ -170,7 +182,7 @@ const ListingsPage = (props) => {
   };
 
   return (
-    <Container maxWidth="100%">
+    <Container style={{ maxWidth: "100%" }}>
       {!searching && (
         <div style={{ width: "fit-content", margin: "1em auto" }}>
           {page > 0 ? (
@@ -193,7 +205,7 @@ const ListingsPage = (props) => {
             label={`Search Term: ${searching}`}
             color="primary"
             variant="outlined"
-            onDelete={handleDelete}
+            onDelete={handleSearchDelete}
           />
         </div>
       )}
@@ -239,32 +251,70 @@ const ListingsPage = (props) => {
               Other
             </ToggleButton>
           </ToggleButtonGroup>
+          <FormControl
+            variant="standard"
+            sx={{ minWidth: 120, position: "relative", bottom: "0.2em", marginLeft: "1em" }}
+          >
+            <InputLabel id="sorted_by_label" sx={{ fontSize: 14 }}>
+              <small
+                style={{ color: theme.palette.primary.main }}
+              >
+                <SortIcon
+                  style={{
+                    width: "18px",
+                    height: "18px",
+                    position: "relative",
+                    bottom: "2px",
+                  }}
+                />{" "}
+                SORTED BY:
+              </small>
+            </InputLabel>
+            <Select
+              labelId="sorted_by_label"
+              id="sorted_by"
+              value={sortedBy}
+              onChange={handleSortedBy}
+              size="small"
+              sx={{ fontSize: 14 }}
+            >
+              <MenuItem value={"Latest"}>LATEST</MenuItem>
+              <MenuItem value={"Oldest"}>OLDEST</MenuItem>
+            </Select>
+          </FormControl>
         </div>
       )}
       <ItemList items={items} loading={loading} />
-      <CreateListing formOpen={formOpen} handleFormClose={handleFormClose} history={props.history} />
-      <Draggable
-        onDrag={() => {
-          setDragging(true);
-        }}
-        onStop={() => {
-          if (!dragging) {
-            handleFormOpen();
-          }
-          setDragging(false);
-        }}
-      >
-        <Fab
-          color="primary"
-          variant="extended"
-          aria-label="create-post"
-          style={{ position: "fixed", right: "5em", bottom: "3em" }}
-          onClick={() => {}}
+      <CreateListing
+        formOpen={formOpen}
+        handleFormClose={handleFormClose}
+        history={props.history}
+      />
+      {/*https://github.com/react-grid-layout/react-draggable/issues/49*/}
+      {currentUser && (
+        <Draggable
+          onDrag={() => {
+            setDragging(true);
+          }}
+          onStop={() => {
+            if (!dragging) {
+              handleFormOpen();
+            }
+            setDragging(false);
+          }}
         >
-          <Add sx={{ mr: 1 }} />
-          Create Listing
-        </Fab>
-      </Draggable>
+          <Fab
+            color="primary"
+            variant="extended"
+            aria-label="create-post"
+            style={{ position: "fixed", right: "5em", bottom: "3em" }}
+            onClick={() => {}}
+          >
+            <Add sx={{ mr: 1 }} />
+            Create Listing
+          </Fab>
+        </Draggable>
+      )}
     </Container>
   );
 };
