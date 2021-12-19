@@ -57,8 +57,19 @@ const ItemListing = (item) => {
           to={`/item/${item._id}`}
           style={{ color: "inherit", textDecoration: "none" }}
         >
-          <ListItemIcon>
-            <ShoppingBasketIcon />
+          <ListItemIcon sx={{ marginRight: "2em" }}>
+            <Avatar
+              sx={{ width: 75, height: 75 }}
+              src={picture}
+              variant="square"
+              alt={item.name}
+            >
+              <img
+                src={Placeholder}
+                alt={item.name}
+                style={{ height: 75, width: "auto" }}
+              />
+            </Avatar>
           </ListItemIcon>
           <ListItemText
             primary={item.name}
