@@ -39,6 +39,15 @@ const Label = styled("span")(({ theme }) => ({
   fontWeight: 500,
 }));
 
+const StyledRating = styled(Rating)({
+  '& .MuiRating-iconFilled': {
+    color: '#1a6ad6',
+  },
+  '& .MuiRating-iconHover': {
+    color: '#1a6ad6',
+  },
+});
+
 const ItemListing = (item) => {
   const deleteItem = async (id) => {
     try {
@@ -50,7 +59,7 @@ const ItemListing = (item) => {
     }
     window.location.reload();
   };
-  console.log(item);
+  // console.log(item);
   return (
     <>
       <ListItem key={item._id} sx={{ padding: 0 }}>
@@ -94,7 +103,6 @@ const ItemListing = (item) => {
         </Button>
         {/* </Link> */}
       </ListItem>
-      <Divider />
     </>
   );
 };
@@ -190,7 +198,7 @@ const ProfilePage = () => {
     total_rating += r.rating;
   }
   let rating = user.ratings.length > 0 ? total_rating / user.ratings.length : 0;
-  console.log("rating", rating);
+  // console.log("rating", rating);
 
   return (
     <Container style={{ maxWidth: "100%" }}>
@@ -213,28 +221,28 @@ const ProfilePage = () => {
                   display: "inline-block",
                   position: "relative",
                   bottom: "6px",
-                  fontSize: "14x",
+                  fontSize: "14px",
                   marginRight: "0.5em"
                 }}
               >
                 Rating:
               </Box>
-              <Rating
+              <StyledRating
                 name="seller-rating"
                 value={rating}
                 readOnly
                 sx={{ m: "3px", position: "relative", left: "-6px" }}
               />
-              <Box
+              <Chip
                 sx={{
-                  display: "inline-block",
                   position: "relative",
                   bottom: "6px",
-                  color: "#2F80ED",
                 }}
-              >
-                {user.ratings.length}
-              </Box>
+                label={user.ratings.length}
+                size="small"
+                color="secondary"
+                variant="outlined"
+              />
             </>
           }
           action={
@@ -247,6 +255,7 @@ const ProfilePage = () => {
               <AddAPhotoIcon style={{ marginLeft: ".3em" }} />
             </Button>
           }
+          subheaderTypographyProps={{ component: "div"}}
           classes={{ title: classes.title }}
         />
         <Divider />

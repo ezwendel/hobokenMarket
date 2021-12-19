@@ -62,8 +62,10 @@ const Searchbar = ({ search }) => {
           id="search"
         />
       </Search>
+      <label for="search-submit" hidden>Search</label>
       <Button
         type="submit"
+        id="search-submit"
         variant="contained"
         style={{ display: "inline-block", width: "fit-content" }}
         disableElevation

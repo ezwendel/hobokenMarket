@@ -88,6 +88,10 @@
   color: inherit;
 }
 
+.home-button:hover {
+  color: #A32638;
+}
+
 .item-avatar-link:hover {
   color: inherit;
   text-decoration: none;

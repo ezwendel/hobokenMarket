@@ -46,46 +46,6 @@ const ListingsPage = (props) => {
   };
 
   const fetchListings = async () => {
-    try {
-      const header = await createToken();
-      let query;
-      if (sortedBy === "Latest") {
-        if (!filter) {
-          query = await axios.get(
-            `http://localhost:4000/items?offset=${page * 20}`,
-            header
-          );
-        } else {
-          query = await axios.get(
-            `http://localhost:4000/items?offset=${
-              page * 20
-            }&filter=${filter}`,
-            header
-          );
-        }
-      } else {
-        if (!filter) {
-          query = await axios.get(
-            `http://localhost:4000/items?offset=${page * 20}&latest=false`,
-            header
-          );
-        } else {
-          query = await axios.get(
-            `http://localhost:4000/items?offset=${
-              page * 20
-            }&filter=${filter}&latest=false`,
-            header
-          );
-        }
-      }
-      const { data } = query;
-      console.log(data);
-      setItems(data);
-      setLoading(false);
-    } catch (e) {
-      setError(e);
-      setLoading(false);
-    }
     // Check if the next page has items
     try {
       const header = await createToken();
@@ -130,6 +90,47 @@ const ListingsPage = (props) => {
         setLast(page);
       }
     }
+    // Get current page's data
+    try {
+      const header = await createToken();
+      let query;
+      if (sortedBy === "Latest") {
+        if (!filter) {
+          query = await axios.get(
+            `http://localhost:4000/items?offset=${page * 20}`,
+            header
+          );
+        } else {
+          query = await axios.get(
+            `http://localhost:4000/items?offset=${
+              page * 20
+            }&filter=${filter}`,
+            header
+          );
+        }
+      } else {
+        if (!filter) {
+          query = await axios.get(
+            `http://localhost:4000/items?offset=${page * 20}&latest=false`,
+            header
+          );
+        } else {
+          query = await axios.get(
+            `http://localhost:4000/items?offset=${
+              page * 20
+            }&filter=${filter}&latest=false`,
+            header
+          );
+        }
+      }
+      const { data } = query;
+      // console.log(data);
+      setItems(data);
+      setLoading(false);
+    } catch (e) {
+      setError(e);
+      setLoading(false);
+    }
   };
 
   // Get item
@@ -155,7 +156,7 @@ const ListingsPage = (props) => {
     let searchTerm = document.getElementById("search").value.trim();
     if (searchTerm.trim() !== "") {
       setSearching(searchTerm);
-      console.log("here");
+      // console.log("here");
       try {
         const header = await createToken();
 
@@ -163,7 +164,7 @@ const ListingsPage = (props) => {
           `http://localhost:4000/items/search/${searchTerm}`,
           header
         );
-        console.log(data);
+        // console.log(data);
         setItems(data);
         setLoading(false);
       } catch (e) {
@@ -179,7 +180,7 @@ const ListingsPage = (props) => {
           `http://localhost:4000/items?offset=${page * 20}`,
           header
         );
-        console.log(data);
+        // console.log(data);
         setItems(data);
         setLoading(false);
       } catch (e) {
@@ -228,13 +229,13 @@ const ListingsPage = (props) => {
           {page > 0 ? (
             <Button onClick={() => prevPage()}>Previous</Button>
           ) : (
-            <Button disabled>Previous</Button>
+            null
           )}
           <Chip style={{ margin: "0 1em" }} label={page} />
           {!searching && page !== last ? (
             <Button onClick={() => nextPage()}>Next</Button>
           ) : (
-            <Button disabled>Next</Button>
+            null
           )}
         </div>
       )}

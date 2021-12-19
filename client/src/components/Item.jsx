@@ -139,7 +139,7 @@ const Item = ({ item }) => {
     avatarInternals = (
       <Link to={`/user/${user._id}`} className="item-avatar-link">
         <Tooltip title={user.username}>
-          <Avatar sx={{ bgcolor: "#EB5757" }}>
+          <Avatar sx={{ bgcolor: "#A32638" }}>
             {user.username[0].toUpperCase()}
           </Avatar>
         </Tooltip>

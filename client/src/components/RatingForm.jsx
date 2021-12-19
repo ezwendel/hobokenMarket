@@ -3,6 +3,8 @@ import { AuthContext } from "../firebase/Auth";
 import { createToken } from "../firebase/AuthBackend";
 import axios from "axios";
 
+import { styled, alpha } from "@mui/material/styles";
+
 import {
   Dialog,
   DialogTitle,
@@ -13,6 +15,15 @@ import {
   Rating,
   Box,
 } from "@mui/material";
+
+const StyledRating = styled(Rating)({
+  '& .MuiRating-iconFilled': {
+    color: '#1a6ad6',
+  },
+  '& .MuiRating-iconHover': {
+    color: '#1a6ad6',
+  },
+});
 
 const RatingForm = (props) => {
   const [formError, setFormError] = useState(false);
@@ -32,7 +43,7 @@ const RatingForm = (props) => {
         submitData,
         header
       );
-      console.log(data);
+      // console.log(data);
       let total_rating = 0;
       for (const r of props.user.ratings) {
         total_rating += r.rating;
@@ -54,11 +65,11 @@ const RatingForm = (props) => {
 
   return (
     <Dialog open={props.formOpen} onClose={props.handleFormClose} scroll="body">
-      <DialogTitle>Leave a Rating</DialogTitle>
+      <DialogTitle component="h1">Leave a Rating</DialogTitle>
       {formError && <Alert severity="error">{formError}</Alert>}
-      <DialogContent sx={{ width: 300, justfiy: "center" }}>
+      <DialogContent sx={{ width: 300, justifyContent: "center" }}>
         <Box sx={{ width: "fit-content", margin: "0 auto" }}>
-          <Rating
+          <StyledRating
             name="user_rating"
             value={value}
             onChange={(event, newValue) => {

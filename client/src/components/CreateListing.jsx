@@ -71,7 +71,7 @@ const CreateListing = (props) => {
     if (!submitError) {
       try {
 
-        console.log("Image: ", selectedFile);
+        // console.log("Image: ", selectedFile);
         let submitData = new FormData();
         submitData.append("name", formData.name.trim());
         submitData.append("description", formData.description.trim());
@@ -86,7 +86,7 @@ const CreateListing = (props) => {
         //   sellerId: currentUser.displayName,
         // };
 
-        console.log(submitData);
+        // console.log(submitData);
 
         const header = await createToken();
 
@@ -95,7 +95,7 @@ const CreateListing = (props) => {
           submitData,
           header
         );
-        console.log(data);
+        // console.log(data);
         nameField.value = "";
         descriptionField.value = "";
         setCategories([]);
@@ -159,7 +159,7 @@ const CreateListing = (props) => {
 
   return (
     <Dialog open={props.formOpen} onClose={props.handleFormClose} scroll="body">
-      <DialogTitle>Add New Listing</DialogTitle>
+      <DialogTitle component="h1">Add New Listing</DialogTitle>
       {formError && <Alert severity="error">{formError}</Alert>}
       <DialogContent sx={{ width: 500 }}>
         <DialogContentText>
@@ -193,7 +193,7 @@ const CreateListing = (props) => {
         />
         {descError && <Alert severity="error">{descError}</Alert>}
         <FormControl sx={{ mt: 1, mb: 1, width: "100%" }}>
-          <InputLabel id="categories">Categories</InputLabel>
+          <InputLabel id="categories-label">Categories</InputLabel>
           <Select
             labelId="categories"
             id="categories"
