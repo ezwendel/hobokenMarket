@@ -58,10 +58,12 @@ router.post("/profile_upload", upload.single("file"), async (req, res) =>{
     let updatedUser = await data.users.updatePfp(user._id.toString(), req.file.id.toString())
     let userDataCached = await client.hsetAsync("user", `${req.body.userId}`, JSON.stringify(updatedUser));
     const imgUrl = `http://localhost:4000/file/${req.file.id}`;
-    try {
-      await data.images.deleteImage(user.profilePicture.toString())
-    } catch (err) {
-      console.log(err)
+    if (user.profilePicture) {
+      try {
+        await data.images.deleteImage(user.profilePicture.toString())
+      } catch (err) {
+        console.log(err)
+      }
     }
     return res.json({imgUrl});
   } catch (e) {
