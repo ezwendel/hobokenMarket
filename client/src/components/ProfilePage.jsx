@@ -8,6 +8,7 @@ import { Redirect } from "react-router-dom";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import { createToken } from "../firebase/AuthBackend";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import Placeholder from "../img/default.png";
 
 import {
   Container,
@@ -64,6 +65,9 @@ const ItemListing = (item) => {
     }
     window.location.reload();
   };
+  let picture = item.itemPictures[0]
+    ? `http://localhost:4000/file/${item.itemPictures[0]}`
+    : Placeholder;
   // console.log(item);
   return (
     <>
@@ -78,8 +82,19 @@ const ItemListing = (item) => {
             borderBottom: "1px solid #ccc",
           }}
         >
-          <ListItemIcon>
-            <ShoppingBasketIcon />
+          <ListItemIcon sx={{ marginRight: "2em" }}>
+            <Avatar
+              sx={{ width: 75, height: 75 }}
+              src={picture}
+              variant="square"
+              alt={item.name}
+            >
+              <img
+                src={Placeholder}
+                alt={item.name}
+                style={{ height: 75, width: "auto" }}
+              />
+            </Avatar>
           </ListItemIcon>
           <ListItemText
             primary={item.name}
@@ -106,17 +121,23 @@ const ItemListing = (item) => {
             }
             secondaryTypographyProps={{ component: "div" }}
           />
-          <Tooltip title="Delete Listing">
-            <Button
-              onClick={(e) => {
-                e.stopPropagation();
-                deleteItem(item._id);
-              }}
-            >
-              <DeleteForeverIcon />
-            </Button>
-          </Tooltip>
         </ListItemButton>
+        <Tooltip title="Delete Listing">
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+              deleteItem(item._id);
+            }}
+            style={{
+              backgroundColor: "transparent",
+              width: "fit-content",
+              maxWidth: "30px",
+              minWidth: "30px",
+            }}
+          >
+            <DeleteForeverIcon />
+          </Button>
+        </Tooltip>
         {/* </Link> */}
       </ListItem>
     </>
