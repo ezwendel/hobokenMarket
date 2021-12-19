@@ -151,12 +151,12 @@ async function getItemsByCategory(category) {
     throw "getItemsByCategory: The provided category must not be an empty string";
 
   const itemCollection = await items();
-  // const itemsList = await itemCollection.find({ categories: category }).toArray();
-  await itemCollection.createIndex({ categories: "text" }); // case insensitive
-  const itemsList = await itemCollection
-    .find({ $text: { $search: category } })
-    .toArray();
-  await itemCollection.dropIndexes();
+  const itemsList = await itemCollection.find({ categories: category }).toArray();
+  // await itemCollection.createIndex({ categories: "text" }); // case insensitive
+  // const itemsList = await itemCollection
+  //   .find({ $text: { $search: category } })
+  //   .toArray();
+  // await itemCollection.dropIndexes();
   // itemsList.reverse() // this makes oldest first
   for (let item of itemsList) {
     item._id = item._id.toString();
