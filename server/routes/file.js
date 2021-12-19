@@ -10,6 +10,17 @@ const e = require('express');
 
 const url = process.env.DOCKER_MODE ? 'mongodb://mongo:27017/hobokenMarketDB' : 'mongodb://localhost:27017/hobokenMarketDB';
 
+const bluebird = require('bluebird');
+const redis = require('redis');
+const redisOptions = {
+  host: process.env.DOCKER_MODE ? 'redis' : 'localhost',
+  port: 6379,
+};
+const client = redis.createClient(redisOptions);
+
+bluebird.promisifyAll(redis.RedisClient.prototype);
+bluebird.promisifyAll(redis.Multi.prototype);
+
 const data = require('../data');
 
 
@@ -44,7 +55,8 @@ router.post("/profile_upload", upload.single("file"), async (req, res) =>{
   console.log(req.file)
   try {
     let user = await data.users.getUserById(req.body.userId);
-    await data.users.updatePfp(req.body.userId, req.file.id)
+    let updatedUser = await data.users.updatePfp(req.body.userId, req.file.id)
+    let userDataCached = await client.hsetAsync("user", `${req.body.userId}`, JSON.stringify(updatedUser));
     const imgUrl = `http://localhost:4000/file/${req.file.id}`;
     try {
       await data.images.deleteImage(user.profilePicture.toString())

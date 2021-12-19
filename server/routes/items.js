@@ -32,6 +32,7 @@ router.get('/search/:keyword', async (req, res) => {
     let searchResultsCached = await client.hsetAsync("search", `${keyword}`, JSON.stringify(searchResults))
     return res.json(searchResults);
   } catch (e) {
+    console.log(e)
     return res.status(500).json({ error: e })
   }
 })
@@ -62,6 +63,9 @@ router.get('/', async (req, res) => {
   if (req.query.filter) {
     searchStr += `filter:${req.query.filter}`
   }
+  if (req.query.latest.toLowerCase() === 'false') {
+    searchStr += `latest:false`
+  }
   searchStr = searchStr.toLowerCase()
   let itemsData = await client.hgetAsync("items", `${searchStr}`);
   if (itemsData) { return res.json(JSON.parse(itemsData)) }
@@ -73,6 +77,9 @@ router.get('/', async (req, res) => {
       items = await data.items.getItemsByCategory(req.query.filter);
     }
     // console.log(req.query);
+    if (req.query.latest.toLowerCase() === 'false') {
+      items.reverse()
+    }
     if (req.query.offset) {
       let offset = Number(req.query.offset);
       // console.log(skipNum);
