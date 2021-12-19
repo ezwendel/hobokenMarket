@@ -2,7 +2,7 @@ import React from "react";
 import CircularProgress from "@mui/material/CircularProgress";
 import { Container, Typography } from "@mui/material";
 
-const Loading = () => {
+const Loading = ({text}) => {
   return (
     <Container style={{ maxWidth: "100%" }}>
       <div
@@ -14,7 +14,7 @@ const Loading = () => {
         }}
       >
         <Typography mb="1em" variant="p" component="div">
-          Loading...
+          {text ? text : "Loading..."}
         </Typography>
         <CircularProgress />
       </div>

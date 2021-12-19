@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, Profiler } from "react";
 import { AuthContext } from "../firebase/Auth";
 import axios from "axios";
 import { createToken } from "../firebase/AuthBackend";
@@ -13,6 +13,7 @@ import {
   FormControl,
   Alert,
 } from "@mui/material";
+import { propsToClassKey } from "@mui/styles";
 
 const ChangeProfilePic = (props) => {
   const [imageError, setImageError] = useState(false);
@@ -49,7 +50,8 @@ const ChangeProfilePic = (props) => {
           submitData,
           header
         );
-        console.log(data);
+        console.log("post data", data);
+        props.setProfilePic(data.imgUrl)
         setSelectedFile(null);
         props.handleFormClose();
       } catch (e) {
