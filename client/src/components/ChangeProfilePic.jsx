@@ -1,6 +1,7 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, Profiler } from "react";
 import { AuthContext } from "../firebase/Auth";
 import axios from "axios";
+import { createToken } from "../firebase/AuthBackend";
 
 import {
   Dialog,
@@ -12,6 +13,7 @@ import {
   FormControl,
   Alert,
 } from "@mui/material";
+import { propsToClassKey } from "@mui/styles";
 
 const ChangeProfilePic = (props) => {
   const [imageError, setImageError] = useState(false);
@@ -38,13 +40,18 @@ const ChangeProfilePic = (props) => {
         console.log("Image: ", selectedFile);
         let submitData = new FormData();
         submitData.append("file", selectedFile);
-        submitData.append("userId", currentUser.displayName);
+        submitData.append("userId", currentUser.email); // formerly currentUser.displayName
         console.log(submitData);
+
+        const header = await createToken();
+
         let { data } = await axios.post(
           "http://localhost:4000/file/profile_upload",
-          submitData
+          submitData,
+          header
         );
-        console.log(data);
+        console.log("post data", data);
+        props.setProfilePic(data.imgUrl)
         setSelectedFile(null);
         props.handleFormClose();
       } catch (e) {

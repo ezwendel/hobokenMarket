@@ -1,12 +1,12 @@
-import React, {useContext,useState }from "react";
+import React, { useContext, useState } from "react";
 import { useTheme } from "@mui/material/styles";
-import SocialSignIn from './SocialSignIn';
-import { Redirect } from 'react-router-dom';
-import { AuthContext } from '../firebase/Auth';
+import SocialSignIn from "./SocialSignIn";
+import { Redirect } from "react-router-dom";
+import { AuthContext } from "../firebase/Auth";
 import {
   doSignInWithEmailAndPassword,
-  doPasswordReset
-} from '../firebase/FirebaseFunctions';
+  doPasswordReset,
+} from "../firebase/FirebaseFunctions";
 
 import {
   Card,
@@ -39,13 +39,13 @@ const Login = () => {
 
   const passwordReset = (event) => {
     event.preventDefault();
-    let email = document.getElementById('email').value;
+    let email = document.getElementById("email").value;
     if (email) {
       doPasswordReset(email);
-      alert('Password reset email was sent');
+      alert("Password reset email was sent");
     } else {
       alert(
-        'Please enter an email address below before you click the forgot password link'
+        "Please enter an email address below before you click the forgot password link"
       );
     }
   };
@@ -65,11 +65,11 @@ const Login = () => {
           >
             <Grid item xs={6}>
               <Typography variant="h5" component="h1" fontWeight="bold">
-                User Login
+                Login
               </Typography>
             </Grid>
             <Grid item xs={6}>
-            <TextField
+              <TextField
                 id="email"
                 label="Email"
                 InputProps={{
@@ -101,25 +101,41 @@ const Login = () => {
               />
             </Grid>
             <Grid item xs={6} m={0.5}>
-              <Button variant="contained" width="100%" endIcon={<LoginIcon />} type="submit">
+              <Button
+                variant="contained"
+                width="100%"
+                endIcon={<LoginIcon />}
+                type="submit"
+              >
                 Login
               </Button>
-
             </Grid>
             <Grid item xs={6}>
-            <Link classname="forgotPassword"  onClick={(e) => {passwordReset(e)}}>
-                Forget Password
-              </Link>
-              <br />
-              <Link
+              <Button
+                className="forgotPassword"
+                onClick={(e) => {
+                  passwordReset(e);
+                }}
+                style={{
+                  color: theme.palette.primary.main,
+                }}
+              >
+                Forgot Password
+              </Button>
+            </Grid>
+            <Grid item xs={6}>
+              <Button
+                component={Link}
                 to="/create-account"
                 style={{
                   textDecoration: "none",
                   color: theme.palette.primary.main,
+                  position: "relative",
+                  bottom: "1em"
                 }}
               >
                 Or Create an Account
-              </Link>
+              </Button>
             </Grid>
           </Grid>
         </CardContent>

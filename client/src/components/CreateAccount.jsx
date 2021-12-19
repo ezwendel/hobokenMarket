@@ -5,6 +5,7 @@ import { doCreateUserWithEmailAndPassword } from "../firebase/FirebaseFunctions"
 import {AuthContext} from '../firebase/Auth';
 import SocialSignIn from './SocialSignIn';
 import axios from "axios";
+import { createToken } from "../firebase/AuthBackend";
 
 import {
   Card,
@@ -14,6 +15,7 @@ import {
   Grid,
   Button,
   TextField,
+  linkClasses,
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import AccountCircle from "@mui/icons-material/AccountCircle";
@@ -21,6 +23,7 @@ import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import EmailIcon from "@mui/icons-material/Email";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 import LocalPhoneIcon from '@mui/icons-material/LocalPhone';
+import Loading from "./Loading";
 
 const CreateAccount = () => {
   const theme = useTheme();
@@ -42,6 +45,9 @@ const CreateAccount = () => {
   const postData = async (e) => {
     try {
       const { username, firstname, lastname, email, password, cellnumber, homenumber } = e.target.elements;
+
+      const header = await createToken();
+
       const { data }=await axios.post(`http://localhost:4000/user/`,{
         firstName: firstname.value,
         lastName: lastname.value,
@@ -53,7 +59,8 @@ const CreateAccount = () => {
           cell: cellnumber.value,
           home: homenumber.value
         }
-      });
+      }, header
+      );
       await doCreateUserWithEmailAndPassword(
         email.value,
         password.value,
@@ -71,9 +78,7 @@ const CreateAccount = () => {
   }
   if (loading) {
     return (
-
-        <div style={{ margin: "0 auto", width: "fit-content" }}>Loading...</div>
-
+      <Loading text={"Creating Account..."} />
     );
   }
 
@@ -218,7 +223,8 @@ const CreateAccount = () => {
               <SocialSignIn/>
             </Grid>
             <Grid item xs={6}>
-              <Link
+              <Button
+                component={Link}
                 to="/login"
                 style={{
                   textDecoration: "none",
@@ -226,7 +232,7 @@ const CreateAccount = () => {
                 }}
               >
                 Or Login to an Existing Account
-              </Link>
+              </Button>
             </Grid>
           </Grid>
         </CardContent>

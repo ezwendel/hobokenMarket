@@ -4,8 +4,9 @@ import { makeStyles } from "@mui/styles";
 import { useTheme } from "@mui/material/styles";
 import axios from "axios";
 import { AuthContext } from "../firebase/Auth";
-import { Redirect } from 'react-router-dom';
+import { Redirect } from "react-router-dom";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
+import { createToken } from "../firebase/AuthBackend";
 
 import {
   Container,
@@ -23,6 +24,7 @@ import {
   Divider,
   Chip,
   Rating,
+  Box,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Link } from "react-router-dom";
@@ -40,8 +42,9 @@ const Label = styled("span")(({ theme }) => ({
 const ItemListing = (item) => {
   const deleteItem = async (id) => {
     try {
-      const { data }=await axios.delete(`http://localhost:4000/items/${id}`);
+      const header = await createToken();
 
+      const { data }=await axios.delete(`http://localhost:4000/items/${id}`, header);
     } catch (e) {
       alert(e);
     }
@@ -86,7 +89,9 @@ const ItemListing = (item) => {
             secondaryTypographyProps={{ component: "div" }}
           />
         </ListItemButton>
-        <Button onClick={()=>deleteItem(item._id)} variant="outlined" >Delete</Button>
+        <Button onClick={() => deleteItem(item._id)} variant="outlined">
+          Delete
+        </Button>
         {/* </Link> */}
       </ListItem>
       <Divider />
@@ -101,6 +106,7 @@ const ProfilePage = () => {
   const [items, setItemData] = useState(undefined);
   const [errorHappened, setError] = useState(undefined);
   const [formOpen, setFormOpen] = useState(false);
+  const [profilePic, setProfilePic] = useState(null);
 
   const handleFormOpen = () => {
     setFormOpen(true);
@@ -122,16 +128,19 @@ const ProfilePage = () => {
     const fetchData = async () => {
       try {
         // firebase.auth().currentUser.updateProfile({ displayName: '61be75a0bfcf8443bbd1279e' })
-        const { data } = await axios.get(
-          `http://localhost:4000/user/${currentUser.displayName}`
+        const header = await createToken();
+
+        const { data } = await axios.get( // formerly currentUser.displayName
+          `http://localhost:4000/user/email/${currentUser.email}`, header 
         );
         const itemData = await Promise.all(
           data.items.map(async (itemId) => {
-            let item = await axios.get(`http://localhost:4000/items/${itemId}`);
+            let item = await axios.get(`http://localhost:4000/items/${itemId}`, header);
             return item.data;
           })
         );
         setUser(data);
+        setProfilePic(`http://localhost:4000/file/${data.profilePicture}`);
         setItemData(itemData);
         setError(undefined);
       } catch (e) {
@@ -161,11 +170,11 @@ const ProfilePage = () => {
   });
 
   let avatarInternals = null;
-  if (user.profilePicture) {
+  if (user.profilePicture || profilePic) {
     avatarInternals = (
       <Avatar
         alt={`${user.name.firstName} ${user.name.lastName}`}
-        src={`http://localhost:4000/file/${user.profilePicture}`}
+        src={profilePic}
         sx={{ width: 75, height: 75 }}
       />
     );
@@ -176,6 +185,12 @@ const ProfilePage = () => {
       </Avatar>
     );
   }
+  let total_rating = 0;
+  for (const r of user.ratings) {
+    total_rating += r.rating;
+  }
+  let rating = user.ratings.length > 0 ? total_rating / user.ratings.length : 0;
+  console.log("rating", rating);
 
   return (
     <Container style={{ maxWidth: "100%" }}>
@@ -193,12 +208,33 @@ const ProfilePage = () => {
                   year: "numeric",
                 })}
               </div>
+              <Box
+                sx={{
+                  display: "inline-block",
+                  position: "relative",
+                  bottom: "6px",
+                  fontSize: "14x",
+                  marginRight: "0.5em"
+                }}
+              >
+                Rating:
+              </Box>
               <Rating
                 name="seller-rating"
-                value={5}
+                value={rating}
                 readOnly
                 sx={{ m: "3px", position: "relative", left: "-6px" }}
               />
+              <Box
+                sx={{
+                  display: "inline-block",
+                  position: "relative",
+                  bottom: "6px",
+                  color: "#2F80ED",
+                }}
+              >
+                {user.ratings.length}
+              </Box>
             </>
           }
           action={
@@ -245,12 +281,16 @@ const ProfilePage = () => {
               Listed Items
             </Typography>
             <div>
-              <List>{itemListings}</List>
+              {user.items.length > 0 ? (
+                <List sx={{ width: "100%" }}>{itemListings}</List>
+              ) : (
+                "No items listed."
+              )}
             </div>
           </div>
         </CardContent>
       </Card>
-      <ChangeProfilePic formOpen={formOpen} handleFormClose={handleFormClose} />
+      <ChangeProfilePic setProfilePic={setProfilePic} formOpen={formOpen} handleFormClose={handleFormClose} />
     </Container>
   );
 };

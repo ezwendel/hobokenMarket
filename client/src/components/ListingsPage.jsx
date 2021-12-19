@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../firebase/Auth";
+import { createToken } from "../firebase/AuthBackend";
 
 import {
   Container,
@@ -44,47 +45,99 @@ const ListingsPage = (props) => {
     props.history.push(`/items/${page + 1}`);
   };
 
+  const fetchListings = async () => {
+    try {
+      const header = await createToken();
+      let query;
+      if (sortedBy === "Latest") {
+        if (!filter) {
+          query = await axios.get(
+            `http://localhost:4000/items?offset=${page * 20}`,
+            header
+          );
+        } else {
+          query = await axios.get(
+            `http://localhost:4000/items?offset=${
+              page * 20
+            }&filter=${filter}`,
+            header
+          );
+        }
+      } else {
+        if (!filter) {
+          query = await axios.get(
+            `http://localhost:4000/items?offset=${page * 20}&latest=false`,
+            header
+          );
+        } else {
+          query = await axios.get(
+            `http://localhost:4000/items?offset=${
+              page * 20
+            }&filter=${filter}&latest=false`,
+            header
+          );
+        }
+      }
+      const { data } = query;
+      console.log(data);
+      setItems(data);
+      setLoading(false);
+    } catch (e) {
+      setError(e);
+      setLoading(false);
+    }
+    // Check if the next page has items
+    try {
+      const header = await createToken();
+      let query;
+      if (sortedBy === "Latest") {
+        if (!filter) {
+          query = await axios.get(
+            `http://localhost:4000/items?offset=${(page + 1) * 20}`,
+            header
+          );
+        } else {
+          query = await axios.get(
+            `http://localhost:4000/items?offset=${
+              (page + 1) * 20
+            }&filter=${filter}`,
+            header
+          );
+        }
+      } else {
+        if (!filter) {
+          query = await axios.get(
+            `http://localhost:4000/items?offset=${
+              (page + 1) * 20
+            }&latest=false`,
+            header
+          );
+        } else {
+          query = await axios.get(
+            `http://localhost:4000/items?offset=${
+              (page + 1) * 20
+            }&filter=${filter}&latest=false`,
+            header
+          );
+        }
+      }
+      const { data } = query;
+      if (data.length === 0) {
+        setLast(page);
+      }
+    } catch (e) {
+      if (e) {
+        setLast(page);
+      }
+    }
+  };
+
   // Get item
   useEffect(() => {
     console.log(`Loading Page ${page}...`);
-    const fetchData = async () => {
-      try {
-        const { data } = !filter
-          ? await axios.get(`http://localhost:4000/items?offset=${page * 20}`)
-          : await axios.get(
-              `http://localhost:4000/items?offset=${page * 20}&filter=${filter}`
-            );
-        console.log(data);
-        setItems(data);
-        setLoading(false);
-      } catch (e) {
-        setError(e);
-        setLoading(false);
-      }
-
-      // Check if the next page has items
-      try {
-        const { data } = !filter
-          ? await axios.get(
-              `http://localhost:4000/items?offset=${(page + 1) * 20}`
-            )
-          : await axios.get(
-              `http://localhost:4000/items?offset=${
-                (page + 1) * 20
-              }&filter=${filter}`
-            );
-        if (data.length === 0) {
-          setLast(page);
-        }
-      } catch (e) {
-        if (e) {
-          setLast(page);
-        }
-      }
-    };
     setLoading(true);
-    fetchData();
-  }, [page, props.history, props.match.params.page, filter]);
+    fetchListings();
+  }, [page, props.history, props.match.params.page, filter, sortedBy]);
 
   const [formOpen, setFormOpen] = useState(false);
 
@@ -104,8 +157,11 @@ const ListingsPage = (props) => {
       setSearching(searchTerm);
       console.log("here");
       try {
+        const header = await createToken();
+
         const { data } = await axios.get(
-          `http://localhost:4000/items/search/${searchTerm}`
+          `http://localhost:4000/items/search/${searchTerm}`,
+          header
         );
         console.log(data);
         setItems(data);
@@ -117,8 +173,11 @@ const ListingsPage = (props) => {
     } else {
       setSearching(false);
       try {
+        const header = await createToken();
+
         const { data } = await axios.get(
-          `http://localhost:4000/items?offset=${page * 20}`
+          `http://localhost:4000/items?offset=${page * 20}`,
+          header
         );
         console.log(data);
         setItems(data);
@@ -130,8 +189,11 @@ const ListingsPage = (props) => {
 
       // Check if the next page has items
       try {
+        const header = await createToken();
+
         const { data } = await axios.get(
-          `http://localhost:4000/items?offset=${(page + 1) * 20}`
+          `http://localhost:4000/items?offset=${(page + 1) * 20}`,
+          header
         );
         if (data.length === 0) {
           setLast(page);
@@ -156,29 +218,7 @@ const ListingsPage = (props) => {
   const handleSearchDelete = async () => {
     setLoading(true);
     setSearching(false);
-    try {
-      const { data } = await axios.get(
-        `http://localhost:4000/items?offset=${page * 20}`
-      );
-      console.log(data);
-      setItems(data);
-      setLoading(false);
-    } catch (e) {
-      setError(e);
-      setLoading(false);
-    }
-
-    // Check if the next page has items
-    try {
-      const { data } = await axios.get(
-        `http://localhost:4000/items?offset=${(page + 1) * 20}`
-      );
-      if (data.length === 0) {
-        setLast(page);
-      }
-    } catch (e) {
-      setLast(page);
-    }
+    fetchListings();
   };
 
   return (
@@ -253,12 +293,15 @@ const ListingsPage = (props) => {
           </ToggleButtonGroup>
           <FormControl
             variant="standard"
-            sx={{ minWidth: 120, position: "relative", bottom: "0.2em", marginLeft: "1em" }}
+            sx={{
+              minWidth: 120,
+              position: "relative",
+              bottom: "0.2em",
+              marginLeft: "1em",
+            }}
           >
             <InputLabel id="sorted_by_label" sx={{ fontSize: 14 }}>
-              <small
-                style={{ color: theme.palette.primary.main }}
-              >
+              <small style={{ color: theme.palette.primary.main }}>
                 <SortIcon
                   style={{
                     width: "18px",
