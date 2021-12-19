@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { styled } from "@mui/styles";
 import { makeStyles } from "@mui/styles";
 import { useTheme } from "@mui/material/styles";
 import axios from "axios";
 import { createToken } from "../firebase/AuthBackend";
+import { AuthContext } from "../firebase/Auth";
 
 import {
   Container,
@@ -98,6 +99,7 @@ const ItemPage = (props) => {
   const [errorHappened, setError] = useState(undefined);
   const [formOpen, setFormOpen] = useState(false);
   const [rating, setRating] = useState(0);
+  const { currentUser } = useContext(AuthContext);
 
   const handleFormOpen = () => {
     setFormOpen(true);
@@ -224,7 +226,7 @@ const ItemPage = (props) => {
                 </Box>
               </>
             }
-            action={
+            action={ currentUser ? 
               <div style={{ textAlign: "right" }}>
                 <Button aria-label="message" color="secondary" sx={{display: "block"}}>
                   Send a Message
@@ -234,7 +236,7 @@ const ItemPage = (props) => {
                   Rate this User
                   <StarBorderIcon style={{ marginLeft: ".3em", position: "relative", bottom: "1px" }} />
                 </Button>
-              </div>
+              </div> : null
             }
             classes={{ title: classes.title }}
           />

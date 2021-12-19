@@ -170,7 +170,7 @@ const ProfilePage = () => {
   });
 
   let avatarInternals = null;
-  if (profilePic) {
+  if (user.profilePicture || profilePic) {
     avatarInternals = (
       <Avatar
         alt={`${user.name.firstName} ${user.name.lastName}`}
