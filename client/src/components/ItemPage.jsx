@@ -132,7 +132,7 @@ const ItemPage = (props) => {
         <CardMedia
           component="img"
           image={
-            !item.itemPictures
+            item.itemPictures[0]
               ? `http://localhost:4000/file/${item.itemPictures[0]}`
               : Placeholder
           }

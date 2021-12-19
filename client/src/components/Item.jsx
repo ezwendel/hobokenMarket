@@ -147,6 +147,8 @@ const Item = ({ item }) => {
     );
   }
 
+
+
   return (
     <Card sx={{ minWidth: 250, height: 600 }}>
       <CardHeader
@@ -163,7 +165,7 @@ const Item = ({ item }) => {
         component="img"
         height="300"
         image={
-          !item.itemPictures
+          item.itemPictures[0]
             ? `http://localhost:4000/file/${item.itemPictures[0]}`
             : Placeholder
         }
