@@ -63,7 +63,7 @@ router.get('/', async (req, res) => {
   if (req.query.filter) {
     searchStr += `filter:${req.query.filter}`
   }
-  if (req.query.latest.toLowerCase() === 'false') {
+  if (req.query.latest && req.query.latest.toLowerCase() === 'false') {
     searchStr += `latest:false`
   }
   searchStr = searchStr.toLowerCase()
@@ -105,7 +105,7 @@ router.get('/', async (req, res) => {
     let itemsDataCached = await client.hsetAsync("items", `${searchStr}`, JSON.stringify(items))
     res.json(items);
   } catch (e) {
-    return res.status(500).json({ error: e });
+    return res.status(500).json({ error: e.toString() });
   }
 })
 
