@@ -30,12 +30,21 @@ import { Link } from "react-router-dom";
 import MessageIcon from "@mui/icons-material/Message";
 import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
 import Loading from "./Loading";
-import StarBorderIcon from '@mui/icons-material/StarBorder';
+import StarBorderIcon from "@mui/icons-material/StarBorder";
 import RatingForm from "./RatingForm";
 
 const Label = styled("span")(({ theme }) => ({
   fontWeight: 500,
 }));
+
+const StyledRating = styled(Rating)({
+  "& .MuiRating-iconFilled": {
+    color: "#1a6ad6",
+  },
+  "& .MuiRating-iconHover": {
+    color: "#1a6ad6",
+  },
+});
 
 const ItemListing = (item) => {
   // console.log(item);
@@ -79,7 +88,6 @@ const ItemListing = (item) => {
         </ListItemButton>
         {/* </Link> */}
       </ListItem>
-      <Divider />
     </>
   );
 };
@@ -110,17 +118,21 @@ const UserPage = (props) => {
   };
 
   useEffect(() => {
-    console.log("useEffect fired");
+    // console.log("useEffect fired");
     async function fetchData() {
       try {
         const header = await createToken();
 
         const { data } = await axios.get(
-          `http://localhost:4000/user/${props.match.params.id}`, header
+          `http://localhost:4000/user/${props.match.params.id}`,
+          header
         );
         const itemData = await Promise.all(
           data.items.map(async (itemId) => {
-            let item = await axios.get(`http://localhost:4000/items/${itemId}`, header);
+            let item = await axios.get(
+              `http://localhost:4000/items/${itemId}`,
+              header
+            );
             return item.data;
           })
         );
@@ -130,7 +142,7 @@ const UserPage = (props) => {
         }
         let avg_rating =
           data.ratings.length > 0 ? total_rating / data.ratings.length : 0;
-        console.log(data);
+        // console.log(data);
         setUserData(data);
         setItemData(itemData);
         setRating(avg_rating);
@@ -201,43 +213,60 @@ const UserPage = (props) => {
                     display: "inline-block",
                     position: "relative",
                     bottom: "6px",
-                    fontSize: "14x",
+                    fontSize: "14px",
                     marginRight: "0.5em",
                   }}
                 >
                   Rating:
                 </Box>
-                <Rating
+                <StyledRating
                   name="seller-rating"
                   value={rating}
                   readOnly
                   precision={0.5}
                   sx={{ m: "3px", position: "relative", left: "-6px" }}
                 />
-                <Box
+                <Chip
                   sx={{
-                    display: "inline-block",
                     position: "relative",
                     bottom: "6px",
-                    color: "#2F80ED",
                   }}
-                >
-                  {user.ratings.length}
-                </Box>
+                  label={user.ratings.length}
+                  size="small"
+                  color="secondary"
+                  variant="outlined"
+                />
               </>
             }
-            action={ currentUser ? 
-              <div style={{ textAlign: "right" }}>
-                <Button aria-label="message" color="secondary" sx={{display: "block"}}>
-                  Send a Message
-                  <MessageIcon style={{ marginLeft: ".3em" }} />
-                </Button>
-                <Button aria-label="message" color="secondary" onClick={handleFormOpen}>
-                  Rate this User
-                  <StarBorderIcon style={{ marginLeft: ".3em", position: "relative", bottom: "1px" }} />
-                </Button>
-              </div> : null
+            action={
+              currentUser ? (
+                <div style={{ textAlign: "right" }}>
+                  <Button
+                    aria-label="message"
+                    color="secondary"
+                    sx={{ display: "block" }}
+                  >
+                    Send a Message
+                    <MessageIcon style={{ marginLeft: ".3em" }} />
+                  </Button>
+                  <Button
+                    aria-label="message"
+                    color="secondary"
+                    onClick={handleFormOpen}
+                  >
+                    Rate this User
+                    <StarBorderIcon
+                      style={{
+                        marginLeft: ".3em",
+                        position: "relative",
+                        bottom: "1px",
+                      }}
+                    />
+                  </Button>
+                </div>
+              ) : null
             }
+            subheaderTypographyProps={{ component: "div" }}
             classes={{ title: classes.title }}
           />
           <Divider />
@@ -280,7 +309,12 @@ const UserPage = (props) => {
             </div>
           </CardContent>
         </Card>
-        <RatingForm setRating={setRating} user={user} formOpen={formOpen} handleFormClose={handleFormClose} />
+        <RatingForm
+          setRating={setRating}
+          user={user}
+          formOpen={formOpen}
+          handleFormClose={handleFormClose}
+        />
       </Container>
     );
   }

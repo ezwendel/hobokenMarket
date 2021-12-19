@@ -46,7 +46,7 @@ const ItemPage = (props) => {
         const header = await createToken();
 
         const { data } = await axios.get(`http://localhost:4000/items/${id}`, header);
-        console.log(data);
+        // console.log(data);
         setItem(data);
       } catch (e) {
         setError(e);
@@ -68,7 +68,7 @@ const ItemPage = (props) => {
           const { data: data2 } = await axios.get(
             `http://localhost:4000/user/${item.sellerId}`, header
           );
-          console.log(data2);
+          // console.log(data2);
           setUser(data2);
         } else {
           setError("404: item not found")

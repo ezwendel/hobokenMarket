@@ -7,6 +7,7 @@ import { AuthContext } from "../firebase/Auth";
 import { Redirect } from "react-router-dom";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import { createToken } from "../firebase/AuthBackend";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 
 import {
   Container,
@@ -25,6 +26,7 @@ import {
   Chip,
   Rating,
   Box,
+  Tooltip,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Link } from "react-router-dom";
@@ -39,18 +41,30 @@ const Label = styled("span")(({ theme }) => ({
   fontWeight: 500,
 }));
 
+const StyledRating = styled(Rating)({
+  "& .MuiRating-iconFilled": {
+    color: "#1a6ad6",
+  },
+  "& .MuiRating-iconHover": {
+    color: "#1a6ad6",
+  },
+});
+
 const ItemListing = (item) => {
   const deleteItem = async (id) => {
     try {
       const header = await createToken();
 
-      const { data }=await axios.delete(`http://localhost:4000/items/${id}`, header);
+      const { data } = await axios.delete(
+        `http://localhost:4000/items/${id}`,
+        header
+      );
     } catch (e) {
       alert(e);
     }
     window.location.reload();
   };
-  console.log(item);
+  // console.log(item);
   return (
     <>
       <ListItem key={item._id} sx={{ padding: 0 }}>
@@ -58,7 +72,11 @@ const ItemListing = (item) => {
         <ListItemButton
           component={Link}
           to={`/item/${item._id}`}
-          style={{ color: "inherit", textDecoration: "none" }}
+          style={{
+            color: "inherit",
+            textDecoration: "none",
+            borderBottom: "1px solid #ccc",
+          }}
         >
           <ListItemIcon>
             <ShoppingBasketIcon />
@@ -88,13 +106,19 @@ const ItemListing = (item) => {
             }
             secondaryTypographyProps={{ component: "div" }}
           />
+          <Tooltip title="Delete Listing">
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteItem(item._id);
+              }}
+            >
+              <DeleteForeverIcon />
+            </Button>
+          </Tooltip>
         </ListItemButton>
-        <Button onClick={() => deleteItem(item._id)} variant="outlined">
-          Delete
-        </Button>
         {/* </Link> */}
       </ListItem>
-      <Divider />
     </>
   );
 };
@@ -130,17 +154,26 @@ const ProfilePage = () => {
         // firebase.auth().currentUser.updateProfile({ displayName: '61be75a0bfcf8443bbd1279e' })
         const header = await createToken();
 
-        const { data } = await axios.get( // formerly currentUser.displayName
-          `http://localhost:4000/user/email/${currentUser.email}`, header 
+        const { data } = await axios.get(
+          // formerly currentUser.displayName
+          `http://localhost:4000/user/email/${currentUser.email}`,
+          header
         );
         const itemData = await Promise.all(
           data.items.map(async (itemId) => {
-            let item = await axios.get(`http://localhost:4000/items/${itemId}`, header);
+            let item = await axios.get(
+              `http://localhost:4000/items/${itemId}`,
+              header
+            );
             return item.data;
           })
         );
         setUser(data);
-        setProfilePic(`http://localhost:4000/file/${data.profilePicture}`);
+        if (data.profilePicture) {
+          setProfilePic(`http://localhost:4000/file/${data.profilePicture}`);
+        } else {
+          setProfilePic(null);
+        }
         setItemData(itemData);
         setError(undefined);
       } catch (e) {
@@ -170,7 +203,7 @@ const ProfilePage = () => {
   });
 
   let avatarInternals = null;
-  if (user.profilePicture || profilePic) {
+  if (profilePic) {
     avatarInternals = (
       <Avatar
         alt={`${user.name.firstName} ${user.name.lastName}`}
@@ -190,7 +223,7 @@ const ProfilePage = () => {
     total_rating += r.rating;
   }
   let rating = user.ratings.length > 0 ? total_rating / user.ratings.length : 0;
-  console.log("rating", rating);
+  // console.log("rating", rating);
 
   return (
     <Container style={{ maxWidth: "100%" }}>
@@ -213,28 +246,28 @@ const ProfilePage = () => {
                   display: "inline-block",
                   position: "relative",
                   bottom: "6px",
-                  fontSize: "14x",
-                  marginRight: "0.5em"
+                  fontSize: "14px",
+                  marginRight: "0.5em",
                 }}
               >
                 Rating:
               </Box>
-              <Rating
+              <StyledRating
                 name="seller-rating"
                 value={rating}
                 readOnly
                 sx={{ m: "3px", position: "relative", left: "-6px" }}
               />
-              <Box
+              <Chip
                 sx={{
-                  display: "inline-block",
                   position: "relative",
                   bottom: "6px",
-                  color: "#2F80ED",
                 }}
-              >
-                {user.ratings.length}
-              </Box>
+                label={user.ratings.length}
+                size="small"
+                color="secondary"
+                variant="outlined"
+              />
             </>
           }
           action={
@@ -247,6 +280,7 @@ const ProfilePage = () => {
               <AddAPhotoIcon style={{ marginLeft: ".3em" }} />
             </Button>
           }
+          subheaderTypographyProps={{ component: "div" }}
           classes={{ title: classes.title }}
         />
         <Divider />
@@ -290,7 +324,11 @@ const ProfilePage = () => {
           </div>
         </CardContent>
       </Card>
-      <ChangeProfilePic setProfilePic={setProfilePic} formOpen={formOpen} handleFormClose={handleFormClose} />
+      <ChangeProfilePic
+        setProfilePic={setProfilePic}
+        formOpen={formOpen}
+        handleFormClose={handleFormClose}
+      />
     </Container>
   );
 };

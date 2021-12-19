@@ -27,6 +27,7 @@ const Item = ({ item }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [profilePic, setProfilePic] = useState(null);
 
   // Get item
   useEffect(() => {
@@ -38,6 +39,11 @@ const Item = ({ item }) => {
         const { data } = await axios.get(
           `http://localhost:4000/user/${item.sellerId}`, header
         );
+        if (data.profilePicture) {
+          setProfilePic(`http://localhost:4000/file/${data.profilePicture}`);
+        } else {
+          setProfilePic(null);
+        }
         setUser(data);
       } catch (e) {
         setUser({ username: "?" });
@@ -124,7 +130,7 @@ const Item = ({ item }) => {
     );
   }
   let avatarInternals = null;
-  if (user.profilePicture) {
+  if (profilePic) {
     avatarInternals = (
       <Link to={`/user/${user._id}`} className="item-avatar-link">
         <Tooltip title={user.username}>
@@ -139,7 +145,7 @@ const Item = ({ item }) => {
     avatarInternals = (
       <Link to={`/user/${user._id}`} className="item-avatar-link">
         <Tooltip title={user.username}>
-          <Avatar sx={{ bgcolor: "#EB5757" }}>
+          <Avatar sx={{ bgcolor: "#A32638" }}>
             {user.username[0].toUpperCase()}
           </Avatar>
         </Tooltip>

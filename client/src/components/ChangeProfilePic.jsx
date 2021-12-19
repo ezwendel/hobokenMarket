@@ -37,11 +37,11 @@ const ChangeProfilePic = (props) => {
     }
     if (!submitError) {
       try {
-        console.log("Image: ", selectedFile);
+        // console.log("Image: ", selectedFile);
         let submitData = new FormData();
         submitData.append("file", selectedFile);
         submitData.append("userId", currentUser.email); // formerly currentUser.displayName
-        console.log(submitData);
+        // console.log(submitData);
 
         const header = await createToken();
 
@@ -50,7 +50,7 @@ const ChangeProfilePic = (props) => {
           submitData,
           header
         );
-        console.log("post data", data);
+        // console.log("post data", data);
         props.setProfilePic(data.imgUrl)
         setSelectedFile(null);
         props.handleFormClose();
@@ -67,9 +67,9 @@ const ChangeProfilePic = (props) => {
 
   return (
     <Dialog open={props.formOpen} onClose={props.handleFormClose} scroll="body">
-      <DialogTitle>Change Profile Pic</DialogTitle>
+      <DialogTitle component="h1">Change Profile Pic</DialogTitle>
       {formError && <Alert severity="error">{formError}</Alert>}
-      <DialogContent sx={{ width: 500, justfiy: "center" }}>
+      <DialogContent sx={{ width: 500, justifyContent: "center" }}>
         <FormControl sx={{ mt: 1, width: "35ch" }}>
           <label htmlFor="image">Upload an image below:</label>
           <Input
