@@ -62,7 +62,7 @@ const Searchbar = ({ search }) => {
           id="search"
         />
       </Search>
-      <label for="search-submit" hidden>Search</label>
+      <label htmlFor="search-submit" hidden>Search</label>
       <Button
         type="submit"
         id="search-submit"

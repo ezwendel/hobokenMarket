@@ -148,7 +148,11 @@ const ProfilePage = () => {
           })
         );
         setUser(data);
-        setProfilePic(`http://localhost:4000/file/${data.profilePicture}`);
+        if (data.profilePicture) {
+          setProfilePic(`http://localhost:4000/file/${data.profilePicture}`);
+        } else {
+          setProfilePic(null);
+        }
         setItemData(itemData);
         setError(undefined);
       } catch (e) {
@@ -178,7 +182,7 @@ const ProfilePage = () => {
   });
 
   let avatarInternals = null;
-  if (user.profilePicture || profilePic) {
+  if (profilePic) {
     avatarInternals = (
       <Avatar
         alt={`${user.name.firstName} ${user.name.lastName}`}
