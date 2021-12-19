@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { makeStyles } from "@mui/styles";
 import axios from "axios";
+import { createToken } from "../firebase/AuthBackend";
 
 import {
   Card,
@@ -31,8 +32,11 @@ const Item = ({ item }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+
+        const header = await createToken();
+
         const { data } = await axios.get(
-          `http://localhost:4000/user/${item.sellerId}`
+          `http://localhost:4000/user/${item.sellerId}`, header
         );
         setUser(data);
       } catch (e) {

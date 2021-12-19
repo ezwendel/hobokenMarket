@@ -54,8 +54,8 @@ router.post("/profile_upload", upload.single("file"), async (req, res) =>{
   console.log(req.body.userId)
   console.log(req.file)
   try {
-    let user = await data.users.getUserById(req.body.userId);
-    let updatedUser = await data.users.updatePfp(req.body.userId, req.file.id)
+    let user = await data.users.getUserByEmail(req.body.userId); // changed from id to email
+    let updatedUser = await data.users.updatePfp(user._id.toString(), req.file.id.toString())
     let userDataCached = await client.hsetAsync("user", `${req.body.userId}`, JSON.stringify(updatedUser));
     const imgUrl = `http://localhost:4000/file/${req.file.id}`;
     try {

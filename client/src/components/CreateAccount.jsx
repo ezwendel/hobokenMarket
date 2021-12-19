@@ -5,6 +5,7 @@ import { doCreateUserWithEmailAndPassword } from "../firebase/FirebaseFunctions"
 import {AuthContext} from '../firebase/Auth';
 import SocialSignIn from './SocialSignIn';
 import axios from "axios";
+import { createToken } from "../firebase/AuthBackend";
 
 import {
   Card,
@@ -42,6 +43,9 @@ const CreateAccount = () => {
   const postData = async (e) => {
     try {
       const { username, firstname, lastname, email, password, cellnumber, homenumber } = e.target.elements;
+
+      const header = await createToken();
+
       const { data }=await axios.post(`http://localhost:4000/user/`,{
         firstName: firstname.value,
         lastName: lastname.value,
@@ -53,7 +57,8 @@ const CreateAccount = () => {
           cell: cellnumber.value,
           home: homenumber.value
         }
-      });
+      }, header
+      );
       await doCreateUserWithEmailAndPassword(
         email.value,
         password.value,

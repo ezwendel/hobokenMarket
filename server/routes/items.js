@@ -63,7 +63,7 @@ router.get('/', async (req, res) => {
   if (req.query.filter) {
     searchStr += `filter:${req.query.filter}`
   }
-  if (req.query.latest.toLowerCase() === 'false') {
+  if (req.query.latest && req.query.latest.toLowerCase() === 'false') {
     searchStr += `latest:false`
   }
   searchStr = searchStr.toLowerCase()
@@ -77,7 +77,7 @@ router.get('/', async (req, res) => {
       items = await data.items.getItemsByCategory(req.query.filter);
     }
     // console.log(req.query);
-    if (req.query.latest.toLowerCase() === 'false') {
+    if (req.query.latest && req.query.latest.toLowerCase() === 'false') {
       items.reverse()
     }
     if (req.query.offset) {
@@ -111,13 +111,15 @@ router.get('/', async (req, res) => {
 
 router.post('/with_image', upload.single("file"), async (req, res) => {
   console.log("good");
+  console.log(req.currentUser)
+  console.log("why");
   if (req.file === undefined) return res.status(400).json({error: "must select a file."})
   console.log(req.file.id)
   // get body + xss body
   let body = req.body
   let name = xss(body.name);
   let description = xss(body.description);
-  let sellerId = xss(body.sellerId);
+  let sellerEmail = xss(body.sellerId);
   let itemPictures = [req.file.id];
   let categories = body.categories.split(","); // xss later
   console.log(body);
@@ -140,7 +142,7 @@ router.post('/with_image', upload.single("file"), async (req, res) => {
       return res.status(400).json({ error: "description not valid" })
     }
   };
-  if (!sellerId || sellerId.trim().length == 0) {
+  if (!sellerEmail || sellerEmail.trim().length == 0) {
     try {
       await data.images.deleteImage(req.file.id.toString()); 
       return res.status(400).json({ error: "sellerId not valid" })
@@ -162,23 +164,24 @@ router.post('/with_image', upload.single("file"), async (req, res) => {
   // see if seller exists
   let seller = null;
   try {
-    seller = await data.users.getUserById(sellerId);
+    seller = await data.users.getUserByEmail(sellerEmail);
   } catch (e) {
     console.log(e)
     try {
       await data.images.deleteImage(req.file.id.toString()); 
-      return res.status(404).json({ error: `user with id ${sellerId} does not exist` })
+      console.log("sellerId", sellerEmail);
+      return res.status(404).json({ error: `user with email ${sellerEmail} does not exist` })
     } catch (e) {
       console.log(e);
-      return res.status(404).json({ error: `user with id ${sellerId} does not exist` })
+      return res.status(404).json({ error: `user with email ${sellerEmail} does not exist` })
     }
   }
   try {
-    let item = await data.items.createItem({ name: name, description: description, sellerId: sellerId, categories: categories, itemPictures: itemPictures })
-    let sellerWithItem = await data.users.addItemToUser(sellerId, item._id)
+    let item = await data.items.createItem({ name: name, description: description, sellerId: seller._id.toString(), categories: categories, itemPictures: itemPictures })
+    let sellerWithItem = await data.users.addItemToUser(seller._id.toString(), item._id)
     delete sellerWithItem.passwordHash;
     // update user with new items in cache
-    let userDataCached = await client.hsetAsync("user", `${sellerId}`, JSON.stringify(sellerWithItem));
+    let userDataCached = await client.hsetAsync("user", `${seller._id.toString()}`, JSON.stringify(sellerWithItem));
     // delete get items and search cache
     let itemsDataCached = await client.delAsync("items")
     let searchDataCached = await client.delAsync("search")
