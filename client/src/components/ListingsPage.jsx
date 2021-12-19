@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../firebase/Auth";
+import { createToken } from "../firebase/AuthBackend";
 
 import {
   Container,
@@ -49,10 +50,12 @@ const ListingsPage = (props) => {
     console.log(`Loading Page ${page}...`);
     const fetchData = async () => {
       try {
+        const header = await createToken();
+
         const { data } = !filter
-          ? await axios.get(`http://localhost:4000/items?offset=${page * 20}`)
+          ? await axios.get(`http://localhost:4000/items?offset=${page * 20}`, header)
           : await axios.get(
-              `http://localhost:4000/items?offset=${page * 20}&filter=${filter}`
+              `http://localhost:4000/items?offset=${page * 20}&filter=${filter}`, header
             );
         console.log(data);
         setItems(data);
@@ -64,14 +67,16 @@ const ListingsPage = (props) => {
 
       // Check if the next page has items
       try {
+        const header = await createToken();
+
         const { data } = !filter
           ? await axios.get(
-              `http://localhost:4000/items?offset=${(page + 1) * 20}`
+              `http://localhost:4000/items?offset=${(page + 1) * 20}`, header
             )
           : await axios.get(
               `http://localhost:4000/items?offset=${
                 (page + 1) * 20
-              }&filter=${filter}`
+              }&filter=${filter}`, header
             );
         if (data.length === 0) {
           setLast(page);
@@ -104,8 +109,10 @@ const ListingsPage = (props) => {
       setSearching(searchTerm);
       console.log("here");
       try {
+        const header = await createToken();
+
         const { data } = await axios.get(
-          `http://localhost:4000/items/search/${searchTerm}`
+          `http://localhost:4000/items/search/${searchTerm}`, header
         );
         console.log(data);
         setItems(data);
@@ -117,8 +124,10 @@ const ListingsPage = (props) => {
     } else {
       setSearching(false);
       try {
+        const header = await createToken();
+
         const { data } = await axios.get(
-          `http://localhost:4000/items?offset=${page * 20}`
+          `http://localhost:4000/items?offset=${page * 20}`, header
         );
         console.log(data);
         setItems(data);
@@ -130,8 +139,10 @@ const ListingsPage = (props) => {
 
       // Check if the next page has items
       try {
+        const header = await createToken();
+
         const { data } = await axios.get(
-          `http://localhost:4000/items?offset=${(page + 1) * 20}`
+          `http://localhost:4000/items?offset=${(page + 1) * 20}`, header
         );
         if (data.length === 0) {
           setLast(page);
@@ -157,8 +168,10 @@ const ListingsPage = (props) => {
     setLoading(true);
     setSearching(false);
     try {
+      const header = await createToken();
+
       const { data } = await axios.get(
-        `http://localhost:4000/items?offset=${page * 20}`
+        `http://localhost:4000/items?offset=${page * 20}`, header
       );
       console.log(data);
       setItems(data);
@@ -170,8 +183,10 @@ const ListingsPage = (props) => {
 
     // Check if the next page has items
     try {
+      const header = await createToken();
+
       const { data } = await axios.get(
-        `http://localhost:4000/items?offset=${(page + 1) * 20}`
+        `http://localhost:4000/items?offset=${(page + 1) * 20}`, header
       );
       if (data.length === 0) {
         setLast(page);

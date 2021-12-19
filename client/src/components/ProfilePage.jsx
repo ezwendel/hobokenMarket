@@ -6,6 +6,7 @@ import axios from "axios";
 import { AuthContext } from "../firebase/Auth";
 import { Redirect } from "react-router-dom";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
+import { createToken } from "../firebase/AuthBackend";
 
 import {
   Container,
@@ -41,7 +42,9 @@ const Label = styled("span")(({ theme }) => ({
 const ItemListing = (item) => {
   const deleteItem = async (id) => {
     try {
-      const { data } = await axios.delete(`http://localhost:4000/items/${id}`);
+      const header = await createToken();
+
+      const { data }=await axios.delete(`http://localhost:4000/items/${id}`, header);
     } catch (e) {
       alert(e);
     }
@@ -124,12 +127,14 @@ const ProfilePage = () => {
     const fetchData = async () => {
       try {
         // firebase.auth().currentUser.updateProfile({ displayName: '61be75a0bfcf8443bbd1279e' })
-        const { data } = await axios.get(
-          `http://localhost:4000/user/${currentUser.displayName}`
+        const header = await createToken();
+
+        const { data } = await axios.get( // formerly currentUser.displayName
+          `http://localhost:4000/user/email/${currentUser.email}`, header 
         );
         const itemData = await Promise.all(
           data.items.map(async (itemId) => {
-            let item = await axios.get(`http://localhost:4000/items/${itemId}`);
+            let item = await axios.get(`http://localhost:4000/items/${itemId}`, header);
             return item.data;
           })
         );

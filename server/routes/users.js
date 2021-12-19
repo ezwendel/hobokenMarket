@@ -21,9 +21,8 @@ function isNumeric(str) {
          !isNaN(parseFloat(str));
 }
 
-router.get('/email/', async (req, res) => {
-  let body = req.body;
-  let emailAddress = xss(req.body.emailAddress)
+router.get('/email/:email', async (req, res) => {
+  let emailAddress = req.params.email;
   if (!emailAddress || emailAddress.trim().length == 0) { return res.status(400).json({ error: "emailAddress not valid" }) };
   try {
     let user = await data.users.getUserByEmail(emailAddress);

@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../firebase/Auth";
+import { createToken } from "../firebase/AuthBackend";
 
 import {
   Dialog,
@@ -76,7 +77,7 @@ const CreateListing = (props) => {
         submitData.append("description", formData.description.trim());
         submitData.append("file", selectedFile);
         submitData.append("categories", categories);
-        submitData.append("sellerId", currentUser.displayName);
+        submitData.append("sellerId", currentUser.email);
         // const submitData = {
         //   name: formData.name.trim(),
         //   description: formData.description.trim(),
@@ -86,9 +87,13 @@ const CreateListing = (props) => {
         // };
 
         console.log(submitData);
+
+        const header = await createToken();
+
         let { data } = await axios.post(
           "http://localhost:4000/items/with_image",
-          submitData
+          submitData,
+          header
         );
         console.log(data);
         nameField.value = "";
