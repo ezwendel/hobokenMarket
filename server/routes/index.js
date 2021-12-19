@@ -4,6 +4,25 @@ const messageRoutes = require('./messageThreads');
 const userRoutes = require('./users');
 
 const constructorMethod = (app) => {
+
+  app.post('/', (req, res) => {
+    const auth = req.currentUser;
+    if (auth) {
+      console.log('authenticated!', auth);
+      return res.send('Hi, from POST');
+    }
+    return res.status(403).send('Not authorized')
+  });
+
+  app.delete('/', (req, res) => {
+    const auth = req.currentUser;
+    if (auth) {
+      console.log('authenticated!', auth);
+      return res.send('Hi, from DELETE');
+    }
+    return res.status(403).send('Not authorized')
+  });
+
   app.use('/file/', fileRoutes);
   app.use('/items', itemRoutes);
   app.use('/messageThreads', messageRoutes);

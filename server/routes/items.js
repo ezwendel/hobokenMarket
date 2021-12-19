@@ -223,7 +223,6 @@ router.post('/', async (req, res) => {
     delete sellerWithItem.passwordHash;
     // update user with new items in cache
     let userDataCached = await client.hsetAsync("user", `${sellerId}`, JSON.stringify(sellerWithItem));
-    // delete get items and search cache
     let itemsDataCached = await client.delAsync("items")
     let searchDataCached = await client.delAsync("search")
     return res.json(item);
@@ -242,6 +241,9 @@ router.delete('/:id', async (req, res) => {
     let deluserInfo= await data.users.deleteItemToUser(itemInfo.sellerId,id);
     let itemDataCached = await client.hdelAsync("item", `${id}`)
     let userDataCached = await client.hsetAsync("user", `${itemInfo.sellerId}`, JSON.stringify(deluserInfo));
+    // delete get items and search cache
+    let itemsDataCached = await client.delAsync("items")
+    let searchDataCached = await client.delAsync("search")
     return res.json(deluserInfo);
   } catch (e) {
     console.log(e)

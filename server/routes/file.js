@@ -41,13 +41,13 @@ conn.once('open', () => {
 });
 
 
-router.post("/upload", upload.single("file"), (req, res) =>{  
-  if (req.file === undefined) return res.json({error: "must select a file."})
-  console.log(req.body.sellerId)
-  console.log(req.file)
-  const imgUrl = `http://localhost:4000/file/${req.file.id}`;
-  return res.send(imgUrl);
-});
+// router.post("/upload", upload.single("file"), (req, res) =>{  
+//   if (req.file === undefined) return res.json({error: "must select a file."})
+//   console.log(req.body.sellerId)
+//   console.log(req.file)
+//   const imgUrl = `http://localhost:4000/file/${req.file.id}`;
+//   return res.send(imgUrl);
+// });
 
 router.post("/profile_upload", upload.single("file"), async (req, res) =>{
   if (req.file === undefined) return res.json({error: "must select a file."})
@@ -78,36 +78,36 @@ router.post("/profile_upload", upload.single("file"), async (req, res) =>{
 
 router.get('/:id', async (req, res) => {
     let id = req.params.id
-    if (!id || id.trim().length === 0) return res.status(400).json({error: {message: "no id given", status: 400}});
+    if (!id || id.trim().length === 0) return res.status(400).json({error: "no id given"});
     const _id = new mongoose.Types.ObjectId(id);
     const files = await gfs.find({ _id }).toArray()
-    if (!files || files.length === 0) return res.status(404).json({error: {message: "file not found", status: 404}});
+    if (!files || files.length === 0) return res.status(404).json({error: "file not found"});
     // console.log(files)
     gfs.openDownloadStream(_id).pipe(res);
   });
 
-async function deleteImage(id) {
-  if (!id || id.trim().length === 0) throw 'deleteImage: id not valid'
-  const imageId = new mongoose.Types.ObjectId(id)
-  const imageChunkCollection = await imageChunks()
-  const imageFileCollection = await imageFiles()
-  let chunkDelData = await imageChunkCollection.deleteMany({files_id:imageId});
-  let fileDelData = await imageFileCollection.deleteOne({_id:imageId});
-  console.log(chunkDelData)
-  console.log(fileDelData)
-  if (chunkDelData.deletedCount === 0 || fileDelData === 0) throw `deleteImage: images with id ${imageId} did not properly delete`
-  return;
-}
+// async function deleteImage(id) {
+//   if (!id || id.trim().length === 0) throw 'deleteImage: id not valid'
+//   const imageId = new mongoose.Types.ObjectId(id)
+//   const imageChunkCollection = await imageChunks()
+//   const imageFileCollection = await imageFiles()
+//   let chunkDelData = await imageChunkCollection.deleteMany({files_id:imageId});
+//   let fileDelData = await imageFileCollection.deleteOne({_id:imageId});
+//   console.log(chunkDelData)
+//   console.log(fileDelData)
+//   if (chunkDelData.deletedCount === 0 || fileDelData === 0) throw `deleteImage: images with id ${imageId} did not properly delete`
+//   return;
+// }
 
-router.delete('/:id', async (req, res) => {
-  try {
-    console.log(req.params.id)
-    await deleteImage(req.params.id)
-    res.json({deleted: true, id: req.params.id})
-  } catch (e) {
-    console.log(e)
-    res.status(500).json({error: {message: e, status: 500 }})
-  }
-})
+// router.delete('/:id', async (req, res) => {
+//   try {
+//     console.log(req.params.id)
+//     await deleteImage(req.params.id)
+//     res.json({deleted: true, id: req.params.id})
+//   } catch (e) {
+//     console.log(e)
+//     res.status(500).json({error: {message: e, status: 500 }})
+//   }
+// })
 
 module.exports = router;
