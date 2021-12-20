@@ -98,7 +98,7 @@ async function createMessage(body) {
   const meassageThreadsCollection = await messageThreads();
 
   let messageThread = await getMessageThreadById(messageThreadId);
-  messageThread.push(newMessage)
+  messageThread.messages.push(newMessage)
 
   delete messageThread._id
 

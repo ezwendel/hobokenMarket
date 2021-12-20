@@ -75,6 +75,7 @@ const CreateContact = (props) => {
         emailField.value = "";
 
         props.handleFormClose();
+        window.location.reload(false);
       } catch (e) {
         console.log(e);
         if (e.error) {
