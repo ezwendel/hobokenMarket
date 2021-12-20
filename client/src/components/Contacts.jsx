@@ -2,21 +2,6 @@ import React, { useState, useEffect, useContext } from 'react'
 import axios from "axios";
 import {
   Container,
-  Card,
-  CardHeader,
-  CardContent,
-  Avatar,
-  Typography,
-  Button,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Divider,
-  Chip,
-  Rating,
-  Box,
   Fab,
 } from "@mui/material";
 import SendIcon from '@mui/icons-material/Send';
@@ -25,11 +10,11 @@ import { createToken } from "../firebase/AuthBackend";
 import Loading from "./Loading";
 import CreateContact from './CreateContact';
 
-const Contacts = () => {
-    const [messages, setMessages] = useState(null);
+const Contacts = (props) => {
+    //const [messages, setMessages] = useState(null);
     const [loading, setLoading] = useState(true);
     const [errorHappened, setError] = useState(undefined);
-    const [formOpen, setFormOpen] = useState(false);
+    const [formOpen, setFormOpen] = useState(props.formOpen);
     const { currentUser } = useContext(AuthContext);
 
     const handleFormOpen = () => {
@@ -49,7 +34,7 @@ const Contacts = () => {
               header
             );
             console.log(data2);
-            setMessages(data2);
+            //setMessages(data2);
             
           } catch (e) {
             setError(e);
@@ -58,7 +43,7 @@ const Contacts = () => {
           setLoading(false);
         };
         fetchData();
-      }, []);
+      }, [currentUser.email]);
     
     if (loading) {
       return <Loading />
@@ -77,6 +62,7 @@ const Contacts = () => {
             <CreateContact
               formOpen={formOpen}
               handleFormClose={handleFormClose}
+              email={props.email}
             />
             <Fab
             color="primary"

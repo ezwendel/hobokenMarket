@@ -7,23 +7,16 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogContentText,
   DialogActions,
   TextField,
-  Input,
   Button,
-  FormControl,
-  InputLabel,
-  Select,
-  OutlinedInput,
-  MenuItem,
   Alert,
 } from "@mui/material";
 
 const CreateContact = (props) => {
   const [formData, setFormData] = useState({
-    name: "",
-    description: "",
+    email: props.email,
+    message: "",
   });
 
   const [formError, setFormError] = useState(false);
@@ -31,6 +24,8 @@ const CreateContact = (props) => {
   const [messageError, setMessageError] = useState(false);
 
   const { currentUser } = useContext(AuthContext);
+
+  
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -50,7 +45,7 @@ const CreateContact = (props) => {
     }
 
     if (messageField.value.trim().length === 0) {
-        setEmailError("Missing  message.");
+        setMessageError("Missing  message.");
         submitError = true;
       }
 
@@ -89,7 +84,7 @@ const CreateContact = (props) => {
 
   return (
     <Dialog open={props.formOpen} onClose={props.handleFormClose} scroll="body">
-      <DialogTitle>Add New Contact</DialogTitle>
+      <DialogTitle>Send New Message</DialogTitle>
       {formError && <Alert severity="error">{formError}</Alert>}
       <DialogContent sx={{ width: 500 }}>
         <TextField
@@ -102,6 +97,7 @@ const CreateContact = (props) => {
           fullWidth
           placeholder="Enter seller's email address"
           variant="standard"
+          value={formData.email}
           onChange={(e) => handleChange(e)}
         />
         {emailError && <Alert severity="error">{emailError}</Alert>}
@@ -118,6 +114,7 @@ const CreateContact = (props) => {
           variant="standard"
           onChange={(e) => handleChange(e)}
         />
+        {messageError && <Alert severity="error">{messageError}</Alert>}
       </DialogContent>
       <DialogActions>
         <Button onClick={props.handleFormClose}>Cancel</Button>
@@ -128,7 +125,7 @@ const CreateContact = (props) => {
             }}
             type="submit"
           >
-            ADD CONTACT
+            SEND MESSAGE
           </Button>
         ) : (
           <Button
@@ -138,7 +135,7 @@ const CreateContact = (props) => {
             type="submit"
             disabled
           >
-            ADD CONTACT
+            SEND MESSAGE
           </Button>
         )}
       </DialogActions>
