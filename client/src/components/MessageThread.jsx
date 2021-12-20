@@ -114,7 +114,9 @@ const MessageThread = (props) => {
 
     return (
       <>
-        <ListItem key={message._id} sx={{ padding: 0 }}>
+        <ListItem key={message._id} sx={{ padding: 0 }} style={{
+            borderBottom: "1px solid #ccc",
+          }}>
           {/* <Link to={`/items/${item._id}`} style={{ color: "inherit", textDecoration: "none" }}> */}
             <ListItemIcon>
               <MailIcon />
@@ -132,7 +134,7 @@ const MessageThread = (props) => {
             />
           {/* </Link> */}
         </ListItem>
-        <Divider />
+
       </>
     );
   };
