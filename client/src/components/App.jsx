@@ -14,6 +14,7 @@ import PrivateRoute from "./PrivateRoute";
 import Home from "./Home";
 import Logout from "./Logout";
 import ChatPage from "./ChatPage";
+import MessageThread from "./MessageThread";
 
 import { createTheme, ThemeProvider } from "@mui/material";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
@@ -44,6 +45,7 @@ function App() {
               <Route exact path="/user/:id" component={UserPage} />
 	            <Route exact path="/logout" component={Logout} />
               <PrivateRoute exact path="/messages" component={ChatPage}/>
+              <PrivateRoute exact path="/messageThread/:id" component={MessageThread}/>
               <Route exact path="/login" component={Login} />
               <Route exact path="/create-account" component={CreateAccount} />
               <PrivateRoute exact path="/profile" component={ProfilePage}/>

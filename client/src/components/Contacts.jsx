@@ -19,7 +19,7 @@ import {
   Box,
   Fab,
 } from "@mui/material";
-import Add from "@mui/icons-material/Add";
+import SendIcon from '@mui/icons-material/Send';
 import { AuthContext } from "../firebase/Auth";
 import { createToken } from "../firebase/AuthBackend";
 import Loading from "./Loading";
@@ -29,7 +29,6 @@ const Contacts = () => {
     const [messages, setMessages] = useState(null);
     const [loading, setLoading] = useState(true);
     const [errorHappened, setError] = useState(undefined);
-    const [selectedIndex, setSelectedIndex] = useState(1);
     const [formOpen, setFormOpen] = useState(false);
     const { currentUser } = useContext(AuthContext);
 
@@ -40,11 +39,6 @@ const Contacts = () => {
     const handleFormClose = () => {
       setFormOpen(false);
     };
-    
-
-    const handleListItemClick = (event, index) => {
-        setSelectedIndex(index)
-    }
 
     useEffect(() => {
         const fetchData = async () => {
@@ -65,18 +59,6 @@ const Contacts = () => {
         };
         fetchData();
       }, []);
-
-    const ContactsList = messages &&
-                         messages.map((contact, index) => {
-                            console.log(contact)
-                             return <ListItemButton
-                                        key = {contact.buyer}
-                                        selected = {selectedIndex === index}
-                                        onClick={(event) => handleListItemClick(event, index)}
-                                    >
-                                        <ListItemText primary={contact.buyer} />
-                                    </ListItemButton>
-                         })
     
     if (loading) {
       return <Loading />
@@ -92,10 +74,6 @@ const Contacts = () => {
 
     return (
         <div>
-            <p>Contacts</p>
-            <List component="nav" aria-label="contacts">
-                {ContactsList}
-            </List>
             <CreateContact
               formOpen={formOpen}
               handleFormClose={handleFormClose}
@@ -103,12 +81,13 @@ const Contacts = () => {
             <Fab
             color="primary"
             variant="extended"
-            aria-label="create-post"
+            aria-label="compose"
             style={{ position: "fixed", right: "5em", bottom: "3em" }}
             onClick={handleFormOpen}
           >
-            <Add sx={{ mr: 1 }} />
-            Create Contact.
+            Compose     
+            <SendIcon sx={{ ml:1, mr: 1 }} />
+              
           </Fab>
         </div>
     )
