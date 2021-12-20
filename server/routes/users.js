@@ -122,7 +122,7 @@ router.post('/rating', async (req, res) => {
   let raterEmail = xss(body.raterEmail);
   let rating = xss(body.rating);
   if (!userId || userId.trim().length == 0) { return res.status(400).json({ error: "userId not valid" }) };
-  if (!raterEmail || raterEmail.trim().length == 0) { return res.status(400).json({ error: "raterId not valid" }) };
+  if (!raterEmail || raterEmail.trim().length == 0) { return res.status(400).json({ error: "raterEmail not valid" }) };
   if (rating === undefined || !isNumeric(rating)) { return res.status(400).json({ error: "rating not valid" }) };
   let parsed_rating = parseInt(rating);
   if (parsed_rating < 0 || parsed_rating > 5) { return res.status(400).json({ error: "rating must be between 0 and 5" }) };
@@ -136,6 +136,7 @@ router.post('/rating', async (req, res) => {
   } catch (e) {
     return res.status(404).json({ error: `user with email ${raterEmail} does not exist` })
   }
+  if (rater._id === userId) { return res.status(400).json({ error: "user cannot rate themselves" }) };
   try {
     let user = await data.users.addRatingToUser(userId, rater._id.toString(), parsed_rating);
     let userDataCached = await client.hsetAsync("user", `${userId}`, JSON.stringify(user));

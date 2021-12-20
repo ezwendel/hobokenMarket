@@ -32,10 +32,12 @@ const RatingForm = (props) => {
 
   const addRating = async (e) => {
     try {
+      setFormError(false);
+      let submitRating = value ? value.toString() : "0";
       let submitData = {
         userId: props.user._id,
         raterEmail: currentUser.email,
-        rating: value.toString(),
+        rating: submitRating,
       };
       const header = await createToken();
       let { data } = await axios.post(
