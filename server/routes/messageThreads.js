@@ -3,7 +3,8 @@ const { readMessage } = require("../data/messageThreads");
 const express = require("express"),
       router = express.Router(),
       data = require('../data'),
-      xss = require('xss')
+      xss = require('xss'),
+      nodemailer = require('nodemailer')
 
 router.post('/message/:id', async (req, res) => {
   let id = xss(req.params.id);
@@ -27,6 +28,40 @@ router.post('/message/:id', async (req, res) => {
 
   try {
     let newMessage = await data.messageThreads.createMessage({messageThreadId: id.toString(), sender: senderObj._id.toString(), message: message.toString()})
+    let messageThread = await data.messageThreads.getMessageThreadById(id.toString())
+    let receiver = null
+    if (messageThread.buyer.toString() === senderObj._id.toString()) {
+      receiver = await data.users.getUserById(messageThread.seller.toString())
+    } else {
+      receiver = await data.users.getUserById(messageThread.buyer.toString())
+    }
+
+    // create reusable transporter object using the default SMTP transport
+    let transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true, // use SSL
+      auth: {
+        user: 'elijahhbmarket@gmail.com', // generated ethereal user
+        pass: '97gH8pYSWx8Ttm9', // generated ethereal password
+      },
+    });
+
+    // send mail with defined transport object
+    let info = await transporter.sendMail({
+      from: '"Elijah Wendel HBMarket" <elijahhbmarket@gmail.com>', // sender address
+      to: receiver.emailAddress, // list of receivers
+      subject: "You've received a message!", // Subject line
+      text: `Check your Hoboken Market Account! A new message has arrived from user ${senderObj.username}!`, // plain text body
+    });
+
+    console.log("Message sent: %s", info.messageId);
+    // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+
+    // Preview only available when sending through an Ethereal account
+    console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+    // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
+
     return res.json(newMessage)
   } catch (e) {
     console.log(e)
@@ -39,7 +74,6 @@ router.post('/close/:id', (req, res) => {
 }) 
 
 router.post('/:seller', async (req, res) => {
-  console.log(req);
   let body = req.body;
   let buyer = xss(body.buyer);
   let seller = xss(req.params.seller);
@@ -71,6 +105,31 @@ router.post('/:seller', async (req, res) => {
 
   try {
     let messageThread = await data.messageThreads.createMessageThread({buyer: buyerObj._id.toString(), seller: sellerObj._id.toString(), message: message})
+    // create reusable transporter object using the default SMTP transport
+    let transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true, // use SSL
+      auth: {
+        user: 'elijahhbmarket@gmail.com', // generated ethereal user
+        pass: '97gH8pYSWx8Ttm9', // generated ethereal password
+      },
+    });
+
+    // send mail with defined transport object
+    let info = await transporter.sendMail({
+      from: '"Elijah Wendel HBMarket" <elijahhbmarket@gmail.com>', // sender address
+      to: sellerObj.emailAddress, // list of receivers
+      subject: "You've received a message!", // Subject line
+      text: `Check your Hoboken Market Account! A message has arrived from user ${buyerObj.username}!`, // plain text body
+    });
+
+    console.log("Message sent: %s", info.messageId);
+    // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+
+    // Preview only available when sending through an Ethereal account
+    console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+    // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
     return res.json(messageThread)
   } catch (e) {
     return res.status(500).json({error: e})
