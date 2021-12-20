@@ -1,6 +1,8 @@
 # Hoboken Marketplace
 ## CS 554 Final Project
 
+https://github.com/ezwendel/hobokenMarket
+
 Team Members
 - Ali Kolenovic
 - Andrew Johnson
@@ -9,7 +11,7 @@ Team Members
 - Junhong Wu
 
 ## For running the project with Docker:
-1. Install Docker at https://www.docker.com/get-started (You may need to make a free account).
+1. Install Docker at https://www.docker.com/get-started (You may need to make a free account). Also install GraphicsMagick at http://www.graphicsmagick.org/README.html
 2. Open a terminal in the root directory of the project and run the command docker-compose build
 3. Once that finishes, run the command `docker-compose up`. This will start the containers, and might take a while.
 4. If everything seems to be running, navigate to `localhost:3000` in your browser to open the website.
