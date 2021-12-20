@@ -103,7 +103,6 @@ const Login = () => {
             <Grid item xs={6} m={0.5}>
               <Button
                 variant="contained"
-                width="100%"
                 endIcon={<LoginIcon />}
                 type="submit"
               >
