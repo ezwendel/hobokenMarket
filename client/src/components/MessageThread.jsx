@@ -150,7 +150,11 @@ const MessageThread = (props) => {
 
 
   let messageThreads = messages.slice(0).reverse().map(message => {
-    return MessageListing(message);
+    return (
+      <div key={message._id}>
+        {MessageListing(message)}
+      </div>
+    );
   });
 
   if (loading) {
