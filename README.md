@@ -16,7 +16,13 @@ Team Members
 5. When finished, `^C` in the terminal to close the app and run the command `docker-compose down` to remove the containers that have been made.
 
 ## For running the project with Node:
-Before starting, you will need to have node.js, the package manager npm, MongoDB, and Redis installed. Ensure that a MongoDB server is running on port `localhost:27017`, and a Redis server on port `localhost:6379`.
+Before starting, you will need to have node.js, the package manager npm, MongoDB, Redis, and GraphicsMagick installed. Ensure that a MongoDB server is running on port `localhost:27017`, and a Redis server on port `localhost:6379`.
+
+Node.js: https://nodejs.org/en/download/current/
+GraphicsMagick: http://www.graphicsmagick.org/README.html
+Redis: https://redis.io/
+MongoDB: https://www.mongodb.com/try/download/community
+
 ### Starting the Server
 1. In the root of the project, `cd` to `/server`, and use `npm install` in the terminal to install all node module dependencies.
 2. Use `npm run seed` in the terminal to run the seed script to populate the database with template data.
