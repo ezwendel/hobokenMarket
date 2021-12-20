@@ -256,14 +256,26 @@ const UserPage = (props) => {
             action={
               currentUser && currentUser.email !== user.emailAddress ? (
                 <div style={{ textAlign: "right" }}>
-                  <Button
+                  <Link to={{
+                    pathname:'/messages',
+                    state: {email: user.emailAddress, formOpen: true}
+                  }}
                     aria-label="message"
                     color="secondary"
                     sx={{ display: "block" }}
                   >
                     Send a Message
                     <MessageIcon style={{ marginLeft: ".3em" }} />
-                  </Button>
+                  </Link>
+                  {/* <Redirect
+                    to={{
+                      pathname: '/messages',
+                      state: { email: user.emailAddress}
+                    }}
+                  >
+                    Send a Message
+                    <MessageIcon style={{ marginLeft: ".3em" }} />
+                  </Redirect> */}
                   <Button
                     aria-label="message"
                     color="secondary"

@@ -1,7 +1,4 @@
 import React, { useState, useEffect, useContext } from "react";
-import { styled } from "@mui/styles";
-import { makeStyles } from "@mui/styles";
-import { useTheme } from "@mui/material/styles";
 import axios from "axios";
 import { createToken } from "../firebase/AuthBackend";
 import { AuthContext } from "../firebase/Auth";
@@ -9,41 +6,36 @@ import { AuthContext } from "../firebase/Auth";
 import {
   Container,
   Card,
-  CardHeader,
   CardContent,
-  Avatar,
   Typography,
-  Button,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
   Divider,
-  Chip,
   ListItem,
-  Rating,
 } from "@mui/material";
 import { Link } from "react-router-dom";
 
-import MessageIcon from "@mui/icons-material/Message";
+
 import MailIcon from "@mui/icons-material/Mail";
 import Loading from "./Loading";
 
-const Label = styled("span")(({ theme }) => ({
-  fontWeight: 500,
-}));
+// const Label = styled("span")(({ theme }) => ({
+//   fontWeight: 500,
+// }));
 
 const ChatBar = (props) => {
-  const theme = useTheme();
-  const useStyles = makeStyles(() => ({
-    title: {
-      fontWeight: "bold",
-      color: "#444",
-    },
-  }));
-  const classes = useStyles();
+  // const theme = useTheme();
+  // const useStyles = makeStyles(() => ({
+  //   title: {
+  //     fontWeight: "bold",
+  //     color: "#444",
+  //   },
+  // }));
+  // const classes = useStyles();
   const [loading, setLoading] = useState(true);
-  const [user, setUserData] = useState(undefined);
+  // const [user, setUserData] = useState(undefined);
   const [messageThreadData, setMessageThreadData] = useState(undefined);
   const [messageThreadUsers, setMessageThreadUserData] = useState(undefined);
   const [errorHappened, setError] = useState(undefined);
@@ -115,7 +107,7 @@ const ChatBar = (props) => {
           })
         );
         setMessageThreadData(data)
-        setUserData(userData.data);
+        //setUserData(userData.data);
         setMessageThreadUserData(messageThreadData);
         setError(undefined);
         setLoading(false);
@@ -126,7 +118,7 @@ const ChatBar = (props) => {
       }
     }
     fetchData();
-  }, []);
+  }, [currentUser.email]);
 
   if (loading) {
     return <Loading />;

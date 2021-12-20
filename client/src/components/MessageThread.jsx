@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useContext } from "react";
-import { makeStyles } from "@mui/styles";
-import { useTheme } from "@mui/material/styles";
 import axios from "axios";
 import { createToken } from "../firebase/AuthBackend";
 import { AuthContext } from "../firebase/Auth";
@@ -8,27 +6,19 @@ import { AuthContext } from "../firebase/Auth";
 import {
     Container,
     Card,
-    CardHeader,
     CardContent,
-    Avatar,
     Typography,
-    Button,
     List,
-    ListItemButton,
     ListItemIcon,
     ListItemText,
     Divider,
-    Chip,
     ListItem,
-    Rating,
     TextField,
     Fab
   } from "@mui/material";
 
-import { Link } from "react-router-dom";
 
 import SendIcon from '@mui/icons-material/Send';
-import Placeholder from "../img/default.png";
 import MailIcon from "@mui/icons-material/Mail";
 import Loading from "./Loading";
 
@@ -42,8 +32,6 @@ const MessageThread = (props) => {
   const [value, setValue] = useState('');
 
   const { currentUser } = useContext(AuthContext);
-
-  const theme = useTheme();
 
   const handleChange = (event) => {
     setValue(event.target.value);
@@ -84,7 +72,7 @@ const MessageThread = (props) => {
     };
     setLoading(true);
     fetchData();
-  }, []);
+  }, [currentUser.email, id]);
 
   const sendMessage = async () => {
     const header = await createToken();
@@ -131,16 +119,6 @@ const MessageThread = (props) => {
     );
   };
 
-  const useStyles = makeStyles(() => ({
-    title: {
-      fontWeight: "bold",
-      color: "#444",
-    },
-  }));
-  const classes = useStyles();
-
-
-
   let messageThreads = messages.slice(0).reverse().map(message => {
     return MessageListing(message);
   });
@@ -167,7 +145,7 @@ const MessageThread = (props) => {
                 Compose Message
             </Typography>
             <TextField
-                placeholder="MultiLine with rows: 2 and rowsMax: 4"
+                placeholder="Type a message..."
                 multiline
                 fullWidth
                 maxRows={4}
