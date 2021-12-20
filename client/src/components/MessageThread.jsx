@@ -4,6 +4,7 @@ import { useTheme } from "@mui/material/styles";
 import axios from "axios";
 import { createToken } from "../firebase/AuthBackend";
 import { AuthContext } from "../firebase/Auth";
+import moment from 'moment-timezone'
 
 import {
     Container,
@@ -108,6 +109,9 @@ const MessageThread = (props) => {
     } else {
         sender = user.username;
     }
+
+
+
     return (
       <>
         <ListItem key={message._id} sx={{ padding: 0 }}>
@@ -120,6 +124,8 @@ const MessageThread = (props) => {
               secondary={
                 <div>
                   {message.message}
+                  <br/>
+                  {moment.tz(message.time, 'America/New_York').format('DD/MM/YYYY HH:mm:ss')}
                 </div>
               }
               secondaryTypographyProps={{ component: "div" }}
