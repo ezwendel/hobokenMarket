@@ -76,6 +76,7 @@ router.post('/close/:id', (req, res) => {
 }) 
 
 router.post('/:seller', async (req, res) => {
+  console.log(req);
   let body = req.body;
   let buyer = xss(body.buyer);
   let seller = xss(req.params.seller);
@@ -96,7 +97,7 @@ router.post('/:seller', async (req, res) => {
 
   let sellerObj = {}
   try {
-    sellerObj = await data.users.getUserById(seller)
+    sellerObj = await data.users.getUserByEmail(seller)
   } catch (e) {
     return res.status(404).json({ error: "seller doesn't exist" })
   }
@@ -120,19 +121,20 @@ router.get('/all_threads_for_user/:email', async (req, res) => {
 
   let user = null;
   try {
-    user = await data.getUserByEmail(email);
+    user = await data.users.getUserByEmail(email);
+    console.log(user);
   } catch (e) {
     return res.status(404).json({error: "user doesn't exist"})
   }
-
+  console.log(req.currentUser);
   if (!req.currentUser && req.currentUser.email.toString() !== email) {
     return res.status(403).json({error: "user does not have perms to read these messages"})
   }
-
   try {
     let messageThreads = await data.messageThreads.getUserMessageThreads(user._id.toString());
     return res.json(messageThreads)
   } catch (e) {
+    console.log(e);
     return res.status(500).json({error: e})
   }
 })
