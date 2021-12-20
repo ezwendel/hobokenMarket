@@ -15,6 +15,7 @@ import Home from "./Home";
 import Logout from "./Logout";
 import ChatPage from "./ChatPage";
 import MessageThread from "./MessageThread";
+import { Container } from "@mui/material";
 
 import { createTheme, ThemeProvider } from "@mui/material";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
@@ -33,23 +34,34 @@ const theme = createTheme({
 function App() {
   return (
     <AuthProvider>
-    <ThemeProvider theme={theme}>
-      <Router>
-        <div className="App">
-          <Header />
-          <div style={{ margin: "2em" }}>
-            <Switch>
-              <PrivateRoute exact path="/" component={Home} />
-              <Route exact path="/items/:page" component={ListingsPage} />
-              <Route exact path="/item/:id" component={ItemPage} />
-              <Route exact path="/user/:id" component={UserPage} />
-	            <Route exact path="/logout" component={Logout} />
-              <PrivateRoute exact path="/messages" component={ChatPage}/>
-              <PrivateRoute exact path="/messageThread/:id" component={MessageThread}/>
-              <Route exact path="/login" component={Login} />
-              <Route exact path="/create-account" component={CreateAccount} />
-              <PrivateRoute exact path="/profile" component={ProfilePage}/>
-            </Switch>
+      <ThemeProvider theme={theme}>
+        <Router>
+          <div className="App">
+            <Header />
+            <div style={{ margin: "2em" }}>
+              <Switch>
+                <PrivateRoute exact path="/" component={Home} />
+                <Route exact path="/items/:page" component={ListingsPage} />
+                <Route exact path="/item/:id" component={ItemPage} />
+                <Route exact path="/user/:id" component={UserPage} />
+                <Route exact path="/logout" component={Logout} />
+                <PrivateRoute exact path="/messages" component={ChatPage} />
+                <PrivateRoute
+                  exact
+                  path="/messageThread/:id"
+                  component={MessageThread}
+                />
+                <Route exact path="/login" component={Login} />
+                <Route exact path="/create-account" component={CreateAccount} />
+                <PrivateRoute exact path="/profile" component={ProfilePage} />
+                <Route>
+                  <Container>
+                    <div style={{ margin: "0 auto", width: "fit-content" }}>
+                      404 Error: This page does not exist.
+                    </div>
+                  </Container>
+                </Route>
+              </Switch>
             </div>
           </div>
         </Router>

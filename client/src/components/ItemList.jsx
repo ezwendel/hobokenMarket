@@ -21,7 +21,7 @@ const ItemList = ({ items, loading }) => {
     </Grid>
   ) : (
     <div style={{ margin: "0 auto", width: "fit-content" }}>
-      404: No listings found.
+      404 Error: No listings found.
     </div>
   );
 };
