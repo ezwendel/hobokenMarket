@@ -1,7 +1,10 @@
+const { readMessage } = require("../data/messageThreads");
+
 const express = require("express"),
       router = express.Router(),
       data = require('../data'),
-      xss = require('xss')
+      xss = require('xss'),
+      nodemailer = require('nodemailer')
 
 router.post('/message/:id', async (req, res) => {
   let id = xss(req.params.id);
@@ -25,50 +28,44 @@ router.post('/message/:id', async (req, res) => {
 
   try {
     let newMessage = await data.messageThreads.createMessage({messageThreadId: id.toString(), sender: senderObj._id.toString(), message: message.toString()})
+    let messageThread = await data.messageThreads.getMessageThreadById(id.toString())
+    let receiver = null
+    if (messageThread.buyer.toString() === senderObj._id.toString()) {
+      receiver = await data.users.getUserById(messageThread.seller.toString())
+    } else {
+      receiver = await data.users.getUserById(messageThread.buyer.toString())
+    }
+
+    // create reusable transporter object using the default SMTP transport
+    let transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true, // use SSL
+      auth: {
+        user: 'elijahhbmarket@gmail.com', // generated ethereal user
+        pass: '97gH8pYSWx8Ttm9', // generated ethereal password
+      },
+    });
+
+    // send mail with defined transport object
+    let info = await transporter.sendMail({
+      from: '"Elijah Wendel HBMarket" <elijahhbmarket@gmail.com>', // sender address
+      to: receiver.emailAddress, // list of receivers
+      subject: "You've received a message!", // Subject line
+      text: `Check your Hoboken Market Account! A new message has arrived from user ${senderObj.username}!`, // plain text body
+    });
+
+    console.log("Message sent: %s", info.messageId);
+    // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+
+    // Preview only available when sending through an Ethereal account
+    console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+    // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
+
     return res.json(newMessage)
   } catch (e) {
     console.log(e)
     return res.status(500).json({ error: e })
-  }
-})
-
-router.post('/read_message/:id', async (req, res) => {
-  let id = xss(req.params.id);
-
-  if (!id || id.trim().length == 0) { return res.status(400).json({ error: "id not valid" }) };
-
-  let message = null;
-  let messageThread = null;
-  try {
-    message = await data.messageThreads.getMessageById(id.toString())
-    messageThread = await data.messageThreads.getParentMessageThreadByMessageId(id.toString())
-  } catch (e) {
-    return res.status(404).json({error: "message doesn't exist"})
-  }
-
-  let currentUserObj = null;
-  try {
-    currentUserObj = await data.users.getUserByEmail(req.currentUser.email.toString())
-  } catch (e) {
-    return res.status(401).json({error: "can't read a message without being logged in"})
-  }
-
-  let receiver = null;
-  if (messageThread.seller.toString() === message.sender.toString()) {
-    receiver = messageThread.buyer.toString()
-  } else {
-    receiver = messageThread.seller.toString()
-  }
-
-  if (!req.currentUser || currentUserObj._id.toString() != receiver.toString()) {
-    return res.status(403).json({ error: "can't read message from a different account" })
-  }
-
-  try {
-    let newMessageThread = await data.messageThreads.readMessage(id.toString())
-    return res.json(newMessageThread);
-  } catch (e) {
-    return res.status(500).json({error: e})
   }
 })
 
@@ -77,7 +74,6 @@ router.post('/close/:id', (req, res) => {
 }) 
 
 router.post('/:seller', async (req, res) => {
-  console.log(req);
   let body = req.body;
   let buyer = xss(body.buyer);
   let seller = xss(req.params.seller);
@@ -109,6 +105,31 @@ router.post('/:seller', async (req, res) => {
 
   try {
     let messageThread = await data.messageThreads.createMessageThread({buyer: buyerObj._id.toString(), seller: sellerObj._id.toString(), message: message})
+    // create reusable transporter object using the default SMTP transport
+    let transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true, // use SSL
+      auth: {
+        user: 'elijahhbmarket@gmail.com', // generated ethereal user
+        pass: '97gH8pYSWx8Ttm9', // generated ethereal password
+      },
+    });
+
+    // send mail with defined transport object
+    let info = await transporter.sendMail({
+      from: '"Elijah Wendel HBMarket" <elijahhbmarket@gmail.com>', // sender address
+      to: sellerObj.emailAddress, // list of receivers
+      subject: "You've received a message!", // Subject line
+      text: `Check your Hoboken Market Account! A message has arrived from user ${buyerObj.username}!`, // plain text body
+    });
+
+    console.log("Message sent: %s", info.messageId);
+    // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+
+    // Preview only available when sending through an Ethereal account
+    console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+    // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
     return res.json(messageThread)
   } catch (e) {
     return res.status(500).json({error: e})
@@ -158,6 +179,12 @@ router.get('/:id', async (req, res) => {
     console.log(messageThread.seller.toString(), "seller")
     if (currentUserObj._id.toString() != messageThread.seller.toString() && currentUserObj._id.toString() != messageThread.buyer.toString()) {
       return res.status(403).json({error: "don't have permission to view these messages"})
+    }
+    for (let message of messageThread.messages) { // read messages here
+      if (message.sender.toString() !== currentUserObj._id.toString() && !message.read) {
+        let readMessage = await data.messageThreads.readMessage(message._id.toString())
+        console.log(readMessage)
+      }
     }
     return res.json(messageThread)
   } catch (e) {

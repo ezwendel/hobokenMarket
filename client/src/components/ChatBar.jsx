@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { createToken } from "../firebase/AuthBackend";
 import { AuthContext } from "../firebase/Auth";
+import moment from 'moment-timezone'
 
 import {
   Container,
@@ -68,8 +69,7 @@ const ChatBar = (props) => {
                   <br />
                   {lastMsg.read ? "Message Read" : "Message Unread"}
                   <br />
-                  {/* {lastMsg.time.split('T')[0]} */}
-                  {lastMsg.time.toLocaleString('en-US', {timeZone: 'EST'})}
+                  {moment.tz(lastMsg.time, 'America/New_York').format('DD/MM/YYYY HH:mm:ss')}
                 </div>
               }
               secondaryTypographyProps={{ component: "div" }}

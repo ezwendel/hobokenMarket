@@ -114,6 +114,10 @@ router.post('/with_image', upload.single("file"), async (req, res) => {
   console.log(req.currentUser)
   console.log("why");
   if (req.file === undefined) return res.status(400).json({error: "must select a file."})
+  const match = ["image/png", "image/jpeg"];
+  if (match.indexOf(req.file.mimetype) === -1) {
+    return res.status(400).json({ error: "can only submit images" })
+  }
   console.log(req.file.id)
   // get body + xss body
   let body = req.body

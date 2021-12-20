@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { createToken } from "../firebase/AuthBackend";
 import { AuthContext } from "../firebase/Auth";
+import moment from 'moment-timezone'
 
 import {
     Container,
@@ -96,9 +97,14 @@ const MessageThread = (props) => {
     } else {
         sender = user.username;
     }
+
+
+
     return (
       <>
-        <ListItem key={message._id} sx={{ padding: 0 }}>
+        <ListItem key={message._id} sx={{ padding: 0 }} style={{
+            borderBottom: "1px solid #ccc",
+          }}>
           {/* <Link to={`/items/${item._id}`} style={{ color: "inherit", textDecoration: "none" }}> */}
             <ListItemIcon>
               <MailIcon />
@@ -108,19 +114,25 @@ const MessageThread = (props) => {
               secondary={
                 <div>
                   {message.message}
+                  <br/>
+                  {moment.tz(message.time, 'America/New_York').format('DD/MM/YYYY HH:mm:ss')}
                 </div>
               }
               secondaryTypographyProps={{ component: "div" }}
             />
           {/* </Link> */}
         </ListItem>
-        <Divider />
+
       </>
     );
   };
 
   let messageThreads = messages.slice(0).reverse().map(message => {
-    return MessageListing(message);
+    return (
+      <div key={message._id}>
+        {MessageListing(message)}
+      </div>
+    );
   });
 
   if (loading) {

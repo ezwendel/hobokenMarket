@@ -115,15 +115,17 @@ async function createMessage(body) {
 
 async function readMessage(id) {
   // ID Error Checking
-  if (!id) throw "getMessageById: Missing id";
+  if (!id) throw "readMessage: Missing id";
   if (typeof id !== "string")
-    throw "getMessageById: The provided id must be a string";
+    throw "readMessage: The provided id must be a string";
   if (id.trim().length === 0)
-    throw "getMessageById: The provided id must not be an empty string";
+    throw "readMessage: The provided id must not be an empty string";
   
-  let messageThread = getParentMessageThreadByMessageId(id);
+  let messageThread = await getParentMessageThreadByMessageId(id);
 
   let messageThreadId = messageThread._id
+
+  console.log(messageThread)
 
   newMessages = []
   for (message of messageThread.messages) {
@@ -137,15 +139,19 @@ async function readMessage(id) {
 
   messageThread.messages = newMessages
 
+  console.log("messageThread", messageThread)
+
   delete messageThread._id
+
+  const meassageThreadsCollection = await messageThreads();
 
   const updateInfo = await meassageThreadsCollection.updateOne(
     { _id: ObjectId(messageThreadId) },
     { $set: messageThread }
   );
 
-  if (updateInfo.modifiedCount === 0) throw "createMessage: Failed to update messageThread with new message";
-  return await getMessageThreadById(messageThreadId);
+  if (updateInfo.modifiedCount === 0) throw "readMessage: Failed to update messageThread with new message";
+  return await getMessageThreadById(messageThreadId.toString());
 }
 
 async function getMessageThreadById(id) {
@@ -171,22 +177,25 @@ async function getMessageThreadById(id) {
 
 async function getParentMessageThreadByMessageId(id) {
   // ID Error Checking
-  if (!id) throw "getMessageById: Missing id";
+  if (!id) throw "getParentMessageThreadByMessageId: Missing id";
   if (typeof id !== "string")
-    throw "getMessageById: The provided id must be a string";
+    throw "getParentMessageThreadByMessageId: The provided id must be a string";
   if (id.trim().length === 0)
-    throw "getMessageById: The provided id must not be an empty string";
+    throw "getParentMessageThreadByMessageId: The provided id must not be an empty string";
   const parsedId = ObjectId(id.trim());
 
   const meassageThreadsCollection = await messageThreads();
-  const messageThread = await meassageThreadsCollection.findOne({ "message._id": parsedId });
-  if (messageThread === null) throw `getMessageById: Failed to find messageThread containing message with id '${id}'`;
-  messageThread._id = messageThread._id.toString();
-  
-  for (message of messageThread.messages) {
-    message._id = message._id.toString()
+  const messageThreadList = await meassageThreadsCollection.find({}).toArray();
+
+  for (let messageThread of messageThreadList) {
+    for (let message of messageThread.messages) {
+      if (message._id.toString() === id.toString()) {
+        return messageThread;
+      }
+    }
   }
-  return messageThread;
+  throw `getParentMessageThreadByMessageId: Failed to find messageThread containing message with id '${id}'`;
+
 }
 
 async function getMessageById(id) {

@@ -52,6 +52,10 @@ conn.once('open', () => {
 
 router.post("/profile_upload", upload.single("file"), async (req, res) =>{
   if (req.file === undefined) return res.json({error: "must select a file."})
+  const match = ["image/png", "image/jpeg"];
+  if (match.indexOf(req.file.mimetype) === -1) {
+    return res.status(400).json({ error: "can only submit images" })
+  }
   console.log(req.body.userId)
   let userId = xss(req.body.userId)
   if (!userId || userId.trim().length == 0) {
