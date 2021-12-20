@@ -63,7 +63,6 @@ router.get('/', async (req, res) => {
   if (req.query.filter) {
     searchStr += `filter:${req.query.filter}`
   }
-  console.log(req.query.filter);
   if (req.query.latest && req.query.latest.toLowerCase() === 'false') {
     searchStr += `latest:false`
   }
