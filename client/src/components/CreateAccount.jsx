@@ -3,7 +3,6 @@ import { useTheme } from "@mui/material/styles";
 import { Redirect } from 'react-router-dom';
 import { doCreateUserWithEmailAndPassword } from "../firebase/FirebaseFunctions";
 import {AuthContext} from '../firebase/Auth';
-import SocialSignIn from './SocialSignIn';
 import axios from "axios";
 import { createToken } from "../firebase/AuthBackend";
 
@@ -220,7 +219,6 @@ const CreateAccount = () => {
               >
                 Create Account
               </Button>
-              <SocialSignIn/>
             </Grid>
             <Grid item xs={6}>
               <Button

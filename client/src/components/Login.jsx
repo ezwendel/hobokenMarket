@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { useTheme } from "@mui/material/styles";
-import SocialSignIn from "./SocialSignIn";
+
 import { Redirect } from "react-router-dom";
 import { AuthContext } from "../firebase/Auth";
 import {
