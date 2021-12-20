@@ -80,7 +80,7 @@ const main = async () => {
     );
     console.log("deleteItemById:", await itemsData.deleteItemById(item1_id));
 
-    // Create 50 items and add to users
+    // Create 100 items and add to users
     let count = 1;
     let categories = [
       "Home",
