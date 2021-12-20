@@ -118,6 +118,7 @@ async function createUser(body) {
     emailAddress: emailAddress.trim(),
     joinDate: new Date(),
     items: [],
+    messageIds: [],
     numbers: { cell: numbers.cell, home: numbers.home },
     ratings: [],
   };
@@ -274,6 +275,31 @@ async function getAllUsers() {
   return usersList;
 }
 
+async function addMessageThreadToUser(userId, messageId) {
+  const userCollection = await users();
+
+  let oldUser = await getUserById(userId);
+
+  let messageIds = oldUser.messageIds
+  messageIds.push(ObjectId(messageId))
+
+  const newUser = {
+    name: oldUser.name,
+    username: oldUser.username,
+    passwordHash: oldUser.passwordHash,
+    profilePicture: oldUser.profilePicture,
+    emailAddress: oldUser.emailAddress,
+    joinDate: oldUser.joinDate,
+    items: oldUser.items,
+    messageIds: messageIds,
+  };
+
+  const updateInfo = await userCollection.updateOne({ _id: ObjectId(userId) }, { $set: newUser });
+  if (updateInfo.modifiedCount === 0) throw "createItem: Failed to update user";
+  return getUserById(userId);
+
+}
+
 async function addItemToUser(userId, itemId) {
   if (!userId) throw "addItemToUser: Missing userId";
   if (typeof userId !== "string")
@@ -344,7 +370,8 @@ async function deleteItemToUser(userId, itemId) {
     profilePicture: oldUser.profilePicture,
     emailAddress: oldUser.emailAddress,
     joinDate: oldUser.joinDate,
-    items: items
+    items: items,
+    contacts: oldUser.contacts,
   };
 
   const updateInfo = await userCollection.updateOne({ _id: ObjectId(userId) }, { $set: newUser });
@@ -426,6 +453,8 @@ async function addRatingToUser(userId, raterId, rating) {
   return getUserById(userId);
 }
 
+
+
 async function getUserById(id) {
   // ID Error Checking
   if (!id) throw "getUserById: Missing id";
@@ -465,6 +494,8 @@ module.exports = {
   updateUser,
   getAllUsers,
   addItemToUser,
+  addMessageThreadToUser,
+  getUserById,
   deleteItemToUser,
   getUserById,
   updatePfp,

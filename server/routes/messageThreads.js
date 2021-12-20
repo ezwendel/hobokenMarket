@@ -5,7 +5,7 @@ const express = require("express"),
 
 router.post('/message/:id', async (req, res) => {
   let id = xss(req.params.id);
-  let sender = xss(req.body.message); // should be an email
+  let sender = xss(req.body.sender); // should be an email
   let message = xss(req.body.message); 
 
   if (!id || id.trim().length == 0) { return res.status(400).json({ error: "id not valid" }) };
@@ -27,6 +27,7 @@ router.post('/message/:id', async (req, res) => {
     let newMessage = await data.messageThreads.createMessage({messageThreadId: id.toString(), sender: senderObj._id.toString(), message: message.toString()})
     return res.json(newMessage)
   } catch (e) {
+    console.log(e)
     return res.status(500).json({ error: e })
   }
 })
@@ -76,6 +77,7 @@ router.post('/close/:id', (req, res) => {
 }) 
 
 router.post('/:seller', async (req, res) => {
+  console.log(req);
   let body = req.body;
   let buyer = xss(body.buyer);
   let seller = xss(req.params.seller);
@@ -96,7 +98,7 @@ router.post('/:seller', async (req, res) => {
 
   let sellerObj = {}
   try {
-    sellerObj = await data.users.getUserById(seller)
+    sellerObj = await data.users.getUserByEmail(seller)
   } catch (e) {
     return res.status(404).json({ error: "seller doesn't exist" })
   }
@@ -120,19 +122,21 @@ router.get('/all_threads_for_user/:email', async (req, res) => {
 
   let user = null;
   try {
-    user = await data.getUserByEmail(email);
+    user = await data.users.getUserByEmail(email);
+    console.log(user);
   } catch (e) {
     return res.status(404).json({error: "user doesn't exist"})
   }
-
+  console.log(req.currentUser);
   if (!req.currentUser && req.currentUser.email.toString() !== email) {
     return res.status(403).json({error: "user does not have perms to read these messages"})
   }
-
   try {
+    console.log('here')
     let messageThreads = await data.messageThreads.getUserMessageThreads(user._id.toString());
     return res.json(messageThreads)
   } catch (e) {
+    console.log(e);
     return res.status(500).json({error: e})
   }
 })
@@ -147,13 +151,17 @@ router.get('/:id', async (req, res) => {
   }
 
   try {
-    let messageThread = await data.messageThreads.getMessageThreadById()
-    let currentUserObj = await data.users.getUserByEmail()
-    if (currentUserObj._id.toString() != messageThread.seller || currentUserObj._id.toString() != messageThread.buyer) {
+    let messageThread = await data.messageThreads.getMessageThreadById(id)
+    let currentUserObj = await data.users.getUserByEmail(req.currentUser.email)
+    console.log(currentUserObj._id.toString(), "curr obj")
+    console.log(messageThread.buyer.toString(), "buyer")
+    console.log(messageThread.seller.toString(), "seller")
+    if (currentUserObj._id.toString() != messageThread.seller.toString() && currentUserObj._id.toString() != messageThread.buyer.toString()) {
       return res.status(403).json({error: "don't have permission to view these messages"})
     }
     return res.json(messageThread)
   } catch (e) {
+    console.log(e)
     return res.status(500).json({error: e})
   }
 })

@@ -98,7 +98,7 @@ async function createMessage(body) {
   const meassageThreadsCollection = await messageThreads();
 
   let messageThread = await getMessageThreadById(messageThreadId);
-  messageThread.push(newMessage)
+  messageThread.messages.push(newMessage)
 
   delete messageThread._id
 
@@ -224,7 +224,7 @@ async function getSellerMessageThreads(id) {
   const messageThreadList = await meassageThreadsCollection.find({ "seller": parsedId }).toArray();
   for (messageThread of messageThreadList) {
     messageThread._id = messageThread._id.toString()
-    for (message of messageThread) {
+    for (message of messageThread.messages) {
       message._id = message._id.toString();
     }
   }
@@ -243,7 +243,7 @@ async function getBuyerMessageThreads(id) {
   const messageThreadList = await meassageThreadsCollection.find({ "buyer": parsedId }).toArray();
   for (messageThread of messageThreadList) {
     messageThread._id = messageThread._id.toString()
-    for (message of messageThread) {
+    for (message of messageThread.messages) {
       message._id = message._id.toString();
     }
   }
